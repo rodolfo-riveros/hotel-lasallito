@@ -1,0 +1,10 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+{% block content %}
+<a href="{% url 'portal:home' r.portal_token %}" class="text-sm text-ink-500">← {% trans "Volver" %}</a>
+<h1 class="mt-2 font-display text-3xl font-semibold">{% trans "Pedir un servicio" %}</h1>
+<form method="post" class="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-soft">{% csrf_token %}
+  {% for field in form %}{% include "components/field.html" %}{% endfor %}
+  <button class="btn-primary w-full py-3 text-base">{% trans "Enviar solicitud" %}</button>
+</form>
+{% endblock %}

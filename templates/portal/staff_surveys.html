@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Encuestas" %}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-6">{% trans "Encuestas de satisfacción" %}</h1>
+<div class="mb-6 grid gap-4 sm:grid-cols-5">
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Respuestas" %}</p><p class="font-display text-3xl font-semibold">{{ stats.n }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "General" %}</p><p class="font-display text-3xl font-semibold">{{ stats.overall|floatformat:1|default:"—" }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Limpieza" %}</p><p class="font-display text-3xl font-semibold">{{ stats.clean|floatformat:1|default:"—" }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Atención" %}</p><p class="font-display text-3xl font-semibold">{{ stats.service|floatformat:1|default:"—" }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Recomiendan" %}</p><p class="font-display text-3xl font-semibold">{{ recommend }}</p></div>
+</div>
+<div class="card overflow-x-auto"><table class="table"><thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Promedio" %}</th><th>{% trans "Comentario" %}</th></tr></thead>
+  <tbody>{% for s in items %}<tr><td class="text-xs">{{ s.created_at|date:"d/m/Y" }}</td><td>{{ s.reservation.guest.full_name }}</td><td class="{% if s.average < 3 %}text-state-danger font-semibold{% endif %}">{{ s.average }}</td><td class="whitespace-normal text-sm">{{ s.comments }}</td></tr>
+  {% empty %}<tr><td colspan="4" class="text-ink-500">{% trans "Sin encuestas." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

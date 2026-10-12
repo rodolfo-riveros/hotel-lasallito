@@ -1,0 +1,23 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pasarela de prueba</title>
+<link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body class="flex min-h-screen items-center justify-center bg-slate-100 p-4">
+<div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+  <p class="text-xs font-bold uppercase tracking-widest text-slate-400">Pasarela de pago · MODO PRUEBA</p>
+  <h1 class="mt-2 text-2xl font-bold text-slate-800">{{ p.currency }} {{ p.amount }}</h1>
+  <p class="text-sm text-slate-500">{{ p.description }}</p>
+  {% if p.status == "paid" %}
+    <p class="mt-6 rounded-lg bg-green-50 p-3 text-green-700">Pago aprobado · {{ p.card_brand }} ****{{ p.card_last4 }} · {{ p.provider_reference }}</p>
+    {% if p.return_url %}<a href="{{ p.return_url }}" class="mt-4 block rounded-lg bg-slate-800 py-2 text-center text-white">Volver al hotel</a>{% endif %}
+  {% elif p.status == "cancelled" %}<p class="mt-6 text-slate-600">Pago cancelado.</p>
+  {% else %}
+    {% if error %}<p class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ error }}</p>{% endif %}
+    <form method="post" class="mt-6 space-y-3">{% csrf_token %}
+      <label class="block text-sm text-slate-600">Número de tarjeta<input name="card" inputmode="numeric" autocomplete="off" placeholder="4111 1111 1111 1111" class="mt-1"></label>
+      <div class="grid grid-cols-2 gap-2"><input placeholder="MM/AA" autocomplete="off"><input placeholder="CVV" autocomplete="off"></div>
+      <button class="w-full rounded-lg bg-indigo-600 py-2.5 font-semibold text-white">Pagar</button>
+      <button name="cancel" value="1" class="w-full text-sm text-slate-500">Cancelar</button>
+    </form>
+    <p class="mt-4 text-xs text-slate-400">Tarjetas de prueba: 4111 1111 1111 1111 (aprobada) · 4000 0000 0000 0002 (rechazada). Esta página simula la pasarela; el hotel no recibe ni guarda los datos de la tarjeta.</p>
+  {% endif %}
+</div></body></html>

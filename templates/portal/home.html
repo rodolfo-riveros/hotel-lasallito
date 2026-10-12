@@ -1,0 +1,43 @@
+{% extends "portal/base.html" %}
+{% load i18n pms %}
+{% block content %}
+<h1 class="font-display text-3xl font-semibold text-ink-900">{% blocktrans with name=r.guest.first_name %}Hola, {{ name }}{% endblocktrans %}</h1>
+<p class="mt-1 text-ink-600">{% trans "Reserva" %} <b>{{ r.code }}</b> · {{ r.get_status_display }}</p>
+
+<section class="mt-6 rounded-2xl bg-white p-5 shadow-soft">
+  <dl class="grid grid-cols-2 gap-4 text-sm">
+    <div><dt class="text-ink-500">{% trans "Llegada" %}</dt><dd class="font-semibold">{{ r.arrival|date:"d/m/Y" }}</dd><dd class="text-xs text-ink-500">{% trans "desde" %} {{ r.property.check_in_time|time:"H:i" }}</dd></div>
+    <div><dt class="text-ink-500">{% trans "Salida" %}</dt><dd class="font-semibold">{{ r.departure|date:"d/m/Y" }}</dd><dd class="text-xs text-ink-500">{% trans "hasta" %} {{ r.property.check_out_time|time:"H:i" }}</dd></div>
+    <div><dt class="text-ink-500">{% trans "Habitación" %}</dt><dd class="font-semibold">{{ r.room_type|lang_field:"name" }}{% if r.room and r.status == "checked_in" %} · {{ r.room.number }}{% endif %}</dd></div>
+    <div><dt class="text-ink-500">{% trans "Huéspedes" %}</dt><dd class="font-semibold">{{ r.adults }}{% if r.children %} + {{ r.children }}{% endif %}</dd></div>
+  </dl>
+</section>
+
+<div class="mt-4 grid gap-3">
+  {% if r.status != "checked_out" %}
+  <a href="{% url 'portal:precheckin' r.portal_token %}" class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-soft">
+    <span class="flex h-11 w-11 items-center justify-center rounded-full {% if r.precheckin_at or r.status == 'checked_in' %}bg-state-available/10 text-state-available{% else %}bg-brand-50 text-brand-700{% endif %}">{% icon "document" %}</span>
+    <span class="flex-1"><b>{% trans "Pre-check-in en línea" %}</b><span class="block text-sm text-ink-500">{% if r.precheckin_at %}{% trans "Completado. ¡Gracias!" %}{% else %}{% trans "Ahorre tiempo en recepción: datos, pasaporte y firma." %}{% endif %}</span></span></a>
+  {% endif %}
+  {% if balance > 0 or r.deposit_required %}
+  <form method="post" action="{% url 'portal:pay' r.portal_token %}">{% csrf_token %}
+    <button class="flex w-full items-center gap-4 rounded-2xl bg-white p-5 text-left shadow-soft"><span class="flex h-11 w-11 items-center justify-center rounded-full bg-gold-100 text-gold-700">{% icon "wallet" %}</span>
+      <span class="flex-1"><b>{% trans "Pagar en línea" %}</b><span class="block text-sm text-ink-500">{% if balance > 0 %}{% trans "Saldo" %}: {{ balance|money }}{% else %}{% trans "Depósito" %}: {{ r.deposit_required|money }}{% endif %}</span></span></button></form>
+  {% endif %}
+  {% if r.status != "checked_out" %}
+  <a href="{% url 'portal:request' r.portal_token %}" class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-soft"><span class="flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-brand-700">{% icon "sparkles" %}</span>
+    <span class="flex-1"><b>{% trans "Pedir un servicio" %}</b><span class="block text-sm text-ink-500">{% trans "Toallas, oxígeno, despertador, traslado..." %}</span></span></a>
+  {% endif %}
+  <a href="{% url 'portal:folio' r.portal_token %}" class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-soft"><span class="flex h-11 w-11 items-center justify-center rounded-full bg-brand-50 text-brand-700">{% icon "receipt" %}</span>
+    <span class="flex-1"><b>{% trans "Mi cuenta y comprobantes" %}</b><span class="block text-sm text-ink-500">{% trans "Consumos y boletas o facturas" %}</span></span></a>
+  {% if r.status == "checked_out" %}<a href="{% url 'portal:survey' r.portal_token %}" class="flex items-center gap-4 rounded-2xl bg-white p-5 shadow-soft"><span class="flex h-11 w-11 items-center justify-center rounded-full bg-gold-100 text-gold-700">{% icon "check-circle" %}</span><span class="flex-1"><b>{% trans "Cuéntenos su experiencia" %}</b></span></a>{% endif %}
+</div>
+
+{% if requests %}<section class="mt-6"><h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-500">{% trans "Mis solicitudes" %}</h2>
+  <ul class="space-y-2">{% for s in requests %}<li class="flex justify-between rounded-xl bg-white p-3 text-sm shadow-soft"><span>{{ s.get_kind_display }}</span><span class="text-ink-500">{{ s.get_status_display }}</span></li>{% endfor %}</ul></section>{% endif %}
+
+<section class="mt-6 rounded-2xl border border-gold-200 bg-gold-50 p-5 text-sm text-gold-900">
+  <b>{% trans "Consejos para la altura" %}</b>
+  <p class="mt-1">{% trans "Urubamba está a 2 871 msnm. Beba agua, coma ligero y descanse el primer día. Tenemos mate de coca y oxígeno a su disposición." %}</p>
+</section>
+{% endblock %}

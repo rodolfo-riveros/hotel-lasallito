@@ -1,0 +1,14 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+{% block content %}
+<a href="{% url 'portal:home' r.portal_token %}" class="text-sm text-ink-500">← {% trans "Volver" %}</a>
+<h1 class="mt-2 font-display text-3xl font-semibold">{% trans "Pre-check-in en línea" %}</h1>
+<p class="mt-1 text-sm text-ink-600">{% trans "Complete sus datos antes de llegar. En recepción solo verificaremos su documento." %}</p>
+<form method="post" enctype="multipart/form-data" class="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-soft">{% csrf_token %}
+  {% include "components/form_errors.html" %}
+  {% for field in form %}{% if field.name != "signature" %}{% include "components/field.html" %}{% endif %}{% endfor %}
+  {% include "components/signature.html" %}
+  <p class="text-xs text-ink-500">{% trans "Sus datos se guardan cifrados y solo se usan para su registro de huésped." %}</p>
+  <button class="btn-primary w-full py-3 text-base">{% trans "Enviar" %}</button>
+</form>
+{% endblock %}

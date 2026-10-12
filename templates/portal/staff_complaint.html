@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ c.number }}{% endblock %}
+{% block content %}
+<a href="{% url 'portal:staff_complaints' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Libro de reclamaciones" %}</a>
+<h1 class="page-title mt-2">{{ c.get_kind_display }} {{ c.number }}</h1>
+<p class="page-subtitle">{{ c.full_name }} · {{ c.doc_number }} · {{ c.email }} · {{ c.phone }} · {% trans "vence" %} {{ c.due_date|date:"d/m/Y" }}</p>
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <section class="card"><div class="card-body space-y-3 text-sm"><p><b>{% trans "Detalle" %}:</b> {{ c.description }}</p><p><b>{% trans "Pedido" %}:</b> {{ c.request }}</p>{% if c.amount %}<p><b>{% trans "Monto" %}:</b> S/ {{ c.amount }}</p>{% endif %}</div></section>
+  <form method="post" class="card">{% csrf_token %}<div class="card-body space-y-3">
+    <label class="block"><span class="field-label">{% trans "Respuesta al consumidor" %}</span><textarea name="response" rows="6">{{ c.response }}</textarea></label>
+    <select name="status">{% for k, v in statuses %}<option value="{{ k }}" {% if c.status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+    <button class="btn-primary w-full">{% trans "Guardar y enviar respuesta" %}</button></div></form>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Solicitudes de huéspedes" %}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-6">{% trans "Solicitudes de huéspedes" %}</h1>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Hab." %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Pedido" %}</th><th>{% trans "Para" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+  <tbody>{% for s in items %}<tr><td class="text-xs">{{ s.created_at|date:"d/m H:i" }}</td><td class="font-semibold">{{ s.reservation.room.number|default:"—" }}</td><td>{{ s.reservation.guest.full_name }}</td><td>{{ s.get_kind_display }}<p class="text-xs text-ink-500">{{ s.notes }}</p></td><td class="text-xs">{{ s.requested_for|date:"d/m H:i"|default:"" }}</td>
+    <td><form method="post">{% csrf_token %}<input type="hidden" name="request" value="{{ s.pk }}"><select name="status" class="!w-36 !py-1 text-xs" onchange="this.form.submit()">{% for k, v in statuses %}<option value="{{ k }}" {% if s.status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></form></td></tr>
+  {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin solicitudes." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

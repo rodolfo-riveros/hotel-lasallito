@@ -1,0 +1,16 @@
+{% extends "portal/base.html" %}
+{% block title %}Libro de reclamaciones · {{ p.name }}{% endblock %}
+{% block content %}
+<h1 class="font-display text-3xl font-semibold">Libro de reclamaciones</h1>
+<p class="mt-1 text-sm text-ink-600">{{ p.legal_name }} · RUC {{ p.ruc }} · {{ p.address }}</p>
+{% if created %}
+  <div class="mt-6 rounded-2xl bg-white p-6 shadow-soft" role="status"><p class="font-semibold">Hoja de reclamación N.° {{ created.number }}</p>
+    <p class="mt-2 text-sm">Le enviamos una copia a {{ created.email }}. Responderemos en un plazo máximo de 15 días hábiles.</p></div>
+{% else %}
+  <form method="post" class="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-soft">{% csrf_token %}
+    {% include "components/form_errors.html" %}{% for field in form %}{% include "components/field.html" %}{% endfor %}
+    <p class="text-xs text-ink-500">Reclamo: disconformidad relacionada con el servicio. Queja: malestar o descontento respecto a la atención. La formulación del reclamo no impide acudir a otras vías de solución de controversias.</p>
+    <button class="btn-primary w-full py-3">Registrar</button>
+  </form>
+{% endif %}
+{% endblock %}

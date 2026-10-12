@@ -1,0 +1,15 @@
+{% extends "portal/base.html" %}
+{% load i18n %}
+{% block content %}
+<h1 class="font-display text-3xl font-semibold">{% trans "¿Cómo fue su estadía?" %}</h1>
+{% if done %}
+  <p class="mt-6 rounded-2xl bg-white p-6 text-center shadow-soft">{% trans "¡Gracias por su opinión! Esperamos verle de nuevo en el Valle Sagrado." %}</p>
+{% else %}
+  <p class="mt-1 text-sm text-ink-600">{% trans "Califique de 1 (malo) a 5 (excelente)." %}</p>
+  <form method="post" class="mt-6 space-y-4 rounded-2xl bg-white p-5 shadow-soft">{% csrf_token %}
+    {% include "components/form_errors.html" %}
+    {% for field in form %}{% include "components/field.html" %}{% endfor %}
+    <button class="btn-primary w-full py-3 text-base">{% trans "Enviar" %}</button>
+  </form>
+{% endif %}
+{% endblock %}

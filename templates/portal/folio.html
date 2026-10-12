@@ -1,0 +1,17 @@
+{% extends "portal/base.html" %}
+{% load i18n pms %}
+{% block content %}
+<a href="{% url 'portal:home' r.portal_token %}" class="text-sm text-ink-500">← {% trans "Volver" %}</a>
+<h1 class="mt-2 font-display text-3xl font-semibold">{% trans "Mi cuenta" %}</h1>
+{% for f in folios %}
+<section class="mt-4 rounded-2xl bg-white p-5 shadow-soft">
+  <h2 class="font-semibold">{{ f.name }} <span class="text-xs font-normal text-ink-500">· {{ f.number }}</span></h2>
+  <ul class="mt-3 divide-y divide-ink-100 text-sm">
+    {% for c in f.charges.all %}{% if not c.is_void %}<li class="flex justify-between py-2"><span>{{ c.service_date|date:"d/m" }} · {{ c.description }}</span><span class="tabular-nums">{{ c.amount|money }}</span></li>{% endif %}{% endfor %}
+    {% for p in f.payments.all %}{% if not p.is_void %}<li class="flex justify-between py-2 text-state-available"><span>{% trans "Pago" %} · {{ p.get_method_display }}</span><span class="tabular-nums">-{{ p.amount|money }}</span></li>{% endif %}{% endfor %}
+  </ul>
+  <p class="mt-2 flex justify-between border-t border-ink-200 pt-2 font-semibold"><span>{% trans "Saldo" %}</span><span class="tabular-nums">{{ f.balance|money }}</span></p>
+  {% for inv in f.invoices.all %}{% if inv.status != "voided" %}<a href="{% url 'portal:invoice_pdf' r.portal_token inv.pk %}" class="mt-2 block text-sm text-brand-700 underline">{{ inv.get_doc_type_display }} {{ inv.full_number }} (PDF)</a>{% endif %}{% endfor %}
+</section>
+{% endfor %}
+{% endblock %}
