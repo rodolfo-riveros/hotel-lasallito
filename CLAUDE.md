@@ -1,6 +1,6 @@
 # CLAUDE.md: PMS Hotel La Sallito
 
-Este es un PMS hotelero en Django para hoteles de Cusco. Es un sistema de enseñanza: solo la facturación SUNAT
+Este es un PMS hotelero en Django para hoteles de Urubamba (Valle Sagrado, Cusco). Es un sistema de enseñanza: solo la facturación SUNAT
 y sus consultas (RUC, DNI, tipo de cambio) se simulan; todo lo demás funciona como un PMS real.
 
 ## Reglas de trabajo

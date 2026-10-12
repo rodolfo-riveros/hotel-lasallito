@@ -18,6 +18,8 @@ class PropertyForm(forms.ModelForm):
             "address",
             "district",
             "city",
+            "province",
+            "region",
             "ubigeo",
             "phone",
             "email",

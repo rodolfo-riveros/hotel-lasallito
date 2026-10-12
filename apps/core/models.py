@@ -140,9 +140,11 @@ class Property(TimeStampedModel, SoftDeleteModel):
         _("estrellas"), default=3, validators=[MinValueValidator(1), MaxValueValidator(5)]
     )
     address = models.CharField(_("dirección"), max_length=255, blank=True)
-    district = models.CharField(_("distrito"), max_length=100, default="Cusco")
-    city = models.CharField(_("ciudad"), max_length=100, default="Cusco")
-    ubigeo = models.CharField(_("ubigeo"), max_length=6, default="080101")
+    district = models.CharField(_("distrito"), max_length=100, default="Urubamba")
+    city = models.CharField(_("ciudad"), max_length=100, default="Urubamba")
+    province = models.CharField(_("provincia"), max_length=100, default="Urubamba")
+    region = models.CharField(_("departamento"), max_length=100, default="Cusco")
+    ubigeo = models.CharField(_("ubigeo"), max_length=6, default="081301")  # Urubamba, Urubamba, Cusco
     phone = models.CharField(_("teléfono"), max_length=30, blank=True)
     email = models.EmailField(_("correo"), blank=True)
     website = models.URLField(_("sitio web"), blank=True)

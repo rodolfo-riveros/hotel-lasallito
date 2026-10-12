@@ -5,7 +5,7 @@ tags: [inicio, indice]
 ---
 # PMS Hotel La Sallito
 
-Sistema de gestión hotelera (PMS) en Django para hoteles de Cusco. Es un sistema de enseñanza: la
+Sistema de gestión hotelera (PMS) en Django para hoteles de Urubamba (Valle Sagrado, Cusco). Es un sistema de enseñanza: la
 facturación SUNAT se simula y todo lo demás funciona como un PMS real.
 
 ## Estado actual

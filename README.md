@@ -1,6 +1,6 @@
 # PMS Hotel La Sallito
 
-PMS (Property Management System) web en Django para hoteles de Cusco, Perú. Cubre reservas, recepción,
+PMS (Property Management System) web en Django para hoteles de Urubamba (Valle Sagrado), Cusco, Perú. Cubre reservas, recepción,
 housekeeping, restaurante, almacén, caja y facturación SUNAT. La facturación SUNAT está **simulada**
 porque el sistema se usa para enseñar gestión hotelera.
 

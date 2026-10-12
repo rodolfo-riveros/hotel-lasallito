@@ -42,7 +42,7 @@
       {% endif %}
       <div class="min-w-0">
         <p class="truncate font-display text-lg font-semibold leading-tight text-white">{{ current_property.name|default:"PMS Hotelero" }}</p>
-        <p class="text-[11px] uppercase tracking-[0.18em] text-gold-300/80">Cusco · PMS</p>
+        <p class="text-[11px] uppercase tracking-[0.18em] text-gold-300/80">{{ current_property.city|default:"Urubamba" }} · PMS</p>
       </div>
       <button type="button" class="ml-auto text-ink-400 hover:text-white lg:hidden" @click="menuOpen = false" aria-label="{% trans 'Cerrar menú' %}">
         {% icon "x" %}

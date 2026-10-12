@@ -1,7 +1,7 @@
 [project]
 name = "pms-la-sallito"
 version = "0.1.0"
-description = "PMS hotelero para hoteles de Cusco (Django)"
+description = "PMS hotelero para hoteles de Urubamba, Cusco (Django)"
 requires-python = ">=3.12"
 
 [tool.black]

@@ -6,7 +6,7 @@ tags: [decision, frontend, diseño]
 ---
 # Decisión: frontend servido localmente
 
-**Contexto.** En Cusco hay cortes de internet frecuentes y la recepción debe seguir operando (sección 2,
+**Contexto.** En Urubamba y el Valle Sagrado hay cortes de internet frecuentes y la recepción debe seguir operando (sección 2,
 RNF-DIS-03).
 
 **Decisión.**
