@@ -4,8 +4,8 @@ tags: [pendientes]
 # Pendientes
 
 ## Para cerrar la fase 0
-- [ ] Decidir qué hacer con las 23 tablas antiguas y vacías de Supabase (`hoteles`, `reservas`, ...). Tienen
-  RLS desactivado y están expuestas.
+- [x] Tablas antiguas de Supabase eliminadas (2026-10-12): 23 tablas vacías, 7 vistas, 12 funciones y 12 tipos
+  del diseño anterior. Se conserva la extensión `pg_trgm`. Falta verificar que el esquema quedó limpio.
 - [ ] El usuario conecta Supabase (`DATABASE_URL`) y corre `migrate` y `seed_pms --demo`. Luego verificar
   que la prueba del trigger de auditoría pase en PostgreSQL.
 - [ ] El usuario conecta el repositorio de GitHub y confirma que la CI pasa.

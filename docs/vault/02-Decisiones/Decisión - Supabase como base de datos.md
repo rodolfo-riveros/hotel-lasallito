@@ -16,6 +16,10 @@ tags: [decision, base-de-datos]
 
 **Decisión.** Opción 1, elegida por el usuario. Se reanudó el proyecto el 2026-10-12.
 
+**Limpieza previa.** El proyecto tenía un esquema anterior en español (`hoteles`, `reservas`, `folios`,
+`perfiles` sobre `auth.users`, triggers y vistas). Estaba vacío y con RLS desactivado. Se eliminó el
+2026-10-12 con la migración `drop_legacy_pms_schema` y se conservó `pg_trgm`.
+
 **Cómo se conecta.**
 - Django se conecta por el **pooler en modo sesión (puerto 5432)** con `DATABASE_URL` en `.env` (RF-BD-01, RF-BD-02).
 - La migración `core.0003` crea `btree_gist` (RF-BD-03).
