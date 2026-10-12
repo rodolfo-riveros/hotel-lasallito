@@ -1,0 +1,13 @@
+{% load static i18n pms %}<!DOCTYPE html>
+<html lang="{{ lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ outlet.name }} · {{ outlet.property.name }}</title><link rel="stylesheet" href="{% static 'css/app.css' %}"></head>
+<body class="bg-ink-50">
+<header class="bg-brand-900 px-6 py-8 text-center text-white"><p class="text-xs uppercase tracking-[0.2em] text-gold-300">{{ outlet.property.name }}</p><h1 class="mt-2 font-display text-4xl font-semibold">{{ outlet.name }}</h1>
+  <nav class="mt-4 flex justify-center gap-2 text-sm" aria-label="Idioma"><a href="?lang=es" class="rounded px-2 py-1 {% if lang == 'es' %}bg-white/20{% endif %}">ES</a><a href="?lang=en" class="rounded px-2 py-1 {% if lang == 'en' %}bg-white/20{% endif %}">EN</a><a href="?lang=pt-br" class="rounded px-2 py-1 {% if lang == 'pt-br' %}bg-white/20{% endif %}">PT</a></nav></header>
+<main class="mx-auto max-w-2xl space-y-8 px-4 py-8">
+  {% for block in cats %}<section><h2 class="mb-3 font-display text-2xl font-semibold text-brand-800">{{ block.c|lang_field:"name" }}</h2>
+    <ul class="space-y-3">{% for i in block.items %}<li class="flex gap-4 rounded-xl bg-white p-4 shadow-soft">{% if i.photo %}<img src="{{ i.photo.url }}" alt="" class="h-20 w-20 rounded-lg object-cover">{% endif %}
+      <div class="flex-1"><div class="flex justify-between gap-3"><p class="font-semibold">{{ i|lang_field:"name" }}</p><p class="font-semibold tabular-nums text-brand-700">{{ i.price|money }}</p></div>
+        <p class="text-sm text-ink-500">{{ i|lang_field:"description" }}</p>{% if i.allergens %}<p class="mt-1 text-xs text-state-dirty">⚠ {{ i.allergens }}</p>{% endif %}</div></li>{% endfor %}</ul></section>{% endfor %}
+  <p class="text-center text-xs text-ink-400">{% if lang == "en" %}Prices in soles, VAT included.{% elif lang == "pt-br" %}Preços em soles, IGV incluído.{% else %}Precios en soles, incluyen IGV.{% endif %}</p>
+</main></body></html>

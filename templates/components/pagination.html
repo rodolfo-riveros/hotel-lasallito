@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if page.has_other_pages %}
+  <nav class="flex items-center justify-between border-t border-ink-100 px-5 py-3 text-sm dark:border-ink-800" aria-label="{% trans 'Paginación' %}">
+    <span class="text-ink-500">{% blocktrans with n=page.number total=page.paginator.num_pages %}Página {{ n }} de {{ total }}{% endblocktrans %}</span>
+    <div class="flex gap-2">
+      {% if page.has_previous %}<a class="btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.previous_page_number }}">← {% trans "Anterior" %}</a>{% endif %}
+      {% if page.has_next %}<a class="btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.next_page_number }}">{% trans "Siguiente" %} →</a>{% endif %}
+    </div>
+  </nav>
+{% endif %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Recepción" %}{% endblock %}
+{% block content %}
+{% can "frontdesk.create" as can_fd %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Fecha hotelera" %} · {{ day|date:"l d/m/Y" }}</p>
+    <h1 class="page-title">{% trans "Recepción" %}</h1>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    {% if can_fd %}<a href="{% url 'frontdesk:walk_in' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}Walk-in</a>{% endif %}
+    <a href="{% url 'reservations:tape_chart' %}" class="btn-secondary">{% icon "calendar" "w-4 h-4" %}{% trans "Calendario" %}</a>
+    <a href="{% url 'frontdesk:luggage' %}" class="btn-secondary">{% icon "box" "w-4 h-4" %}{% trans "Equipaje" %}</a>
+    <a href="{% url 'frontdesk:shift_log' %}" class="btn-secondary">{% icon "chat" "w-4 h-4" %}{% trans "Novedades" %}</a>
+    <a href="{% url 'frontdesk:wakeups' %}" class="btn-secondary">{% icon "clock" "w-4 h-4" %}{% trans "Despertador" %}</a>
+    <a href="{% url 'frontdesk:night_audit' %}" class="btn-secondary">{% icon "moon" "w-4 h-4" %}{% trans "Cierre de día" %}</a>
+  </div>
+</div>
+
+<div class="mb-6 grid gap-4 sm:grid-cols-4">
+  <a href="?tab=arrivals" class="card p-4 {% if tab == 'arrivals' %}ring-2 ring-brand-600{% endif %}"><p class="text-sm text-ink-500">{% trans "Llegadas" %}</p><p class="font-display text-3xl font-semibold">{{ counts.pending_arrivals }}<span class="text-base text-ink-400"> / {{ counts.arrivals }}</span></p></a>
+  <a href="?tab=departures" class="card p-4 {% if tab == 'departures' %}ring-2 ring-brand-600{% endif %}"><p class="text-sm text-ink-500">{% trans "Salidas" %}</p><p class="font-display text-3xl font-semibold">{{ counts.departures }}</p></a>
+  <a href="?tab=in_house" class="card p-4 {% if tab == 'in_house' %}ring-2 ring-brand-600{% endif %}"><p class="text-sm text-ink-500">{% trans "En casa" %}</p><p class="font-display text-3xl font-semibold">{{ counts.in_house }}</p></a>
+  <div class="card p-4"><p class="mb-2 text-sm text-ink-500">{% trans "Contingencia sin internet" %}</p>
+    <div class="flex flex-wrap gap-1 text-xs">
+      <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'llegadas' 'pdf' %}">{% trans "Llegadas" %} PDF</a>
+      <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'en-casa' 'xlsx' %}">{% trans "En casa" %} Excel</a>
+      <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'libres' 'pdf' %}">{% trans "Libres" %} PDF</a>
+    </div></div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-hidden lg:col-span-2">
+    <div class="card-header">
+      <h2 class="card-title">{% if tab == "departures" %}{% trans "Salidas del día" %}{% elif tab == "in_house" %}{% trans "Huéspedes en casa" %}{% else %}{% trans "Llegadas del día" %}{% endif %}</h2>
+      {% if tab == "arrivals" %}
+        <div class="flex gap-1 text-xs">
+          <a href="?tab=arrivals" class="badge {% if not eta %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Todas" %}</a>
+          <a href="?tab=arrivals&eta=morning" class="badge {% if eta == 'morning' %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Mañana" %}</a>
+          <a href="?tab=arrivals&eta=afternoon" class="badge {% if eta == 'afternoon' %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Tarde" %}</a>
+          <a href="?tab=arrivals&eta=none" class="badge {% if eta == 'none' %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Sin hora" %}</a>
+        </div>
+      {% endif %}
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>{% trans "Hab." %}</th><th>{% trans "Huésped" %}</th><th>{% if tab == 'arrivals' %}ETA{% else %}{% trans "Salida" %}{% endif %}</th><th>{% trans "Estado hab." %}</th><th>{% trans "Saldo" %}</th><th></th></tr></thead>
+        <tbody>
+          {% if tab == "departures" %}{% for r in departures %}{% include "frontdesk/partials/row.html" with mode="departure" %}{% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin salidas." %}</td></tr>{% endfor %}
+          {% elif tab == "in_house" %}{% for r in in_house %}{% include "frontdesk/partials/row.html" with mode="in_house" %}{% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin huéspedes en casa." %}</td></tr>{% endfor %}
+          {% else %}{% for r in arrivals %}{% include "frontdesk/partials/row.html" with mode="arrival" %}{% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin llegadas." %}</td></tr>{% endfor %}{% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <aside class="space-y-6">
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Alertas" %}</h2><span class="text-xs text-ink-400">RF-REC-12</span></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+        {% for r, text in alerts %}<li class="px-5 py-2"><a href="{% url 'reservations:reservation_detail' r.pk %}" class="font-medium hover:underline">{{ r.room.number|default:r.code }} · {{ r.guest.last_name }}</a><p class="text-xs text-ink-500">{{ text }}</p></li>
+        {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Sin alertas." %}</li>{% endfor %}
+      </ul></section>
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Despertadores (12 h)" %}</h2></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+        {% for w in wakeups %}<li class="px-5 py-2">{{ w.scheduled_for|date:"H:i" }} · {% trans "hab." %} {{ w.reservation.room.number|default:"-" }} · {{ w.notes }}</li>
+        {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Ninguno." %}</li>{% endfor %}
+      </ul></section>
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Novedades del turno" %}</h2></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+        {% for log in logs %}<li class="px-5 py-2 {% if log.priority == 'high' %}border-l-4 border-state-danger{% endif %}">{{ log.message|truncatechars:120 }}<p class="text-xs text-ink-400">{{ log.created_by }} · {{ log.created_at|date:"d/m H:i" }}</p></li>
+        {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Sin novedades pendientes." %}</li>{% endfor %}
+      </ul></section>
+  </aside>
+</div>
+{% endblock %}

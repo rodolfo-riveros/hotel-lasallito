@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Cocina" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+  <h1 class="page-title">{% if station == "bar" %}{% trans "Barra" %}{% else %}{% trans "Cocina" %}{% endif %} · KDS</h1>
+  <div class="flex gap-2"><a href="?station=kitchen" class="{% if station == 'kitchen' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{% trans "Cocina" %}</a><a href="?station=bar" class="{% if station == 'bar' %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{% trans "Barra" %}</a></div>
+</div>
+<div id="kds" hx-get="{% url 'pos:kds' %}?station={{ station }}" hx-trigger="every 5s" hx-swap="innerHTML">{% include "pos/partials/kds_items.html" %}</div>
+{% endblock %}

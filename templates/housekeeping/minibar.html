@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Minibar" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4"><div><a href="{% url 'housekeeping:board' %}" class="text-sm text-ink-500 hover:text-ink-800">← Housekeeping</a>
+  <h1 class="page-title mt-2">{% trans "Control de minibar" %}</h1><p class="page-subtitle">{% trans "El consumo se carga al folio del huésped (RF-HK-05)." %}</p></div>
+  <a href="{% url 'housekeeping:minibaritem_list' %}" class="btn-secondary">{% trans "Artículos y precios" %}</a></div>
+<form method="post" action="{% url 'housekeeping:minibar_post' %}" class="card max-w-3xl">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+  <div class="card-body space-y-4">
+    <label class="block"><span class="field-label">{% trans "Habitación" %}</span><select name="reservation" required>{% for r in in_house %}<option value="{{ r.pk }}">{{ r.room.number }} · {{ r.guest.full_name }}</option>{% endfor %}</select></label>
+    <div class="grid gap-3 sm:grid-cols-2">{% for item in items %}<label class="flex items-center justify-between gap-2 rounded-lg border border-ink-200 p-3 text-sm dark:border-ink-700"><span>{{ item.name }} <span class="text-ink-500">S/ {{ item.price }}</span></span><input type="number" min="0" max="20" name="qty-{{ item.pk }}" value="0" class="!w-16"></label>{% empty %}<p class="text-ink-500">{% trans "Configure los artículos del minibar." %}</p>{% endfor %}</div>
+    <button class="btn-primary">{% trans "Cargar consumo" %}</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% load i18n pms %}
+{% for g in page %}
+  <tr class="cursor-pointer" onclick="location='{% url 'guests:guest_detail' g.pk %}'">
+    <td><span class="font-medium text-ink-900 dark:text-ink-100">{{ g.full_name }}</span>
+      {% for t in g.tags %}<span class="badge ml-1 bg-gold-100 text-gold-800">{{ t }}</span>{% endfor %}{% if g.is_blacklisted %}<span class="badge ml-1 bg-state-danger/10 text-state-danger">{% trans "lista negra" %}</span>{% endif %}</td>
+    <td class="text-xs">{{ g.get_doc_type_display }} {{ g.masked_doc }}</td>
+    <td>{% if g.nationality %}{{ g.nationality.name }}{% else %}—{% endif %}</td>
+    <td class="text-xs">{{ g.email }}<br>{{ g.phone }}</td>
+    <td class="text-right">{{ g.total_stays }}</td><td class="text-right tabular-nums">{{ g.total_spent|money }}</td>
+  </tr>
+{% empty %}<tr><td colspan="6">{% trans "No se encontraron huéspedes." as msg %}{% include "components/empty.html" with icon_name="users" message=msg %}</td></tr>{% endfor %}

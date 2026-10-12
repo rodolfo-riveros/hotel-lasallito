@@ -1,0 +1,12 @@
+{% load i18n %}
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  {% for i in items %}
+    <div class="card p-4 {% if i.status == 'ready' %}border-state-available{% elif i.status == 'preparing' %}border-state-cleaning{% endif %}">
+      <div class="flex items-center justify-between text-xs text-ink-500"><span>{% if i.order.table %}{% trans "Mesa" %} {{ i.order.table.number }}{% else %}{{ i.order.number }}{% endif %}</span><span>{{ i.sent_at|timesince:now }}</span></div>
+      <p class="mt-2 text-xl font-semibold">{{ i.quantity }} × {{ i.menu_item.name }}</p>
+      {% if i.notes %}<p class="text-sm text-state-dirty">{{ i.notes }}</p>{% endif %}
+      <form hx-post="{% url 'pos:kds' %}?station={{ station }}" hx-target="#kds" class="mt-3">{% csrf_token %}<input type="hidden" name="item" value="{{ i.pk }}">
+        <button class="{% if i.status == 'ready' %}btn-secondary{% else %}btn-primary{% endif %} w-full">{% if i.status == "sent" %}{% trans "Preparar" %}{% elif i.status == "preparing" %}{% trans "Listo" %}{% else %}{% trans "Servido" %}{% endif %}</button></form>
+    </div>
+  {% empty %}<p class="text-ink-500">{% trans "Sin pedidos pendientes." %}</p>{% endfor %}
+</div>

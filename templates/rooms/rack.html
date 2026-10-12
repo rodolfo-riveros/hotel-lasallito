@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Habitaciones" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{{ total }} {% trans "habitaciones" %}</p><h1 class="page-title">{% trans "Rack de habitaciones" %}</h1></div>
+  <div class="flex flex-wrap gap-2"><a href="{% url 'rooms:room_list' %}" class="btn-secondary">{% trans "Habitaciones" %}</a><a href="{% url 'rooms:roomtype_list' %}" class="btn-secondary">{% trans "Tipos" %}</a><a href="{% url 'rooms:block_list' %}" class="btn-secondary">{% icon "lock" "w-4 h-4" %}{% trans "Bloqueos" %}</a></div>
+</div>
+<div class="mb-6 flex flex-wrap gap-2">{% for key, n in summary.items %}<span class="inline-flex items-center gap-1">{% status_badge "room" key %}<b class="text-sm">{{ n }}</b></span>{% endfor %}</div>
+{% for floor, items in floors %}
+  <h2 class="mb-3 mt-6 text-sm font-semibold uppercase tracking-wide text-ink-500">{% trans "Piso" %} {{ floor }}</h2>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+    {% for item in items %}
+      <div class="card p-3">
+        <div class="flex items-start justify-between"><span class="font-display text-2xl font-semibold">{{ item.room.number }}</span><span class="text-[10px] font-semibold uppercase text-ink-400">{{ item.room.room_type.code }}</span></div>
+        <div class="mt-2">{% status_badge "room" item.status %}</div>
+        {% if item.guest_reservation %}<a href="{% url 'reservations:reservation_detail' item.guest_reservation.pk %}" class="mt-2 block truncate text-xs hover:underline">{{ item.guest_reservation.guest.last_name }} · {% trans "sale" %} {{ item.guest_reservation.departure|date:"d/m" }}</a>{% endif %}
+        {% if item.arrival %}<a href="{% url 'reservations:reservation_detail' item.arrival.pk %}" class="mt-1 block truncate text-xs text-state-occupied hover:underline">↘ {{ item.arrival.guest.last_name }}</a>{% endif %}
+        {% if item.block %}<p class="mt-1 truncate text-xs text-ink-500">{{ item.block.reason }}</p>{% endif %}
+        <div class="mt-2 flex gap-2 text-[11px] text-ink-400">{% if item.room.has_oxygen %}O₂{% endif %}{% if item.room.has_balcony %} · {% trans "balcón" %}{% endif %}<a href="{% url 'rooms:room_inventory' item.room.pk %}" class="ml-auto hover:underline">{% trans "inventario" %}</a></div>
+      </div>
+    {% endfor %}
+  </div>
+{% empty %}{% trans "Cree tipos y habitaciones para empezar." as msg %}{% include "components/empty.html" with icon_name="bed" message=msg %}{% endfor %}
+{% endblock %}

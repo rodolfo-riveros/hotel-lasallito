@@ -6,7 +6,7 @@ porque el sistema se usa para enseñar gestión hotelera.
 
 La fuente de verdad es el documento de requerimientos (`docs/vault/01-Requerimientos`).
 
-**Estado:** fase 0 (base) terminada. La siguiente es la fase 1 (MVP operativo + restaurante).
+**Estado:** fases 0 y 1 terminadas (base y MVP operativo con restaurante). Siguiente: fase 2.
 
 ## Puesta en marcha (Windows)
 
@@ -32,8 +32,10 @@ Luego:
 .venv\Scripts\python manage.py migrate
 .venv\Scripts\python manage.py seed_pms --demo
 .venv\Scripts\python manage.py createsuperuser
-.venv\Scripts\python manage.py runserver
+.venv\Scripts\python manage.py runserver --nothreading
 ```
+
+`--nothreading` reutiliza la conexión con Supabase (cada conexión nueva cuesta ~2 s).
 
 Abra http://127.0.0.1:8000. `seed_pms --demo` crea un usuario de práctica por rol: `admin`, `gerente`,
 `recepcion`, `nocturno`, `ventas`, `gobernanta`, `mantenimiento`, `almacen`, `compras`, `restaurante` y

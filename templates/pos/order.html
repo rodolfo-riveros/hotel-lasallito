@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ o.number }}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+  <div><a href="{% url 'pos:floor' o.outlet.pk %}" class="text-sm text-ink-500 hover:text-ink-800">← {{ o.outlet }}</a>
+    <h1 class="page-title mt-1">{% if o.table %}{% trans "Mesa" %} {{ o.table.number }}{% else %}{{ o.number }}{% endif %}{% if o.reservation %} · {% trans "hab." %} {{ o.reservation.room.number }}{% endif %}</h1>
+    <p class="page-subtitle">{{ o.number }} · {{ o.covers }} {% trans "comensales" %} · {{ o.get_status_display }}{% if o.reservation %} · {{ o.reservation.guest.full_name }}{% endif %}</p></div>
+  <div class="flex gap-2"><a href="{% url 'pos:precheck' o.pk %}" target="_blank" class="btn-secondary">{% trans "Precuenta" %}</a></div>
+</div>
+{% if o.status == "open" %}
+<div class="grid gap-6 lg:grid-cols-5">
+  <section class="lg:col-span-3" x-data="{ cat: 0 }">
+    <div class="mb-3 flex gap-2 overflow-x-auto pb-1">{% for m in menu %}<button type="button" @click="cat = {{ forloop.counter0 }}" :class="cat === {{ forloop.counter0 }} ? 'btn-primary' : 'btn-secondary'" class="btn-sm whitespace-nowrap">{{ m.category.name }}</button>{% endfor %}</div>
+    {% for m in menu %}
+      <div x-show="cat === {{ forloop.counter0 }}" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {% for item in m.items %}
+          <form hx-post="{% url 'pos:order_action' o.pk 'add' %}" hx-target="#order-items" hx-swap="innerHTML">{% csrf_token %}<input type="hidden" name="item" value="{{ item.pk }}">
+            <button class="card flex h-full w-full flex-col items-start p-3 text-left transition hover:border-brand-300 active:scale-[0.98] {% if not item.is_available %}opacity-40{% endif %}" {% if not item.is_available %}disabled{% endif %}>
+              <span class="font-medium leading-tight">{{ item.name }}</span>
+              {% if item.allergens %}<span class="mt-1 text-[11px] text-state-dirty">{{ item.allergens }}</span>{% endif %}
+              <span class="mt-auto pt-2 font-semibold tabular-nums text-brand-700 dark:text-brand-300">{{ item.price|money }}</span></button></form>
+        {% endfor %}
+      </div>
+    {% empty %}<p class="text-ink-500">{% trans "La carta de este punto de venta está vacía." %}</p>{% endfor %}
+  </section>
+  <aside class="space-y-4 lg:col-span-2">
+    <form method="post" class="card" id="items-form">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Cuenta" %}</h2></div>
+      <div id="order-items">{% include "pos/partials/items.html" %}</div>
+      <div class="grid grid-cols-2 gap-2 border-t border-ink-100 p-4 dark:border-ink-800">
+        <button formaction="{% url 'pos:order_action' o.pk 'send' %}" class="btn-primary">{% icon "arrow-right" "w-4 h-4" %}{% trans "Enviar a cocina" %}</button>
+        <button formaction="{% url 'pos:order_action' o.pk 'split' %}" class="btn-secondary">{% trans "Separar marcados" %}</button>
+      </div>
+    </form>
+    <div x-data="{ mode: '{% if o.reservation %}room{% else %}pay{% endif %}' }" class="card">
+      <div class="flex border-b border-ink-100 dark:border-ink-800"><button type="button" @click="mode='pay'" :class="mode==='pay' && 'border-b-2 border-brand-700 text-brand-700'" class="flex-1 py-3 text-sm font-medium">{% trans "Cobrar" %}</button><button type="button" @click="mode='room'" :class="mode==='room' && 'border-b-2 border-brand-700 text-brand-700'" class="flex-1 py-3 text-sm font-medium">{% trans "Cargo a habitación" %}</button></div>
+      <form x-show="mode==='pay'" method="post" action="{% url 'pos:order_action' o.pk 'pay' %}" class="card-body space-y-3" x-data="{ total: {{ o.total|stringformat:'s' }}, tip: 0 }">{% csrf_token %}
+        <label class="block text-sm">{% trans "Propina" %} <input name="tip" x-model.number="tip" inputmode="decimal" value="0"></label>
+        <p class="text-sm">{% trans "Total a cobrar" %}: <b x-text="'S/ ' + (total + (+tip || 0)).toFixed(2)"></b></p>
+        {% for i in "012"|make_list %}<div class="grid grid-cols-2 gap-2"><select name="method{{ i }}"><option value="">—</option>{% for k, v in methods %}<option value="{{ k }}" {% if forloop.first and i == "0" %}selected{% endif %}>{{ v }}</option>{% endfor %}</select><input name="amount{{ i }}" inputmode="decimal" placeholder="{% trans 'Monto' %}" {% if i == "0" %}:value="(total + (+tip || 0)).toFixed(2)"{% endif %}></div>{% endfor %}
+        <select name="doc_type"><option value="03">{% trans "Boleta" %}</option><option value="01">{% trans "Factura" %}</option></select>
+        <div class="grid grid-cols-2 gap-2"><input name="customer_doc" placeholder="{% trans 'DNI / RUC (opcional)' %}"><input name="customer_name" placeholder="{% trans 'Nombre / razón social' %}"></div>
+        <button class="btn-primary w-full">{% trans "Cobrar y emitir" %}</button>
+      </form>
+      <form x-show="mode==='room'" x-cloak method="post" action="{% url 'pos:order_action' o.pk 'room' %}" class="card-body space-y-3">{% csrf_token %}
+        <select name="reservation" required>{% for r in in_house %}<option value="{{ r.pk }}" {% if o.reservation_id == r.pk %}selected{% endif %}>{{ r.room.number }} · {{ r.guest.full_name }}</option>{% endfor %}</select>
+        {% include "components/signature.html" %}
+        <button class="btn-primary w-full">{% trans "Cargar a la habitación" %}</button>
+      </form>
+    </div>
+    <form method="post" action="{% url 'pos:order_action' o.pk 'cancel' %}" data-confirm="{% trans '¿Anular toda la cuenta?' %}">{% csrf_token %}<button class="btn-ghost btn-sm w-full text-state-danger">{% trans "Anular cuenta" %}</button></form>
+  </aside>
+</div>
+{% else %}
+  <section class="card max-w-xl p-6"><p>{% trans "Cuenta cerrada" %} · {{ o.get_settlement_display }} · {{ o.total|money }}</p>{% if o.folio %}<a href="{% url 'folio:folio_detail' o.folio.pk %}" class="btn-secondary mt-3">Folio {{ o.folio.number }}</a>{% endif %}</section>
+{% endif %}
+{% endblock %}

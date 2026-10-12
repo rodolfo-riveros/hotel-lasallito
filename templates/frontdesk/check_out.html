@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}Check-out {{ r.code }}{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'frontdesk:panel' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Recepción" %}</a>
+  <h1 class="page-title mt-2">Check-out · {{ r.guest.full_name }}</h1>
+  <p class="page-subtitle">{% trans "Hab." %} {{ r.room.number }} · {{ r.code }} · {{ r.arrival|date:"d/m" }}–{{ r.departure|date:"d/m/Y" }}</p></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-hidden lg:col-span-2">
+    <div class="card-header"><h2 class="card-title">1. {% trans "Folios y comprobantes" %}</h2></div>
+    <table class="table">
+      <thead><tr><th>{% trans "Folio" %}</th><th>{% trans "A nombre de" %}</th><th class="!text-right">{% trans "Cargos" %}</th><th class="!text-right">{% trans "Pagos" %}</th><th class="!text-right">{% trans "Saldo" %}</th><th>{% trans "Comprobantes" %}</th><th></th></tr></thead>
+      <tbody>{% for f in folios %}
+        <tr><td class="font-mono text-xs">{{ f.number }}</td><td>{{ f.name }}</td><td class="text-right tabular-nums">{{ f.total_charges|money }}</td><td class="text-right tabular-nums">{{ f.total_payments|money }}</td>
+          <td class="text-right font-semibold tabular-nums {% if f.balance != 0 %}text-state-danger{% else %}text-state-available{% endif %}">{{ f.balance|money }}</td>
+          <td class="text-xs">{% for inv in f.invoices.all %}<a href="{% url 'billing:invoice_detail' inv.pk %}" class="hover:underline">{{ inv.full_number }}</a>{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</td>
+          <td class="text-right"><a href="{% url 'folio:folio_detail' f.pk %}" class="btn-secondary btn-sm">{% trans "Cobrar / facturar" %}</a></td></tr>
+      {% endfor %}</tbody>
+    </table>
+    <p class="px-5 py-3 text-xs text-ink-500">{% trans "Desde el folio: cobre el saldo (efectivo, tarjeta, Yape/Plin, transferencia o crédito de empresa) y emita boleta o factura." %}</p>
+  </section>
+  <aside>
+    <form method="post" class="card" data-confirm="{% trans '¿Confirmar la salida del huésped?' %}">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">2. {% trans "Salida" %}</h2></div>
+      <div class="card-body space-y-4 text-sm">
+        <label class="flex items-start gap-3"><input type="checkbox" name="charge_late" {% if late %}checked{% endif %}><span>{% trans "Cobrar late check-out" %} ({{ r.property.late_checkout_fee_percent|floatformat:0 }}% {% trans "de la noche" %}){% if late %}<span class="block text-xs text-state-dirty">{% trans "Pasó la hora de salida" %} ({{ r.property.check_out_time|time:"H:i" }})</span>{% endif %}</span></label>
+        {% can "folio.approve" as can_force %}{% if can_force %}<label class="flex items-start gap-3"><input type="checkbox" name="force_balance"><span>{% trans "Dar salida con saldo pendiente (supervisor)" %}</span></label>{% endif %}
+        <p class="text-ink-500">{% trans "Al salir: la habitación pasa a sucia, se crea la tarea de limpieza y se envía el agradecimiento con la encuesta." %}</p>
+        <button class="btn-primary w-full py-2.5">{% trans "Completar check-out" %}</button>
+      </div>
+    </form>
+  </aside>
+</div>
+{% endblock %}

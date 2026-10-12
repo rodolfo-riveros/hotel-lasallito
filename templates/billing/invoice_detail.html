@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ inv.full_number }}{% endblock %}
+{% block content %}
+{% can "billing.void" as can_void %}{% can "billing.create" as can_create %}
+<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+  <div><a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
+    <div class="mt-2 flex flex-wrap items-center gap-3"><h1 class="page-title">{{ inv.get_doc_type_display }} {{ inv.full_number }}</h1>
+      <span class="status {% if inv.status == 'accepted' %}status-confirmed{% elif inv.status == 'pending' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></div>
+    <p class="page-subtitle">{{ inv.issue_date|date:"d/m/Y" }} · {{ inv.customer_name }} · {{ inv.get_customer_doc_type_display }} {{ inv.customer_doc }}{% if inv.related_invoice %} · {% trans "modifica" %} <a class="hover:underline" href="{% url 'billing:invoice_detail' inv.related_invoice.pk %}">{{ inv.related_invoice.full_number }}</a>{% endif %}</p></div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'billing:invoice_pdf' inv.pk %}" target="_blank" class="btn-secondary">{% icon "document" "w-4 h-4" %}PDF</a>
+    {% if inv.status == "pending" or inv.status == "rejected" %}<form method="post" action="{% url 'billing:invoice_action' inv.pk 'send' %}">{% csrf_token %}<button class="btn-primary">{% trans "Enviar a SUNAT" %}</button></form>{% endif %}
+    {% if inv.folio %}<a href="{% url 'folio:folio_detail' inv.folio.pk %}" class="btn-secondary">Folio {{ inv.folio.number }}</a>{% endif %}
+  </div>
+</div>
+<div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card overflow-hidden"><table class="table">
+      <thead><tr><th>{% trans "Descripción" %}</th><th>{% trans "Afectación" %}</th><th class="!text-right">{% trans "Cant." %}</th><th class="!text-right">{% trans "Valor" %}</th><th class="!text-right">IGV</th><th class="!text-right">{% trans "Total" %}</th></tr></thead>
+      <tbody>{% for ln in lines %}<tr><td>{{ ln.description }}</td><td class="text-xs">{{ ln.affectation }} {{ ln.get_affectation_display }}</td><td class="text-right">{{ ln.quantity|floatformat:"-2" }}</td><td class="text-right tabular-nums">{{ ln.base }}</td><td class="text-right tabular-nums">{{ ln.igv }}</td><td class="text-right tabular-nums">{{ ln.total }}</td></tr>{% endfor %}</tbody>
+      <tfoot class="text-sm">
+        {% if inv.taxed_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Op. gravadas" %}</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.taxed_amount }}</td></tr>{% endif %}
+        {% if inv.exempt_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Op. exoneradas" %}</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.exempt_amount }}</td></tr>{% endif %}
+        {% if inv.export_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Exportación" %}</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.export_amount }}</td></tr>{% endif %}
+        <tr><td colspan="5" class="px-4 py-1 text-right">IGV</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.igv }}</td></tr>
+        <tr><td colspan="5" class="px-4 py-2 text-right font-semibold">{% trans "Total" %} {{ inv.currency }}</td><td class="px-4 py-2 text-right font-display text-xl font-semibold tabular-nums">{{ inv.total }}</td></tr>
+      </tfoot></table>
+      <div class="space-y-1 border-t border-ink-100 px-5 py-3 text-xs text-ink-500 dark:border-ink-800">{% for lg in inv.legends %}<p>{{ lg.code }} · {{ lg.text }}</p>{% endfor %}<p>Hash: {{ inv.hash }}</p></div>
+    </section>
+    <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Envíos a SUNAT / OSE (simulados)" %}</h2></div>
+      <table class="table"><tbody>{% for s in submissions %}<tr><td class="text-xs">{{ s.created_at|date:"d/m H:i:s" }}</td><td>{{ s.get_kind_display }}</td><td>{% if s.success %}<span class="text-state-available">✓ {{ s.code }}</span>{% elif s.connection_error %}<span class="text-state-dirty">{% trans "Sin conexión" %}</span>{% else %}<span class="text-state-danger">✗ {{ s.code }}</span>{% endif %}</td><td class="text-xs">{{ s.message }}</td></tr>
+      {% empty %}<tr><td class="text-ink-500">{% trans "Aún no se envía." %}</td></tr>{% endfor %}</tbody></table></section>
+    {% if notes %}<section class="card"><div class="card-header"><h2 class="card-title">{% trans "Notas emitidas" %}</h2></div><ul class="card-body space-y-1 text-sm">{% for n in notes %}<li><a href="{% url 'billing:invoice_detail' n.pk %}" class="hover:underline">{{ n.get_doc_type_display }} {{ n.full_number }}</a> · {{ n.total }} · {{ n.note_reason }}</li>{% endfor %}</ul></section>{% endif %}
+  </div>
+  <aside class="space-y-6">
+    <form method="post" action="{% url 'billing:invoice_action' inv.pk 'email' %}" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Enviar por correo" %}</h2></div>
+      <div class="card-body flex gap-2"><input type="email" name="to" value="{{ inv.customer_email }}" placeholder="correo@ejemplo.com"><button class="btn-secondary">{% trans "Enviar" %}</button></div></form>
+    {% if can_void and inv.doc_type in "01 03" and inv.status in "accepted observed" %}
+    <form method="post" action="{% url 'billing:invoice_action' inv.pk 'credit_note' %}" class="card" data-confirm="{% trans '¿Emitir la nota de crédito?' %}">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Nota de crédito" %}</h2></div>
+      <div class="card-body space-y-3"><select name="reason_code">{% for k, v in nc_reasons %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+        <input name="reason" placeholder="{% trans 'Sustento' %}" required><input name="amount" inputmode="decimal" placeholder="{% trans 'Monto (vacío = total)' %}">
+        <button class="btn-secondary w-full">{% trans "Emitir nota de crédito" %}</button></div></form>
+    {% endif %}
+    {% if can_create and inv.doc_type in "01 03" and inv.status == "accepted" %}
+    <form method="post" action="{% url 'billing:invoice_action' inv.pk 'debit_note' %}" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Nota de débito" %}</h2></div>
+      <div class="card-body space-y-3"><select name="reason_code">{% for k, v in nd_reasons %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+        <input name="reason" placeholder="{% trans 'Sustento' %}" required><input name="amount" inputmode="decimal" placeholder="{% trans 'Monto' %}" required>
+        <button class="btn-secondary w-full">{% trans "Emitir nota de débito" %}</button></div></form>
+    {% endif %}
+    {% if can_void and inv.status != "voided" %}
+    <form method="post" action="{% url 'billing:invoice_action' inv.pk 'void' %}" class="card border-state-danger/30" data-confirm="{% trans '¿Dar de baja el comprobante?' %}">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title text-state-danger">{% trans "Comunicación de baja" %}</h2></div>
+      <div class="card-body space-y-3"><input name="reason" placeholder="{% trans 'Motivo' %}" required><p class="text-xs text-ink-500">{% trans "Plazo: 7 días desde la emisión. Después, use una nota de crédito." %}</p><button class="btn-danger w-full">{% trans "Dar de baja" %}</button></div></form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

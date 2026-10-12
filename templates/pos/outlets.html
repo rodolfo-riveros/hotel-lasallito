@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Restaurante y bar" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4"><h1 class="page-title">{% trans "Puntos de venta" %}</h1>
+  <div class="flex flex-wrap gap-2"><a href="{% url 'pos:kds' %}" class="btn-secondary">{% icon "coffee" "w-4 h-4" %}{% trans "Cocina (KDS)" %}</a><a href="{% url 'pos:breakfast' %}" class="btn-secondary">{% trans "Desayunos" %}</a>
+    <a href="{% url 'pos:menuitem_list' %}" class="btn-secondary">{% trans "Carta" %}</a><a href="{% url 'pos:outlet_list' %}" class="btn-secondary">{% trans "Configurar" %}</a></div></div>
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for o in outlets %}<a href="{% url 'pos:floor' o.pk %}" class="card p-6 transition hover:-translate-y-0.5"><span class="text-brand-700">{% icon "coffee" "w-6 h-6" %}</span><p class="mt-3 font-display text-2xl font-semibold">{{ o.name }}</p><p class="text-sm text-ink-500">{{ o.get_kind_display }}</p></a>
+{% empty %}<div class="card p-8 text-ink-500">{% trans "Configure un punto de venta." %}</div>{% endfor %}</div>
+{% endblock %}

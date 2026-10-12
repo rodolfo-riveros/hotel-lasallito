@@ -1,0 +1,11 @@
+{# Renderiza todos los campos de `form` en una grilla de 2 columnas; textos largos ocupan el ancho. #}
+<div class="grid gap-5 sm:grid-cols-2">
+  {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  {% for field in form.visible_fields %}
+    {% if field.field.widget.input_type == "textarea" or field.widget_type == "textarea" or field.widget_type == "selectmultiple" or field.widget_type == "checkboxselectmultiple" %}
+      {% include "components/field.html" with wrapper_class="sm:col-span-2" %}
+    {% else %}
+      {% include "components/field.html" %}
+    {% endif %}
+  {% endfor %}
+</div>

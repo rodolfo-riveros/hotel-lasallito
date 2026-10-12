@@ -83,10 +83,14 @@ class User(AbstractUser):
             from .permissions import all_permission_codes
 
             return frozenset(all_permission_codes())
-        access = self.access_for(property_obj)
-        if access is None:
+        if property_obj is None:
             return frozenset()
-        return access.role.permission_codes()
+        memo = self.__dict__.setdefault("_pms_perm_memo", {})
+        if property_obj.pk not in memo:
+            from .cache import permissions_for
+
+            memo[property_obj.pk] = permissions_for(self, property_obj.pk)[0]
+        return memo[property_obj.pk]
 
     def has_pms_perm(self, property_obj, perm: str) -> bool:
         return perm in self.pms_permissions(property_obj)

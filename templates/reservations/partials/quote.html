@@ -1,0 +1,23 @@
+{% load i18n pms %}
+{% if q %}
+  {% if q.errors %}
+    <ul class="space-y-1">{% for e in q.errors %}<li class="field-error">{% icon "x-circle" "w-3.5 h-3.5" %}{{ e }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if q.nights %}
+    <table class="w-full text-sm">
+      {% for n in q.nights %}
+        <tr><td class="py-0.5 text-ink-500">{{ n.date|date:"D d/m" }}{% if n.season %} · <span class="text-gold-700">{{ n.season }}</span>{% endif %}</td>
+            <td class="py-0.5 text-right tabular-nums">{{ n.amount|money:q.currency }}</td></tr>
+      {% endfor %}
+      {% if q.discount %}<tr><td class="pt-2 text-ink-500">{% trans "Descuento" %} {{ q.discount_percent|floatformat:"-2" }}%{% if q.promotion %} ({{ q.promotion.code }}){% endif %}</td><td class="pt-2 text-right tabular-nums">-{{ q.discount|money:q.currency }}</td></tr>{% endif %}
+      <tr class="border-t border-ink-200 dark:border-ink-700"><td class="pt-2 font-semibold text-ink-900 dark:text-ink-100">{% trans "Total" %} ({{ q.nights|length }} {% trans "noches" %})</td>
+          <td class="pt-2 text-right font-display text-2xl font-semibold tabular-nums text-ink-900 dark:text-ink-50">{{ q.total|money:q.currency }}</td></tr>
+    </table>
+    <p class="mt-3 text-xs text-ink-500">{{ q.rate_plan.get_meal_plan_display }} · {% trans "Política" %}: {{ q.rate_plan.cancellation_policy }}</p>
+  {% endif %}
+  <p class="mt-3 flex items-center gap-2 text-sm {% if free > 0 %}text-state-available{% else %}text-state-danger{% endif %}">
+    {% if free > 0 %}{% icon "check-circle" "w-4 h-4" %}{% blocktrans count n=free %}{{ n }} habitación libre{% plural %}{{ n }} habitaciones libres{% endblocktrans %}{% else %}{% icon "x-circle" "w-4 h-4" %}{% trans "Sin disponibilidad: lista de espera o sobreventa con aprobación" %}{% endif %}
+  </p>
+{% else %}
+  <p class="text-ink-500">{% trans "Complete fechas, tipo y tarifa para cotizar." %}</p>
+{% endif %}

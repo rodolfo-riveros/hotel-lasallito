@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+{% can "reports.export" as can_export %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'reports:index' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Reportes" %}</a><h1 class="page-title mt-2">{{ title }}</h1></div>
+  {% if can_export %}<div class="flex gap-2">
+    <a href="?{{ request.GET.urlencode }}&format=pdf" class="btn-secondary btn-sm">{% icon "download" "w-4 h-4" %}PDF</a>
+    <a href="?{{ request.GET.urlencode }}&format=xlsx" class="btn-secondary btn-sm">Excel</a>
+    <a href="?{{ request.GET.urlencode }}&format=csv" class="btn-secondary btn-sm">CSV</a></div>{% endif %}
+</div>
+<form class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <label><span class="field-label">{% trans "Desde" %}</span><input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label>
+  <label><span class="field-label">{% trans "Hasta (exclusive)" %}</span><input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label>
+  {% if key == "kpis" %}<label><span class="field-label">{% trans "Tipo" %}</span><select name="room_type"><option value="">{% trans "Todos" %}</option>{% for t in room_types %}<option value="{{ t.pk }}" {% if request.GET.room_type == t.pk|stringformat:"s" %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></label>{% endif %}
+  <button class="btn-primary">{% trans "Ver" %}</button>
+</form>
+{% if key == "kpis" and extra %}
+<div class="mb-4 grid gap-4 sm:grid-cols-4">
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Ocupación" %}</p><p class="font-display text-3xl font-semibold">{{ extra.occupancy }}%</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">ADR</p><p class="font-display text-3xl font-semibold">{{ extra.adr|money }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">RevPAR</p><p class="font-display text-3xl font-semibold">{{ extra.revpar|money }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Ingreso alojamiento" %}</p><p class="font-display text-3xl font-semibold">{{ extra.revenue|money }}</p></div>
+</div>
+<div class="card mb-4 p-4"><div class="flex h-32 items-end gap-1">{% for d in extra.days %}<div class="flex-1 rounded-t bg-brand-600/80" style="height: {{ d.occupancy }}%" title="{{ d.date|date:'d/m' }}: {{ d.occupancy }}%"></div>{% endfor %}</div><p class="mt-1 text-xs text-ink-500">{% trans "Ocupación diaria" %}</p></div>
+{% endif %}
+{% if key == "channel" and extra %}<p class="mb-4 text-sm text-ink-500">{% trans "Estadía promedio" %}: <b>{{ extra.alos }}</b> · {% trans "cancelaciones" %}: <b>{{ extra.cancelled }}</b> ({{ extra.cancellation_rate }}%) · no shows: <b>{{ extra.no_show }}</b></p>{% endif %}
+{% if key == "mincetur" and extra %}<p class="mb-4 text-sm text-ink-500">{{ extra.start|date:"F Y" }} · {% trans "nacionales" %} {{ extra.national_arrivals }} · {% trans "extranjeros" %} {{ extra.foreign_arrivals }} · {% trans "ocupación" %} {{ extra.occupancy }}% · {% trans "habitaciones vendidas" %} {{ extra.rooms_sold }}</p>{% endif %}
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr>{% for h in header %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for row in rows %}<tr>{% for v in row %}<td class="tabular-nums">{{ v|cell }}</td>{% endfor %}</tr>{% empty %}<tr><td colspan="{{ header|length }}" class="text-ink-500">{% trans "Sin datos en el periodo." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+{% endblock %}

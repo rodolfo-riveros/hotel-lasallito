@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ r.code }}{% endblock %}
+{% block content %}
+{% can "reservations.edit" as can_edit %}{% can "reservations.void" as can_void %}{% can "frontdesk.create" as can_fd %}{% can "folio.view" as can_folio %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <a href="{% url 'reservations:reservation_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Reservas" %}</a>
+    <div class="mt-2 flex flex-wrap items-center gap-3">
+      <h1 class="page-title">{{ r.code }}</h1>{% status_badge "reservation" r.status %}
+      {% if r.overbooked %}<span class="badge bg-state-danger/10 text-state-danger">{% trans "Sobreventa" %}</span>{% endif %}
+      {% if r.igv_exempt %}<span class="badge bg-gold-100 text-gold-800">{% trans "IGV exonerado" %}</span>{% endif %}
+    </div>
+    <p class="page-subtitle">{{ r.get_channel_display }}{% if r.external_ref %} · {{ r.external_ref }}{% endif %} · {% trans "creada" %} {{ r.created_at|date:"d/m/Y H:i" }}{% if r.created_by %} {% trans "por" %} {{ r.created_by }}{% endif %}</p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    {% if can_fd and r.status in "pending confirmed guaranteed" %}<a href="{% url 'frontdesk:check_in' r.pk %}" class="btn-primary">{% icon "key" "w-4 h-4" %}{% trans "Check-in" %}</a>{% endif %}
+    {% if can_fd and r.status == "checked_in" %}<a href="{% url 'frontdesk:check_out' r.pk %}" class="btn-primary">{% icon "logout" "w-4 h-4" %}{% trans "Check-out" %}</a>{% endif %}
+    {% if can_edit and r.status not in "checked_out cancelled no_show" %}<a href="{% url 'reservations:reservation_edit' r.pk %}" class="btn-secondary">{% trans "Modificar" %}</a>{% endif %}
+    <a href="{% url 'reservations:reservation_pdf' r.pk %}" target="_blank" class="btn-secondary">{% icon "document" "w-4 h-4" %}PDF</a>
+    {% if can_edit %}<form method="post" action="{% url 'reservations:reservation_action' r.pk 'resend' %}">{% csrf_token %}<button class="btn-secondary">{% icon "chat" "w-4 h-4" %}{% trans "Reenviar confirmación" %}</button></form>{% endif %}
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Estadía" %}</h2></div>
+      <dl class="card-body grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-4">
+        <div><dt class="text-ink-500">{% trans "Llegada" %}</dt><dd class="font-medium">{{ r.arrival|date:"D d/m/Y" }}{% if r.eta %} · {{ r.eta|time:"H:i" }}{% endif %}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Salida" %}</dt><dd class="font-medium">{{ r.departure|date:"D d/m/Y" }}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Noches" %}</dt><dd class="font-medium">{{ r.nights }}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Personas" %}</dt><dd class="font-medium">{{ r.adults }} AD{% if r.children %} · {{ r.children }} NI{% endif %}{% if r.extra_beds %} · {{ r.extra_beds }} {% trans "cama extra" %}{% endif %}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Tipo" %}</dt><dd class="font-medium">{{ r.room_type }}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Habitación" %}</dt><dd class="font-medium">{{ r.room.number|default:"—" }}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Tarifa" %}</dt><dd class="font-medium">{{ r.rate_plan }} · {{ r.rate_plan.meal_plan }}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Total alojamiento" %}</dt><dd class="font-display text-xl font-semibold">{{ r.total_amount|money:r.currency }}</dd></div>
+        {% if r.company %}<div class="col-span-2"><dt class="text-ink-500">{% trans "Empresa / agencia" %}</dt><dd class="font-medium">{{ r.company }}</dd></div>{% endif %}
+        {% if r.group %}<div class="col-span-2"><dt class="text-ink-500">{% trans "Grupo" %}</dt><dd><a class="font-medium text-brand-700 hover:underline" href="{% url 'reservations:group_detail' r.group.pk %}">{{ r.group }}</a></dd></div>{% endif %}
+        {% if r.discount_percent %}<div class="col-span-2"><dt class="text-ink-500">{% trans "Descuento" %}</dt><dd>{{ r.discount_percent|floatformat:"-2" }}% · {{ r.discount_reason }}</dd></div>{% endif %}
+        <div class="col-span-2"><dt class="text-ink-500">{% trans "Garantía" %}</dt><dd>{{ r.get_guarantee_display }}{% if r.deposit_required %} · {% trans "depósito" %} {{ r.deposit_required|money }}{% endif %}</dd></div>
+      </dl>
+      {% if r.special_requests or r.notes %}
+        <div class="border-t border-ink-100 px-5 py-4 text-sm dark:border-ink-800">
+          {% if r.special_requests %}<p><span class="font-medium">{% trans "Solicitudes" %}:</span> {{ r.special_requests }}</p>{% endif %}
+          {% if r.notes %}<p class="mt-1 text-ink-500"><span class="font-medium">{% trans "Notas" %}:</span> {{ r.notes }}</p>{% endif %}
+        </div>
+      {% endif %}
+      {% if r.cancellation_reason %}<p class="border-t border-ink-100 px-5 py-3 text-sm text-state-danger dark:border-ink-800">{% trans "Cancelada" %}: {{ r.cancellation_reason }} · {% trans "penalidad" %} {{ r.cancellation_penalty|money }}</p>{% endif %}
+    </section>
+
+    {% if can_folio %}
+    <section class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">{% trans "Folios" %}</h2></div>
+      <table class="table">
+        <thead><tr><th>{% trans "Folio" %}</th><th>{% trans "A nombre de" %}</th><th class="!text-right">{% trans "Cargos" %}</th><th class="!text-right">{% trans "Pagos" %}</th><th class="!text-right">{% trans "Saldo" %}</th><th></th></tr></thead>
+        <tbody>
+          {% for f in folios %}
+            <tr><td class="font-mono text-xs">{{ f.number }}{% if f.is_main %} ★{% endif %}</td><td>{{ f.name }}</td>
+              <td class="text-right tabular-nums">{{ f.total_charges|money }}</td><td class="text-right tabular-nums">{{ f.total_payments|money }}</td>
+              <td class="text-right font-semibold tabular-nums {% if f.balance > 0 %}text-state-danger{% endif %}">{{ f.balance|money }}</td>
+              <td class="text-right"><a href="{% url 'folio:folio_detail' f.pk %}" class="btn-ghost btn-sm">{% trans "Abrir" %}</a></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Historial de cambios" %}</h2><span class="text-xs text-ink-400">RF-RES-10</span></div>
+      <ol class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+        {% for log in history %}
+          <li class="px-5 py-3"><p><span class="font-medium">{{ log.username|default:"sistema" }}</span> · {{ log.get_action_display }} · <span class="text-ink-500">{{ log.timestamp|date:"d/m/Y H:i" }}</span></p>
+            {% if log.changes %}<p class="mt-1 break-words font-mono text-xs text-ink-500">{% for k, v in log.changes.items %}{{ k }}: {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+            {% if log.reason %}<p class="text-xs italic text-ink-500">{{ log.reason }}</p>{% endif %}</li>
+        {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Sin cambios." %}</li>{% endfor %}
+      </ol>
+    </section>
+  </div>
+
+  <aside class="space-y-6">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Huésped" %}</h2><a href="{% url 'guests:guest_detail' r.guest.pk %}" class="text-xs font-medium text-brand-700 hover:underline">{% trans "Ver perfil" %}</a></div>
+      <div class="card-body space-y-1 text-sm">
+        <p class="text-base font-semibold">{{ r.guest.full_name }} {% if r.guest.is_vip %}<span class="badge bg-gold-100 text-gold-800">VIP</span>{% endif %}</p>
+        <p class="text-ink-500">{{ r.guest.get_doc_type_display }} {{ r.guest.masked_doc }} · {{ r.guest.nationality.name|default:"" }}</p>
+        <p>{{ r.guest.email }}</p><p>{{ r.guest.phone }}</p>
+        {% if r.guest.allergies %}<p class="mt-2 rounded bg-state-danger/10 px-2 py-1 text-state-danger">{% icon "info" "w-4 h-4 inline" %} {% trans "Alergias" %}: {{ r.guest.allergies }}</p>{% endif %}
+        {% if r.guest.is_blacklisted %}<p class="rounded bg-state-danger/10 px-2 py-1 text-state-danger">{% trans "Lista negra" %}: {{ r.guest.blacklist_reason }}</p>{% endif %}
+      </div>
+    </section>
+
+    {% if can_edit and r.status in "pending confirmed guaranteed waitlist quote" %}
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Asignación" %}</h2><span class="text-xs text-ink-400">RF-RES-09</span></div>
+      <div class="card-body space-y-3">
+        <form method="post" action="{% url 'reservations:reservation_action' r.pk 'assign' %}" class="flex gap-2">{% csrf_token %}
+          <select name="room" class="flex-1"><option value="">{% trans "Automática (según preferencias)" %}</option>
+            {% for room in free_rooms %}<option value="{{ room.pk }}">{{ room.number }} · {% trans "piso" %} {{ room.floor }} · {{ room.get_view_display }}{% if not room.is_ready %} · {% trans "sucia" %}{% endif %}</option>{% endfor %}
+          </select><button class="btn-secondary">{% trans "Asignar" %}</button></form>
+        {% if r.room %}<form method="post" action="{% url 'reservations:reservation_action' r.pk 'unassign' %}">{% csrf_token %}<button class="btn-ghost btn-sm">{% trans "Quitar habitación" %}</button></form>{% endif %}
+        {% if r.status == "waitlist" or r.status == "quote" %}<form method="post" action="{% url 'reservations:reservation_action' r.pk 'confirm' %}">{% csrf_token %}<button class="btn-primary w-full">{% trans "Confirmar reserva" %}</button></form>{% endif %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Tren y Machu Picchu" %}</h2><span class="text-xs text-ink-400">RF-TUR-04</span></div>
+      <form method="post" action="{% url 'reservations:reservation_action' r.pk 'train' %}" class="card-body grid grid-cols-2 gap-3">{% csrf_token %}
+        <label class="text-xs">{% trans "Fecha del tren" %}<input type="date" name="train_date" value="{{ r.train_date|date:'Y-m-d' }}"></label>
+        <label class="text-xs">{% trans "Hora" %}<input type="time" name="train_time" value="{{ r.train_time|time:'H:i' }}"></label>
+        <label class="col-span-2 text-xs">{% trans "Ingreso a Machu Picchu" %}<input type="date" name="machu_picchu_date" value="{{ r.machu_picchu_date|date:'Y-m-d' }}"></label>
+        {% if can_edit %}<button class="btn-secondary btn-sm col-span-2">{% trans "Guardar" %}</button>{% endif %}
+      </form>
+    </section>
+
+    {% if can_void and r.status in "pending confirmed guaranteed waitlist quote" %}
+    <section class="card border-state-danger/30">
+      <div class="card-header"><h2 class="card-title text-state-danger">{% trans "Cancelar reserva" %}</h2></div>
+      <form method="post" action="{% url 'reservations:reservation_cancel' r.pk %}" class="card-body space-y-3" data-confirm="{% trans '¿Cancelar la reserva? Se aplicará la política de cancelación.' %}">{% csrf_token %}
+        {% include "components/field.html" with field=cancel_form.reason %}
+        {% include "components/field.html" with field=cancel_form.waive_penalty %}
+        <p class="text-xs text-ink-500">{% trans "Política" %}: {{ r.rate_plan.cancellation_policy }}</p>
+        <button class="btn-danger w-full">{% trans "Cancelar reserva" %}</button>
+      </form>
+      {% if r.status in "pending confirmed guaranteed" %}
+      <form method="post" action="{% url 'reservations:reservation_action' r.pk 'no_show' %}" class="px-5 pb-5" data-confirm="{% trans '¿Marcar como no show?' %}">{% csrf_token %}<button class="btn-ghost btn-sm w-full">{% trans "Marcar no show" %}</button></form>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {% if moves %}
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Cambios de habitación" %}</h2></div>
+      <ul class="card-body space-y-2 text-sm">{% for m in moves %}<li>{{ m.from_room.number }} → {{ m.to_room.number }} · {{ m.get_kind_display }} · <span class="text-ink-500">{{ m.reason }}</span></li>{% endfor %}</ul></section>
+    {% endif %}
+
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Mensajes" %}</h2></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+        {% for m in messages_log %}<li class="px-5 py-2"><span class="font-medium">{{ m.get_channel_display }}</span> · {{ m.subject|default:m.body|truncatechars:50 }} <span class="text-xs {% if m.status == 'failed' %}text-state-danger{% else %}text-ink-400{% endif %}">{{ m.get_status_display }}</span></li>
+        {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Sin mensajes." %}</li>{% endfor %}
+      </ul></section>
+  </aside>
+</div>
+{% endblock %}

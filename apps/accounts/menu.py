@@ -25,6 +25,17 @@ HOTKEYS = {
 ACTIVE_PREFIX = {
     "settings": "/configuracion/",
     "accounts": "/cuenta/",
+    "frontdesk": "/recepcion/",
+    "reservations": "/reservas/",
+    "rooms": "/habitaciones/",
+    "housekeeping": "/housekeeping/",
+    "guests": "/huespedes/",
+    "pos": "/restaurante/",
+    "folio": "/folios/",
+    "rates": "/tarifas/",
+    "comms": "/comunicaciones/",
+    "billing": "/facturacion/",
+    "reports": "/reportes/",
 }
 
 

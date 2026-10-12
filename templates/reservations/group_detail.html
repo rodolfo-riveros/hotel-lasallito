@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ group }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'reservations:group_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Grupos" %}</a>
+    <h1 class="page-title mt-2">{{ group.name }}</h1>
+    <p class="page-subtitle">{{ group.code }} · {{ group.arrival|date:"d/m" }}–{{ group.departure|date:"d/m/Y" }} · {% trans "liberación" %} {{ group.release_date|date:"d/m/Y" }} · {{ group.get_status_display }}</p></div>
+  <div class="flex gap-2">
+    <a href="?export=csv" class="btn-secondary">{% icon "download" "w-4 h-4" %}Rooming list</a>
+    <a href="{% url 'reservations:group_edit' group.pk %}" class="btn-secondary">{% trans "Editar" %}</a>
+    <a href="{% url 'reservations:reservation_create' %}?arrival={{ group.arrival|date:'Y-m-d' }}&departure={{ group.departure|date:'Y-m-d' }}" class="btn-primary">{% icon "plus" "w-4 h-4" %}{% trans "Agregar integrante" %}</a>
+  </div>
+</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-3">
+  {% for p in pickup %}
+    <div class="card p-4"><p class="text-sm text-ink-500">{{ p.a.room_type }}</p>
+      <p class="font-display text-3xl font-semibold">{{ p.sold }} / {{ p.a.quantity }}</p>
+      <p class="text-xs text-ink-500">{{ p.pending }} {% trans "por vender" %}{% if p.a.rate %} · {{ p.a.rate|money }}{% endif %}</p></div>
+  {% endfor %}
+</div>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>{% trans "Reserva" %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Hab." %}</th><th>{% trans "Estado" %}</th></tr></thead>
+    <tbody>{% for r in rooming %}<tr><td><a class="font-mono text-xs hover:underline" href="{% url 'reservations:reservation_detail' r.pk %}">{{ r.code }}</a></td><td>{{ r.guest.full_name }}</td><td>{{ r.room_type }}</td><td>{{ r.room.number|default:"—" }}</td><td>{% status_badge "reservation" r.status %}</td></tr>
+    {% empty %}<tr><td colspan="5">{% trans "Aún no hay integrantes." as msg %}{% include "components/empty.html" with message=msg %}</td></tr>{% endfor %}</tbody>
+  </table>
+</div>
+{% if group.contract %}<section class="card mt-6"><div class="card-header"><h2 class="card-title">{% trans "Contrato" %}</h2></div><p class="card-body whitespace-pre-line text-sm">{{ group.contract }}</p></section>{% endif %}
+{% endblock %}

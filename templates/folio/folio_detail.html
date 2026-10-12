@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}Folio {{ folio.number }}{% endblock %}
+{% block content %}
+{% can "folio.create" as can_charge %}{% can "folio.void" as can_void %}{% can "billing.create" as can_bill %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    {% if folio.reservation %}<a href="{% url 'reservations:reservation_detail' folio.reservation.pk %}" class="text-sm text-ink-500 hover:text-ink-800">← {{ folio.reservation.code }}</a>{% else %}<a href="{% url 'folio:folio_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Folios" %}</a>{% endif %}
+    <h1 class="page-title mt-2">Folio {{ folio.number }} · {{ folio.name }}</h1>
+    <p class="page-subtitle">{{ folio.get_kind_display }} · {{ folio.get_status_display }}{% if folio.reservation %} · {% trans "hab." %} {{ folio.reservation.room.number|default:"—" }}{% endif %}{% if folio.reservation.igv_exempt %} · <span class="text-gold-700">{% trans "alojamiento exonerado de IGV" %}</span>{% endif %}</p>
+  </div>
+  <div class="card flex gap-6 px-5 py-3 text-right">
+    <div><p class="text-xs text-ink-500">{% trans "Cargos" %}</p><p class="font-semibold tabular-nums">{{ folio.total_charges|money }}</p></div>
+    <div><p class="text-xs text-ink-500">{% trans "Pagos" %}</p><p class="font-semibold tabular-nums">{{ folio.total_payments|money }}</p></div>
+    <div><p class="text-xs text-ink-500">{% trans "Saldo" %}</p><p class="font-display text-2xl font-semibold tabular-nums {% if folio.balance > 0 %}text-state-danger{% elif folio.balance == 0 %}text-state-available{% endif %}">{{ folio.balance|money }}</p></div>
+  </div>
+</div>
+
+<div class="grid gap-6 xl:grid-cols-3">
+  <div class="space-y-6 xl:col-span-2">
+    <form method="post" action="{% url 'folio:folio_action' folio.pk 'transfer' %}" class="card overflow-hidden" id="charges-form">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Cargos" %}</h2>
+        {% if others and can_charge %}<div class="flex items-center gap-2 text-sm"><select name="target" class="!w-auto !py-1.5">{% for o in others %}<option value="{{ o.pk }}">{{ o.number }} · {{ o.name }}</option>{% endfor %}</select><button class="btn-secondary btn-sm">{% trans "Transferir marcados" %}</button></div>{% endif %}</div>
+      <div class="overflow-x-auto"><table class="table">
+        <thead><tr><th></th><th>{% trans "Fecha" %}</th><th>{% trans "Descripción" %}</th><th class="!text-right">{% trans "Cant." %}</th><th class="!text-right">{% trans "Importe" %}</th><th class="!text-right">IGV</th><th>{% trans "Comprobante" %}</th><th></th></tr></thead>
+        <tbody>{% for c in charges %}
+          <tr class="{% if c.is_void %}opacity-50 line-through{% endif %}">
+            <td>{% if not c.is_void and not c.invoice %}<input type="checkbox" name="charges" value="{{ c.pk }}" form="charges-form">{% endif %}</td>
+            <td class="text-xs">{{ c.service_date|date:"d/m" }}</td>
+            <td>{{ c.description }}{% if c.tax_exempt %} <span class="badge bg-gold-100 text-gold-800">{% trans "export." %}</span>{% endif %}{% if c.discount_percent %} <span class="text-xs text-ink-500">-{{ c.discount_percent|floatformat:"-2" }}%</span>{% endif %}<p class="text-xs text-ink-400">{{ c.get_source_display }}{% if c.created_by %} · {{ c.created_by }}{% endif %}{% if c.is_void %} · {{ c.void_reason }}{% endif %}</p></td>
+            <td class="text-right tabular-nums">{{ c.quantity|floatformat:"-2" }}</td><td class="text-right tabular-nums">{{ c.amount|money }}</td><td class="text-right text-xs tabular-nums">{{ c.igv }}</td>
+            <td class="text-xs">{% if c.invoice %}<a class="hover:underline" href="{% url 'billing:invoice_detail' c.invoice.pk %}">{{ c.invoice.full_number }}</a>{% else %}—{% endif %}</td>
+            <td class="text-right">{% if can_void and not c.is_void and not c.invoice %}
+              <button type="button" class="btn-ghost btn-sm text-state-danger" onclick="const r=prompt('{% trans 'Motivo de la anulación' %}'); if(r){const f=document.getElementById('void-charge'); f.charge.value='{{ c.pk }}'; f.reason.value=r; f.submit();}">{% trans "Anular" %}</button>{% endif %}</td>
+          </tr>{% empty %}<tr><td colspan="8" class="text-ink-500">{% trans "Sin cargos." %}</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </form>
+    <form id="void-charge" method="post" action="{% url 'folio:folio_action' folio.pk 'void_charge' %}" class="hidden">{% csrf_token %}<input name="charge"><input name="reason"></form>
+    <form id="void-payment" method="post" action="{% url 'folio:folio_action' folio.pk 'void_payment' %}" class="hidden">{% csrf_token %}<input name="payment"><input name="reason"></form>
+
+    <section class="card overflow-hidden">
+      <div class="card-header"><h2 class="card-title">{% trans "Pagos" %}</h2></div>
+      <table class="table"><thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Medio" %}</th><th>{% trans "Referencia" %}</th><th class="!text-right">{% trans "Original" %}</th><th class="!text-right">S/</th><th></th></tr></thead>
+        <tbody>{% for p in payments %}<tr class="{% if p.is_void %}opacity-50 line-through{% endif %}"><td class="text-xs">{{ p.date|date:"d/m" }}</td><td>{{ p.get_method_display }}{% if p.is_deposit %} <span class="badge bg-ink-100 dark:bg-ink-800">{% trans "adelanto" %}</span>{% endif %}{% if p.is_refund %} <span class="badge bg-state-danger/10 text-state-danger">{% trans "devolución" %}</span>{% endif %}</td><td class="text-xs">{{ p.reference }}</td>
+          <td class="text-right tabular-nums">{{ p.currency }} {{ p.amount_original }}{% if p.currency == "USD" %} <span class="text-xs text-ink-400">TC {{ p.exchange_rate }}</span>{% endif %}</td><td class="text-right tabular-nums">{{ p.amount|money }}</td>
+          <td class="text-right">{% if can_void and not p.is_void %}<button type="button" class="btn-ghost btn-sm text-state-danger" onclick="const r=prompt('{% trans 'Motivo' %}'); if(r){const f=document.getElementById('void-payment'); f.payment.value='{{ p.pk }}'; f.reason.value=r; f.submit();}">{% trans "Anular" %}</button>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin pagos." %}</td></tr>{% endfor %}</tbody></table>
+    </section>
+
+    {% if invoices %}<section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Comprobantes" %}</h2></div>
+      <table class="table"><tbody>{% for inv in invoices %}<tr><td><a href="{% url 'billing:invoice_detail' inv.pk %}" class="font-mono text-xs hover:underline">{{ inv.full_number }}</a></td><td>{{ inv.get_doc_type_display }}</td><td>{{ inv.customer_name }}</td><td class="text-right tabular-nums">{{ inv.currency }} {{ inv.total }}</td><td>{{ inv.get_status_display }}</td></tr>{% endfor %}</tbody></table></section>{% endif %}
+  </div>
+
+  {% if folio.status == "open" %}
+  <aside class="space-y-6">
+    {% if can_charge %}
+    <form method="post" action="{% url 'folio:folio_action' folio.pk 'charge' %}" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Agregar cargo" %}</h2></div>
+      <div class="card-body grid grid-cols-2 gap-3">
+        {% include "components/field.html" with field=charge_form.concept wrapper_class="col-span-2" %}
+        {% include "components/field.html" with field=charge_form.description wrapper_class="col-span-2" %}
+        {% include "components/field.html" with field=charge_form.quantity %}{% include "components/field.html" with field=charge_form.unit_price %}
+        {% include "components/field.html" with field=charge_form.discount_percent %}
+        <div class="flex items-end"><button class="btn-primary w-full">{% trans "Cargar" %}</button></div></div></form>
+
+    <form method="post" action="{% url 'folio:folio_action' folio.pk 'pay' %}" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Cobrar" %}</h2>{% if not session %}<a href="{% url 'folio:cash' %}" class="text-xs text-state-dirty hover:underline">{% trans "Caja cerrada" %}</a>{% endif %}</div>
+      <div class="card-body grid grid-cols-2 gap-3">
+        {% include "components/field.html" with field=payment_form.method wrapper_class="col-span-2" %}
+        {% include "components/field.html" with field=payment_form.amount %}{% include "components/field.html" with field=payment_form.reference %}
+        {% include "components/field.html" with field=payment_form.is_deposit %}{% include "components/field.html" with field=payment_form.refund %}
+        <p class="col-span-2 text-xs text-ink-500">{% trans "Efectivo en US$: ingrese el monto en dólares; se convierte al tipo de cambio de compra del día." %}</p>
+        <button class="btn-primary col-span-2">{% trans "Registrar pago" %}</button></div></form>
+    {% endif %}
+
+    {% if can_bill %}
+    <form method="post" action="{% url 'folio:folio_action' folio.pk 'invoice' %}" class="card" x-data="{ doc: '03' }">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Emitir comprobante" %}</h2></div>
+      <div class="card-body space-y-3">
+        <div class="sim-banner">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+        <p class="text-sm">{% trans "Por facturar" %}: <b>{{ uninvoiced_total|money }}</b> <span class="text-xs text-ink-500">({% trans "o marque cargos para facturar solo esos" %})</span></p>
+        <div class="grid grid-cols-2 gap-3" x-data="rucLookup('{% url 'billing:lookup' %}')">
+          {% include "components/field.html" with field=invoice_form.doc_type %}{% include "components/field.html" with field=invoice_form.currency %}
+          {% include "components/field.html" with field=invoice_form.customer_doc_type %}
+          <div><label class="field-label">{{ invoice_form.customer_doc.label }}</label><div class="flex gap-1"><input type="text" name="i-customer_doc" value="{{ invoice_form.customer_doc.value|default:'' }}" x-ref="doc"><button type="button" class="btn-secondary btn-sm" @click="lookup()" title="{% trans 'Consultar (simulado)' %}">{% icon "search" "w-4 h-4" %}</button></div></div>
+          <div class="col-span-2"><label class="field-label">{{ invoice_form.customer_name.label }}</label><input type="text" name="i-customer_name" value="{{ invoice_form.customer_name.value|default:'' }}" x-ref="name" required></div>
+          <div class="col-span-2"><label class="field-label">{{ invoice_form.customer_address.label }}</label><input type="text" name="i-customer_address" value="{{ invoice_form.customer_address.value|default:'' }}" x-ref="address"></div>
+          {% include "components/field.html" with field=invoice_form.customer_email %}{% include "components/field.html" with field=invoice_form.credit_days %}
+          <p class="col-span-2 text-xs" x-text="msg"></p>
+        </div>
+        {% for c in charges %}{% if not c.is_void and not c.invoice %}<input type="checkbox" name="invoice_charges" value="{{ c.pk }}" class="hidden invoice-mirror" data-charge="{{ c.pk }}">{% endif %}{% endfor %}
+        <button class="btn-primary w-full" onclick="document.querySelectorAll('.invoice-mirror').forEach(m => { const src = document.querySelector('#charges-form input[name=charges][value=\'' + m.dataset.charge + '\']'); m.checked = src && src.checked; })">{% trans "Emitir" %}</button>
+      </div></form>
+    {% endif %}
+
+    <section class="card"><div class="card-body space-y-2">
+      <form method="post" action="{% url 'folio:folio_action' folio.pk 'split' %}" class="flex gap-2">{% csrf_token %}<input name="name" placeholder="{% trans 'Nombre del nuevo folio' %}" class="!py-1.5"><button class="btn-secondary btn-sm whitespace-nowrap">{% trans "Dividir cuenta" %}</button></form>
+      {% if folio.balance == 0 %}<form method="post" action="{% url 'folio:folio_action' folio.pk 'close' %}">{% csrf_token %}<button class="btn-ghost btn-sm w-full">{% trans "Cerrar folio" %}</button></form>{% endif %}
+    </div></section>
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("alpine:init", () => {
+  Alpine.data("rucLookup", (url) => ({
+    msg: "",
+    async lookup() {
+      const doc = this.$refs.doc.value.trim();
+      const param = doc.length === 11 ? "ruc" : "dni";
+      const r = await fetch(`${url}?${param}=${encodeURIComponent(doc)}`);
+      const d = await r.json();
+      if (d.found) { this.$refs.name.value = d.name; if (d.address) this.$refs.address.value = d.address; this.msg = d.status ? `${d.status} · ${d.condition}` : "✓"; }
+      else this.msg = d.error || "{{ _('No encontrado en el padrón simulado') }}";
+    },
+  }));
+});
+</script>
+{% endblock %}

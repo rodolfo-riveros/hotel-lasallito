@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Turno de caja" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4"><div><a href="{% url 'folio:cash' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Caja" %}</a>
+  <h1 class="page-title mt-2">{{ session }}</h1><p class="page-subtitle">{{ session.get_status_display }} · {% trans "apertura" %} {{ session.opened_at|date:"d/m H:i" }}{% if session.closed_at %} · {% trans "cierre" %} {{ session.closed_at|date:"d/m H:i" }}{% endif %}</p></div>
+  {% if session.status == "closed" %}<div class="card px-5 py-3 text-right"><p class="text-xs text-ink-500">{% trans "Diferencia" %}</p><p class="font-display text-2xl font-semibold {% if session.difference < 0 %}text-state-danger{% elif session.difference > 0 %}text-state-dirty{% else %}text-state-available{% endif %}">{{ session.difference|money }}</p></div>{% endif %}</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Conciliación por medio de pago" %}</h2><span class="text-xs text-ink-400">RF-CAJ-04</span></div>
+    <table class="table"><thead><tr><th>{% trans "Medio" %}</th><th class="!text-right">{% trans "Esperado" %}</th><th class="!text-right">{% trans "Contado" %}</th><th class="!text-right">{% trans "Dif." %}</th></tr></thead>
+      <tbody>{% for r in rows %}{% if r.expected or r.counted %}<tr><td>{{ r.label }}</td><td class="text-right tabular-nums">{{ r.expected }}</td><td class="text-right tabular-nums">{{ r.counted }}</td><td class="text-right tabular-nums {% if r.diff < 0 %}text-state-danger{% endif %}">{{ r.diff }}</td></tr>{% endif %}{% endfor %}</tbody></table>
+    {% if session.notes %}<p class="px-5 py-3 text-sm text-ink-500">{{ session.notes }}</p>{% endif %}</section>
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Movimientos" %}</h2></div>
+    <table class="table"><tbody>{% for p in payments %}<tr class="{% if p.is_void %}line-through opacity-50{% endif %}"><td class="text-xs">{{ p.created_at|date:"H:i" }}</td><td>{{ p.get_method_display }}</td><td class="text-xs"><a href="{% url 'folio:folio_detail' p.folio.pk %}" class="hover:underline">{{ p.folio.number }}</a></td><td class="text-right tabular-nums">{{ p.currency }} {{ p.amount_original }}</td></tr>{% endfor %}
+      {% for e in expenses %}<tr class="text-state-dirty"><td class="text-xs">{{ e.created_at|date:"H:i" }}</td><td colspan="2">{% trans "Caja chica" %}: {{ e.description }}</td><td class="text-right tabular-nums">-{{ e.amount }}</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}

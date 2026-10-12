@@ -40,14 +40,27 @@ DJANGO_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.postgres",
 ]
 THIRD_PARTY_APPS = [
     "axes",
     "django_htmx",
+    "django_countries",
 ]
 LOCAL_APPS = [
     "apps.core",
     "apps.accounts",
+    "apps.rooms",
+    "apps.rates",
+    "apps.guests",
+    "apps.reservations",
+    "apps.folio",
+    "apps.billing",
+    "apps.frontdesk",
+    "apps.housekeeping",
+    "apps.pos",
+    "apps.comms",
+    "apps.reports",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -110,7 +123,7 @@ if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
     DATABASES["default"]["OPTIONS"].setdefault("sslmode", env("DB_SSLMODE", default="require"))
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-FORMS_URLFIELD_ASSUME_HTTPS = True
+
 
 # --------------------------------------------------------------------------
 # Autenticación y seguridad (RNF-SEG-01)
@@ -118,7 +131,7 @@ FORMS_URLFIELD_ASSUME_HTTPS = True
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
-    "django.contrib.auth.backends.ModelBackend",
+    "apps.accounts.backends.CachedModelBackend",
 ]
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -143,6 +156,10 @@ AXES_COOLOFF_TIME = env("AXES_COOLOFF_MINUTES") / 60  # horas
 AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
 AXES_RESET_ON_SUCCESS = True
 AXES_LOCKOUT_TEMPLATE = "accounts/locked.html"
+
+# Sesión firmada en cookie: no consulta la base en cada página (RNF-REN-01).
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "pms"}}
 
 # Cierre de sesión por inactividad
 SESSION_IDLE_SECONDS = env("SESSION_IDLE_SECONDS")
@@ -219,6 +236,8 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Hotel La Sallito <no-rep
 # --------------------------------------------------------------------------
 # Propio del PMS
 # --------------------------------------------------------------------------
+# RNF-SEG-04: llave de cifrado de pasaportes y datos de salud (Fernet, base64 de 32 bytes).
+FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")
 # Sección 12: "simulator" o "production". Solo afecta la facturación SUNAT.
 SUNAT_MODE = env("SUNAT_MODE")
 

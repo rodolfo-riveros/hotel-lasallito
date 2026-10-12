@@ -1,0 +1,39 @@
+{% load i18n %}<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: a4 portrait; margin: 1.8cm; }
+  body { font-family: Helvetica; font-size: 10pt; color: #292524; }
+  h1 { color: #7a1e2c; font-size: 18pt; margin-bottom: 0; }
+  .muted { color: #78716c; }
+  table.d { width: 100%; margin-top: 14px; border-collapse: collapse; }
+  table.d td { padding: 6px; border-bottom: 0.5px solid #e7e5e4; }
+  .label { color: #78716c; width: 35%; }
+  .box { background: #fbf8ef; border: 1px solid #e9d7a6; padding: 10px; margin-top: 14px; }
+</style>
+</head>
+<body>
+  <h1>{{ property.name }}</h1>
+  <p class="muted">{{ property.address }} · {{ property.district }}, {{ property.region }} · {{ property.phone }} · {{ property.email }}</p>
+  <h2>{% trans "Confirmación de reserva" %} {{ r.code }}</h2>
+  <p>{% blocktrans with name=r.guest.first_name %}Estimado(a) {{ name }}, gracias por elegirnos. Estos son los datos de su reserva:{% endblocktrans %}</p>
+  <table class="d">
+    <tr><td class="label">{% trans "Huésped" %}</td><td>{{ r.guest.full_name }}</td></tr>
+    <tr><td class="label">{% trans "Llegada" %}</td><td>{{ r.arrival|date:"d/m/Y" }} · {% trans "check-in desde" %} {{ property.check_in_time|time:"H:i" }}</td></tr>
+    <tr><td class="label">{% trans "Salida" %}</td><td>{{ r.departure|date:"d/m/Y" }} · {% trans "check-out hasta" %} {{ property.check_out_time|time:"H:i" }}</td></tr>
+    <tr><td class="label">{% trans "Noches" %}</td><td>{{ r.nights }}</td></tr>
+    <tr><td class="label">{% trans "Habitación" %}</td><td>{{ r.room_type }}{% if r.room %} · {{ r.room.number }}{% endif %}</td></tr>
+    <tr><td class="label">{% trans "Personas" %}</td><td>{{ r.adults }} {% trans "adultos" %}{% if r.children %}, {{ r.children }} {% trans "niños" %}{% endif %}</td></tr>
+    <tr><td class="label">{% trans "Tarifa" %}</td><td>{{ r.rate_plan }} · {{ r.rate_plan.get_meal_plan_display }}</td></tr>
+    <tr><td class="label">{% trans "Total del alojamiento" %}</td><td><b>{{ r.currency }} {{ r.total_amount }}</b></td></tr>
+  </table>
+  <div class="box">
+    <b>{% trans "Política de cancelación" %}:</b> {{ r.rate_plan.cancellation_policy.description|default:r.rate_plan.cancellation_policy.name }}
+  </div>
+  <div class="box">
+    {% trans "Urubamba está a 2 871 msnm. Le recomendamos descansar y tomar mate de coca al llegar. Contamos con oxígeno y custodia de equipaje si viaja a Machu Picchu." %}
+  </div>
+  <p class="muted">{% trans "Complete su pre-check-in en línea" %}: {{ portal_url }}</p>
+</body>
+</html>

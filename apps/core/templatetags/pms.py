@@ -104,3 +104,69 @@ def money(value, currency="PEN"):
 @register.filter
 def get_item(mapping, key):
     return mapping.get(key) if hasattr(mapping, "get") else None
+
+
+@register.filter
+def cell(value):
+    """Valor de celda para tablas genéricas."""
+    import datetime
+
+    if value is None or value == "":
+        return "—"
+    if isinstance(value, bool):
+        return format_html(
+            '<span class="{}">{}</span>',
+            "text-state-available" if value else "text-ink-400",
+            "Sí" if value else "No",
+        )
+    if isinstance(value, Decimal):
+        return f"{value:,.2f}"
+    if isinstance(value, datetime.datetime):
+        from django.utils import timezone
+
+        return timezone.localtime(value).strftime("%d/%m/%Y %H:%M")
+    if isinstance(value, datetime.date):
+        return value.strftime("%d/%m/%Y")
+    if isinstance(value, list | tuple):
+        return ", ".join(str(v) for v in value)
+    return value
+
+
+@register.filter
+def lang_field(obj, field):
+    """Campo traducido: `obj|lang_field:"name"` usa name_en / name_pt según el idioma activo."""
+    from django.utils.translation import get_language
+
+    lang = (get_language() or "es")[:2]
+    if lang in ("en", "pt"):
+        value = getattr(obj, f"{field}_{lang}", "")
+        if value:
+            return value
+    return getattr(obj, field, "")
+
+
+@register.filter
+def dictget(mapping, key):
+    try:
+        return mapping.get(key)
+    except AttributeError:
+        return None
+
+
+@register.filter
+def sub(a, b):
+    try:
+        return a - b
+    except TypeError:
+        return ""
+
+
+@register.filter
+def hk_key(room):
+    """Clave de estado de limpieza de una habitación (sin ocupación)."""
+    return {
+        "clean": "vacant_clean",
+        "dirty": "vacant_dirty",
+        "cleaning": "cleaning",
+        "inspected": "inspected",
+    }.get(getattr(room, "hk_status", ""), "vacant_clean")

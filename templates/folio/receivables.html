@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Cuentas por cobrar" %}{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'folio:folio_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Folios" %}</a>
+  <h1 class="page-title mt-2">{% trans "Cuentas por cobrar" %}</h1><p class="page-subtitle">{% trans "Empresas y agencias con crédito: antigüedad de saldos y cobros (RF-CAJ-05)." %}</p></div>
+<div class="mb-6 grid gap-4 sm:grid-cols-4">{% for k, v in buckets.items %}<div class="card p-4"><p class="text-sm text-ink-500">{{ k }} {% trans "días" %}</p><p class="font-display text-2xl font-semibold tabular-nums {% if k == '+90' and v %}text-state-danger{% endif %}">{{ v|money }}</p></div>{% endfor %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-hidden lg:col-span-2"><div class="card-header"><h2 class="card-title">{% trans "Comprobantes pendientes" %}</h2></div>
+    <div class="overflow-x-auto"><table class="table"><thead><tr><th>{% trans "Comprobante" %}</th><th>{% trans "Cliente" %}</th><th>{% trans "Vence" %}</th><th>{% trans "Días" %}</th><th class="!text-right">{% trans "Total" %}</th><th></th></tr></thead>
+      <tbody>{% for row in rows %}<tr><td><a href="{% url 'billing:invoice_detail' row.inv.pk %}" class="font-mono text-xs hover:underline">{{ row.inv.full_number }}</a></td><td>{{ row.inv.company|default:row.inv.customer_name }}</td><td>{{ row.inv.due_date|date:"d/m/Y"|default:"—" }}</td><td class="{% if row.days > 30 %}text-state-danger{% endif %}">{{ row.days }}</td><td class="text-right tabular-nums">{{ row.inv.currency }} {{ row.inv.total }}</td>
+        <td><form method="post" class="flex gap-1">{% csrf_token %}<input type="hidden" name="invoice" value="{{ row.inv.pk }}"><input name="reference" placeholder="{% trans 'Operación' %}" class="!w-28 !py-1 text-xs"><button class="btn-secondary btn-sm">{% trans "Cobrado" %}</button></form></td></tr>
+      {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "No hay saldos pendientes." %}</td></tr>{% endfor %}</tbody></table></div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Estado de cuenta por cliente" %}</h2></div>
+    <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">{% for name, total in by_company %}<li class="flex justify-between px-5 py-2"><span>{{ name }}</span><span class="tabular-nums">{{ total|money }}</span></li>{% empty %}<li class="px-5 py-3 text-ink-500">—</li>{% endfor %}</ul></section>
+</div>
+{% endblock %}

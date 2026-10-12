@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Huéspedes" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">CRM</p><h1 class="page-title">{% trans "Huéspedes" %}</h1></div>
+  <div class="flex gap-2"><a href="{% url 'guests:company_list' %}" class="btn-secondary">{% icon "building" "w-4 h-4" %}{% trans "Empresas y agencias" %}</a>
+    <a href="{% url 'guests:guest_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo huésped" %}</a></div>
+</div>
+<div class="card overflow-hidden">
+  <div class="flex flex-wrap items-center gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Nombre, documento, correo o teléfono' %}" class="!w-80" data-search
+           hx-get="{% url 'guests:guest_list' %}" hx-trigger="input changed delay:300ms, search" hx-target="#guest-rows" hx-include="this">
+    <div class="flex flex-wrap gap-1 text-xs"><a href="?" class="badge {% if not tag %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Todos" %}</a>
+      {% for k, v in tags %}<a href="?tag={{ k }}" class="badge {% if tag == k %}bg-brand-700 text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{{ v }}</a>{% endfor %}
+      <a href="?tag=blacklist" class="badge {% if tag == 'blacklist' %}bg-state-danger text-white{% else %}bg-ink-100 dark:bg-ink-800{% endif %}">{% trans "Lista negra" %}</a></div>
+  </div>
+  <div class="overflow-x-auto"><table class="table">
+    <thead><tr><th>{% trans "Nombre" %}</th><th>{% trans "Documento" %}</th><th>{% trans "Nacionalidad" %}</th><th>{% trans "Contacto" %}</th><th class="!text-right">{% trans "Estadías" %}</th><th class="!text-right">{% trans "Gasto" %}</th></tr></thead>
+    <tbody id="guest-rows">{% include "guests/partials/guest_rows.html" %}</tbody>
+  </table></div>
+  {% include "components/pagination.html" %}
+</div>
+{% endblock %}

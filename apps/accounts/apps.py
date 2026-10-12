@@ -8,7 +8,9 @@ class AccountsConfig(AppConfig):
     verbose_name = "Usuarios y permisos"
 
     def ready(self):
-        from . import signals  # noqa: F401
+        from . import signals
+
+        signals.connect_cache_signals()
 
         post_migrate.connect(_sync_after_migrate, sender=self)
 

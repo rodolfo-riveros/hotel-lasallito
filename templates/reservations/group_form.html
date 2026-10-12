@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Grupo" %}{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'reservations:group_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Grupos" %}</a>
+  <h1 class="page-title mt-2">{% if object %}{{ object }}{% else %}{% trans "Nuevo grupo" %}{% endif %}</h1></div>
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+  <section class="card"><div class="card-body">{% include "components/form_errors.html" %}{% include "components/form_grid.html" %}</div></section>
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Cupos por tipo de habitación" %}</h2></div>
+    <div class="card-body space-y-3">
+      {{ formset.management_form }}
+      {% for f in formset %}
+        <div class="grid items-end gap-3 sm:grid-cols-4">{{ f.id }}
+          {% include "components/field.html" with field=f.room_type %}{% include "components/field.html" with field=f.quantity %}
+          {% include "components/field.html" with field=f.rate %}{% if f.instance.pk %}{% include "components/field.html" with field=f.DELETE %}{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  <div class="flex justify-end"><button class="btn-primary">{% trans "Guardar grupo" %}</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Hab." %} {{ task.room.number }}{% endblock %}
+{% block content %}
+<a href="{% url 'housekeeping:my_tasks' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Mis habitaciones" %}</a>
+<div class="mt-2 mb-5 flex items-center justify-between gap-3">
+  <div><h1 class="page-title">{% trans "Habitación" %} {{ task.room.number }}</h1><p class="page-subtitle">{{ task.get_kind_display }} · {{ task.room.room_type }} · {% trans "piso" %} {{ task.room.floor }}</p></div>
+  <span class="status {% if task.status == 'inspected' %}status-inspected{% elif task.status == 'done' %}status-available{% elif task.status == 'in_progress' %}status-cleaning{% elif task.status == 'rejected' %}status-danger{% else %}status-dirty{% endif %}">{{ task.get_status_display }}</span>
+</div>
+{% if task.inspection_notes %}<p class="mb-4 rounded-lg bg-state-danger/10 p-3 text-sm text-state-danger">{% trans "Inspección" %}: {{ task.inspection_notes }}</p>{% endif %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <form method="post" class="card">{% csrf_token %}
+    {% if task.status == "pending" or task.status == "rejected" %}
+      <div class="card-body"><input type="hidden" name="action" value="start"><button class="btn-primary w-full py-4 text-base">{% icon "clock" "w-5 h-5" %}{% trans "Empezar limpieza" %}</button></div>
+    {% elif task.status == "in_progress" %}
+      <input type="hidden" name="action" value="finish">
+      <div class="card-header"><h2 class="card-title">{% trans "Checklist" %}</h2><span class="text-xs text-ink-500">{% trans "desde" %} {{ task.started_at|time:"H:i" }}</span></div>
+      <ul class="card-body space-y-3">{% for item in task.checklist_items %}<li><label class="flex items-center gap-3 text-base"><input type="checkbox" name="chk-{{ forloop.counter0 }}" class="!h-6 !w-6">{{ item.label }}</label></li>{% endfor %}</ul>
+      <div class="space-y-3 px-5 pb-5"><input name="notes" placeholder="{% trans 'Observaciones (desperfectos, faltantes)' %}"><button class="btn-primary w-full py-4 text-base">{% icon "check-circle" "w-5 h-5" %}{% trans "Terminé" %}</button></div>
+    {% else %}
+      <ul class="card-body space-y-2 text-sm">{% for item in task.checklist_items %}<li class="flex items-center gap-2">{% if item.done %}<span class="text-state-available">{% icon "check-circle" "w-4 h-4" %}</span>{% else %}<span class="text-ink-300">{% icon "minus-circle" "w-4 h-4" %}</span>{% endif %}{{ item.label }}</li>{% endfor %}
+        <li class="pt-2 text-xs text-ink-500">{{ task.minutes }} min · {{ task.notes }}</li></ul>
+    {% endif %}
+  </form>
+  <div class="space-y-6">
+    {% if is_supervisor and task.status == "done" %}
+    <form method="post" enctype="multipart/form-data" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Inspección" %}</h2><span class="text-xs text-ink-400">RF-HK-04</span></div>
+      <div class="card-body space-y-3"><input name="notes" placeholder="{% trans 'Observaciones' %}"><input type="file" name="photo" accept="image/*" capture="environment">
+        <div class="grid grid-cols-2 gap-2"><button name="action" value="approve" class="btn-primary">{% trans "Aprobar" %}</button><button name="action" value="reject" class="btn-danger">{% trans "Rechazar" %}</button></div></div></form>
+    {% endif %}
+    {% if reservation and minibar %}
+    <form method="post" action="{% url 'housekeeping:minibar_post' %}" class="card">{% csrf_token %}<input type="hidden" name="reservation" value="{{ reservation.pk }}"><input type="hidden" name="next" value="{{ request.path }}">
+      <div class="card-header"><h2 class="card-title">{% trans "Minibar consumido" %}</h2><span class="text-xs text-ink-500">{{ reservation.guest.last_name }}</span></div>
+      <div class="card-body grid grid-cols-2 gap-3 text-sm">{% for item in minibar %}<label class="flex items-center justify-between gap-2">{{ item.name }}<input type="number" min="0" max="20" name="qty-{{ item.pk }}" value="0" class="!w-16"></label>{% endfor %}
+        <button class="btn-secondary col-span-2">{% trans "Cargar al folio" %}</button></div></form>
+    {% endif %}
+    {% if inventory %}<section class="card"><div class="card-header"><h2 class="card-title">{% trans "Inventario de la habitación" %}</h2></div>
+      <ul class="card-body space-y-1 text-sm">{% for i in inventory %}<li>{{ i.quantity }} × {{ i.name }}</li>{% endfor %}</ul></section>{% endif %}
+  </div>
+</div>
+{% endblock %}

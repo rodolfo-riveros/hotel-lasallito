@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% if object %}{{ object.code }}{% else %}{% trans "Nueva reserva" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a href="{% if object %}{% url 'reservations:reservation_detail' object.pk %}{% else %}{% url 'reservations:reservation_list' %}{% endif %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Volver" %}</a>
+  <h1 class="page-title mt-2">{% if object %}{% trans "Modificar reserva" %} {{ object.code }}{% else %}{% trans "Nueva reserva" %}{% endif %}</h1>
+</div>
+
+<form method="post" class="grid gap-6 lg:grid-cols-3" id="res-form"
+      hx-get="{% url 'reservations:quote_preview' %}" hx-trigger="change from:#res-form delay:300ms, load" hx-target="#quote" hx-include="#res-form">
+  {% csrf_token %}
+  <div class="space-y-6 lg:col-span-2">
+    {% include "components/form_errors.html" %}
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Huésped" %}</h2>
+        <a href="{% url 'guests:guest_create' %}?next={{ request.path|urlencode }}" class="btn-ghost btn-sm">{% icon "plus" "w-4 h-4" %}{% trans "Nuevo huésped" %}</a></div>
+      <div class="card-body" x-data="guestPicker('{% url 'guests:guest_search_json' %}', '{{ selected_guest.pk|default:'' }}', '{{ selected_guest|default:''|escapejs }}')">
+        <label class="field-label" for="guest-search">{% trans "Buscar por nombre, documento, correo o teléfono" %} <span class="text-state-danger">*</span></label>
+        <input type="hidden" name="guest" :value="id">
+        <div class="relative">
+          <input id="guest-search" type="search" x-model="text" @input.debounce.250ms="search()" autocomplete="off" data-search placeholder="{% trans 'Escriba al menos 2 letras' %}">
+          <ul x-show="results.length" x-cloak class="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-ink-700 dark:bg-ink-900">
+            <template x-for="g in results" :key="g.id">
+              <li><button type="button" class="block w-full px-3 py-2 text-left text-sm hover:bg-ink-50 dark:hover:bg-ink-800" @click="pick(g)">
+                <span x-text="g.text"></span> <span x-show="g.blacklisted" class="text-state-danger">· {% trans "lista negra" %}</span></button></li>
+            </template>
+          </ul>
+        </div>
+        {% for e in form.guest.errors %}<p class="field-error">{{ e }}</p>{% endfor %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Estadía" %}</h2></div>
+      <div class="card-body grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {% include "components/field.html" with field=form.arrival %}
+        {% include "components/field.html" with field=form.departure %}
+        {% include "components/field.html" with field=form.room_type %}
+        {% include "components/field.html" with field=form.rate_plan %}
+        {% include "components/field.html" with field=form.adults %}
+        {% include "components/field.html" with field=form.children %}
+        {% include "components/field.html" with field=form.extra_beds %}
+        {% include "components/field.html" with field=form.cribs %}
+        {% include "components/field.html" with field=form.room wrapper_class="sm:col-span-2" %}
+        {% include "components/field.html" with field=form.eta %}
+        {% include "components/field.html" with field=form.status %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Origen, garantía y precio" %}</h2></div>
+      <div class="card-body grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {% include "components/field.html" with field=form.channel %}
+        {% include "components/field.html" with field=form.company %}
+        {% include "components/field.html" with field=form.group %}
+        {% include "components/field.html" with field=form.guarantee %}
+        {% include "components/field.html" with field=form.deposit_required %}
+        {% include "components/field.html" with field=form.promo_code %}
+        {% include "components/field.html" with field=form.discount_percent %}
+        {% include "components/field.html" with field=form.discount_reason wrapper_class="sm:col-span-2" %}
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Preferencias y notas" %}</h2></div>
+      <div class="card-body grid gap-5 sm:grid-cols-2">
+        {% include "components/field.html" with field=form.pref_floor %}
+        {% include "components/field.html" with field=form.pref_view %}
+        {% include "components/field.html" with field=form.pref_quiet %}
+        {% include "components/field.html" with field=form.pref_accessible %}
+        {% include "components/field.html" with field=form.special_requests wrapper_class="sm:col-span-2" %}
+        {% include "components/field.html" with field=form.notes wrapper_class="sm:col-span-2" %}
+        {% can "reservations.approve" as can_approve %}
+        {% if can_approve %}{% include "components/field.html" with field=form.allow_overbooking %}{% endif %}
+      </div>
+    </section>
+  </div>
+
+  <aside class="space-y-4 lg:sticky lg:top-20 lg:h-fit">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">{% trans "Cotización" %}</h2></div>
+      <div id="quote" class="card-body text-sm text-ink-500">{% trans "Complete fechas, tipo y tarifa." %}</div>
+    </section>
+    <button type="submit" class="btn-primary w-full py-2.5">{% if object %}{% trans "Guardar cambios" %}{% else %}{% trans "Crear reserva" %}{% endif %}</button>
+  </aside>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("alpine:init", () => {
+  Alpine.data("guestPicker", (url, id, text) => ({
+    id, text, results: [],
+    async search() {
+      if (this.text.length < 2) { this.results = []; return; }
+      const r = await fetch(url + "?q=" + encodeURIComponent(this.text));
+      this.results = (await r.json()).results;
+    },
+    pick(g) { this.id = g.id; this.text = g.text; this.results = []; document.getElementById("res-form").dispatchEvent(new Event("change")); },
+  }));
+});
+</script>
+{% endblock %}

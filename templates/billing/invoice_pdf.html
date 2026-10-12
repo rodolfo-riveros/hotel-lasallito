@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: a4 portrait; margin: 1.5cm 1.5cm 2cm 1.5cm;
+          @frame watermark { -pdf-frame-content: wm; left: 2cm; top: 11cm; width: 17cm; height: 3cm; } }
+  body { font-family: Helvetica; font-size: 9pt; color: #292524; }
+  h1 { font-size: 14pt; color: #7a1e2c; margin: 0; }
+  .box { border: 1.5px solid #7a1e2c; padding: 8px; text-align: center; }
+  .box p { margin: 2px; font-size: 11pt; font-weight: bold; }
+  table.lines { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.lines th { background: #f5f5f4; border-bottom: 1px solid #a8a29e; padding: 4px; text-align: left; font-size: 8pt; }
+  table.lines td { border-bottom: 0.5px solid #e7e5e4; padding: 4px; }
+  .right { text-align: right; }
+  .totals td { padding: 2px 4px; }
+  .muted { color: #78716c; font-size: 8pt; }
+  #wm { font-size: 30pt; color: #e7c9ce; text-align: center; font-weight: bold; }
+  .sim { border: 1px dashed #c08b36; color: #865127; padding: 4px; text-align: center; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="wm">SIMULACIÓN, SIN VALOR TRIBUTARIO</div>
+<table width="100%">
+  <tr>
+    <td width="62%" valign="top">
+      <h1>{{ property.name }}</h1>
+      <p>{{ property.legal_name }}<br>{{ property.address }}<br>{{ property.district }} - {{ property.province }} - {{ property.region }}<br>
+      {% if property.phone %}Tel. {{ property.phone }} · {% endif %}{{ property.email }}</p>
+    </td>
+    <td width="38%" valign="top">
+      <div class="box">
+        <p>R.U.C. {{ property.ruc }}</p>
+        <p>{{ inv.get_doc_type_display|upper }} ELECTRÓNICA</p>
+        <p>{{ inv.full_number }}</p>
+      </div>
+    </td>
+  </tr>
+</table>
+{% if inv.is_simulated %}<p class="sim">SIMULACIÓN, SIN VALOR TRIBUTARIO · SIMULATION, NO TAX VALUE</p>{% endif %}
+<table width="100%">
+  <tr><td width="22%"><b>Cliente / Customer:</b></td><td>{{ inv.customer_name }}</td>
+      <td width="18%"><b>Fecha / Date:</b></td><td>{{ inv.issue_date|date:"d/m/Y" }}</td></tr>
+  <tr><td><b>{{ inv.get_customer_doc_type_display }}:</b></td><td>{{ inv.customer_doc|default:"-" }}</td>
+      <td><b>Moneda / Currency:</b></td><td>{{ inv.currency }}{% if inv.currency == "USD" %} (T.C. {{ inv.exchange_rate }}){% endif %}</td></tr>
+  {% if inv.customer_address %}<tr><td><b>Dirección:</b></td><td colspan="3">{{ inv.customer_address }}</td></tr>{% endif %}
+  {% if inv.related_invoice %}<tr><td><b>Documento que modifica:</b></td><td>{{ inv.related_invoice.full_number }}</td>
+      <td><b>Motivo:</b></td><td>{{ inv.note_reason_code }} {{ inv.note_reason }}</td></tr>{% endif %}
+  {% if inv.folio and inv.folio.reservation %}<tr><td><b>Reserva / Booking:</b></td><td>{{ inv.folio.reservation.code }}</td>
+      <td><b>Habitación / Room:</b></td><td>{{ inv.folio.reservation.room.number|default:"-" }}</td></tr>{% endif %}
+</table>
+<table class="lines">
+  <tr><th width="8%">Cant.</th><th>Descripción / Description</th><th width="10%">Afect.</th><th width="14%" class="right">P. unit.</th><th width="14%" class="right">Total</th></tr>
+  {% for ln in inv.lines.all %}
+  <tr><td>{{ ln.quantity|floatformat:"-2" }}</td><td>{{ ln.description }}</td><td>{{ ln.get_affectation_display }}</td>
+      <td class="right">{{ ln.unit_price }}</td><td class="right">{{ ln.total }}</td></tr>
+  {% endfor %}
+</table>
+<table width="100%" style="margin-top:8px">
+  <tr>
+    <td width="55%" valign="top">
+      {% for lg in inv.legends %}<p class="muted">{{ lg.text }}</p>{% endfor %}
+      <p class="muted">Código hash: {{ inv.hash }}<br>Estado: {{ inv.get_status_display }} {{ inv.sunat_message }}</p>
+      {% if qr %}<img src="{{ qr }}" width="90" height="90">{% endif %}
+    </td>
+    <td width="45%" valign="top">
+      <table width="100%" class="totals">
+        {% if inv.taxed_amount %}<tr><td>Op. gravadas</td><td class="right">{{ inv.taxed_amount }}</td></tr>{% endif %}
+        {% if inv.exempt_amount %}<tr><td>Op. exoneradas</td><td class="right">{{ inv.exempt_amount }}</td></tr>{% endif %}
+        {% if inv.export_amount %}<tr><td>Exportación</td><td class="right">{{ inv.export_amount }}</td></tr>{% endif %}
+        <tr><td>IGV 18%</td><td class="right">{{ inv.igv }}</td></tr>
+        {% if inv.other_charges %}<tr><td>Otros cargos</td><td class="right">{{ inv.other_charges }}</td></tr>{% endif %}
+        <tr><td><b>IMPORTE TOTAL {{ inv.currency }}</b></td><td class="right"><b>{{ inv.total }}</b></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p class="muted">Representación impresa de la {{ inv.get_doc_type_display|lower }} electrónica (simulación educativa). Printed representation of an electronic receipt (educational simulation).</p>
+</body>
+</html>

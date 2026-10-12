@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Desayunos" %}{% endblock %}
+{% block content %}
+<div class="mb-6"><h1 class="page-title">{% trans "Control de desayunos" %}</h1>
+  <p class="page-subtitle">{{ day|date:"l d/m/Y" }} · {{ served }} / {{ rows|length }} {% trans "habitaciones atendidas" %} · RF-POS-06</p></div>
+{% if tomorrow_box %}<div class="mb-6 rounded-xl border border-gold-300 bg-gold-50 p-4 text-sm dark:border-gold-800 dark:bg-gold-900/20"><b>{% trans "Box lunch para mañana (tren a Machu Picchu)" %}:</b> {% for r in tomorrow_box %}{{ r.room.number }} ({{ r.train_time|time:"H:i" }}){% if not forloop.last %}, {% endif %}{% endfor %}</div>{% endif %}
+<section class="card overflow-hidden"><table class="table">
+  <thead><tr><th>{% trans "Hab." %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Pax" %}</th><th>{% trans "Plan" %}</th><th>{% trans "Restaurante" %}</th><th>{% trans "Para llevar" %}</th></tr></thead>
+  <tbody>{% for row in rows %}
+    <tr><td class="font-semibold">{{ row.r.room.number }}</td><td>{{ row.r.guest.full_name }}{% if row.train %} <span class="badge bg-gold-100 text-gold-800">{% trans "tren hoy" %}</span>{% endif %}{% if row.r.guest.allergies %}<p class="text-xs text-state-danger">{{ row.r.guest.allergies }}</p>{% endif %}</td>
+      <td>{{ row.r.adults|add:row.r.children }}</td><td class="text-xs">{{ row.r.rate_plan.get_meal_plan_display }}</td>
+      <td>{% if row.rest.served %}<span class="text-state-available">✓ {{ row.rest.served_at|time:"H:i" }}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="reservation" value="{{ row.r.pk }}"><input type="hidden" name="kind" value="restaurant"><input type="hidden" name="serve" value="1"><button class="btn-secondary btn-sm">{% trans "Servido" %}</button></form>{% endif %}</td>
+      <td>{% if row.box %}<span class="text-state-available">✓ {% if row.box.served %}{% trans "entregado" %}{% else %}{% trans "pedido" %}{% endif %}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="reservation" value="{{ row.r.pk }}"><input type="hidden" name="kind" value="box"><button class="btn-ghost btn-sm">{% trans "Pedir box" %}</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "No hay huéspedes con desayuno incluido." %}</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

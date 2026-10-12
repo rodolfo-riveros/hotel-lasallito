@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}PLE{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
+  <h1 class="page-title mt-2">{% trans "Libros electrónicos (PLE)" %}</h1><p class="page-subtitle">{% trans "Registro de Ventas e Ingresos 14.1 con formato real, marcado como EJEMPLO (RF-FAC-08)." %}</p></div>
+<form class="card mb-6 flex flex-wrap items-end gap-3 p-4">
+  <label><span class="field-label">{% trans "Año" %}</span><input type="number" name="year" value="{{ year }}" class="!w-28"></label>
+  <label><span class="field-label">{% trans "Mes" %}</span><input type="number" name="month" min="1" max="12" value="{{ month }}" class="!w-20"></label>
+  <button class="btn-secondary">{% trans "Ver" %}</button>
+  <button name="download" value="1" class="btn-primary">{% icon "download" "w-4 h-4" %}{% trans "Descargar TXT" %}</button>
+</form>
+<section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{{ start|date:"F Y" }} · {{ count }} {% trans "comprobantes" %}</h2></div>
+  <table class="table"><thead><tr><th>{% trans "Tipo" %}</th><th>{% trans "Cantidad" %}</th><th class="!text-right">{% trans "Gravado" %}</th><th class="!text-right">{% trans "Exportación" %}</th><th class="!text-right">IGV</th><th class="!text-right">{% trans "Total" %}</th></tr></thead>
+    <tbody>{% for s in summary %}<tr><td>{{ s.doc_type }}</td><td>{{ s.n }}</td><td class="text-right tabular-nums">{{ s.taxed }}</td><td class="text-right tabular-nums">{{ s.export }}</td><td class="text-right tabular-nums">{{ s.igv }}</td><td class="text-right tabular-nums">{{ s.total }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin comprobantes en el periodo." %}</td></tr>{% endfor %}</tbody></table></section>
+{% endblock %}

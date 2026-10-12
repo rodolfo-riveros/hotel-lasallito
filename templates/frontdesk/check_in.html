@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}Check-in {{ r.code }}{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a href="{% url 'frontdesk:panel' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Recepción" %}</a>
+  <h1 class="page-title mt-2">Check-in · {{ r.guest.full_name }}</h1>
+  <p class="page-subtitle">{{ r.code }} · {{ r.room_type }} · {{ r.arrival|date:"d/m" }}–{{ r.departure|date:"d/m/Y" }} · {{ r.nights }} {% trans "noches" %} · {{ r.rate_plan }}</p>
+</div>
+<form method="post" enctype="multipart/form-data" class="grid gap-6 lg:grid-cols-3">
+  {% csrf_token %}
+  <div class="space-y-6 lg:col-span-2">
+    {% include "components/form_errors.html" with form=guest_form %}
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">1. {% trans "Ficha de registro" %}</h2><span class="text-xs text-ink-400">RF-REC-03</span></div>
+      <div class="card-body grid gap-4 sm:grid-cols-3">
+        {% include "components/field.html" with field=guest_form.first_name %}{% include "components/field.html" with field=guest_form.last_name %}{% include "components/field.html" with field=guest_form.nationality %}
+        {% include "components/field.html" with field=guest_form.doc_type %}{% include "components/field.html" with field=guest_form.doc_number %}{% include "components/field.html" with field=guest_form.residence_country %}
+        {% include "components/field.html" with field=guest_form.birth_date %}{% include "components/field.html" with field=guest_form.email %}{% include "components/field.html" with field=guest_form.phone %}
+        {% include "components/field.html" with field=guest_form.tam_number %}{% include "components/field.html" with field=guest_form.peru_entry_date %}{% include "components/field.html" with field=guest_form.language %}
+        {% include "components/field.html" with field=guest_form.origin %}{% include "components/field.html" with field=guest_form.next_destination %}{% include "components/field.html" with field=guest_form.address %}
+        {% include "components/field.html" with field=guest_form.allergies %}{% include "components/field.html" with field=guest_form.medical_conditions wrapper_class="sm:col-span-2" %}
+        {% include "components/field.html" with field=guest_form.data_consent wrapper_class="sm:col-span-3" %}
+        <div class="hidden">{% for f in guest_form %}{% if f.name not in "first_name last_name nationality doc_type doc_number residence_country birth_date email phone tam_number peru_entry_date language origin next_destination address allergies medical_conditions data_consent" %}{{ f }}{% endif %}{% endfor %}</div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">2. {% trans "Documento y firma" %}</h2><span class="text-xs text-ink-400">RF-REC-02/04</span></div>
+      <div class="card-body grid gap-5 sm:grid-cols-2">
+        <div class="space-y-4">
+          <div>{% include "components/field.html" with field=form.document_photo %}<p class="field-help">{% trans "En el celular abre la cámara. Use datos ficticios en clase (RF-SIM-07)." %}</p></div>
+          {% include "components/field.html" with field=form.document_verified %}
+          {% if r.guest.doc_type == "1" %}
+            <div class="rounded-lg bg-ink-50 p-3 text-xs dark:bg-ink-800" x-data="{ res: '' }">
+              <button type="button" class="btn-ghost btn-sm" @click="fetch('{% url 'billing:lookup' %}?dni={{ r.guest.doc_number }}').then(r => r.json()).then(d => res = d.found ? d.name : '{% trans 'No encontrado en el padrón simulado' %}')">{% icon "search" "w-4 h-4" %}{% trans "Validar DNI (RENIEC simulado)" %}</button>
+              <p x-text="res" class="mt-1 font-medium"></p></div>
+          {% endif %}
+        </div>
+        {% include "components/signature.html" %}
+      </div>
+    </section>
+  </div>
+  <aside class="space-y-6">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">3. {% trans "Habitación" %}</h2></div>
+      <div class="card-body space-y-4">
+        {% include "components/field.html" with field=form.room %}
+        {% include "components/field.html" with field=form.allow_dirty %}
+        {% include "components/field.html" with field=form.charge_early %}
+        <p class="text-xs text-ink-500">{% trans "Hora de check-in" %}: {{ r.property.check_in_time|time:"H:i" }} · {% trans "cargo" %} {{ r.property.early_checkin_fee_percent|floatformat:0 }}% {% trans "de la noche" %}</p>
+        {% include "components/field.html" with field=form.validate_non_domiciled %}
+        <p class="text-xs text-ink-500">{% trans "Requiere pasaporte, nacionalidad extranjera, residencia fuera del Perú y fecha de ingreso (TAM). Queda en auditoría." %}</p>
+      </div>
+    </section>
+    {% if r.special_requests or r.guest.allergies %}
+    <section class="card border-gold-300"><div class="card-body text-sm">
+      {% if r.special_requests %}<p><b>{% trans "Solicitudes" %}:</b> {{ r.special_requests }}</p>{% endif %}
+      {% if r.guest.allergies %}<p class="text-state-danger"><b>{% trans "Alergias" %}:</b> {{ r.guest.allergies }}</p>{% endif %}
+      <p class="mt-2 text-ink-500">{% trans "Recuerde ofrecer mate de coca y explicar la aclimatación a la altura." %}</p>
+    </div></section>
+    {% endif %}
+    <button type="submit" class="btn-primary w-full py-3 text-base">{% icon "key" "w-5 h-5" %}{% trans "Completar check-in" %}</button>
+  </aside>
+</form>
+{% endblock %}

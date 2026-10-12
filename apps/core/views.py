@@ -28,14 +28,53 @@ def _require_property(request):
 def dashboard(request):
     """Tablero gerencial. En la fase 0 muestra la estructura; los indicadores
     reales (ocupación, ADR, RevPAR) se calculan desde la fase 1 (RF-REP-01)."""
-    today = timezone.localdate()
+    prop = request.property
+    today = prop.current_business_date() if prop else timezone.localdate()
     usd = ExchangeRate.for_date("USD", today)
-    kpis = [
-        {"label": _("Ocupación"), "value": "—", "hint": _("Fase 1"), "icon": "bed"},
-        {"label": _("ADR"), "value": "—", "hint": _("Tarifa promedio"), "icon": "tag"},
-        {"label": _("RevPAR"), "value": "—", "hint": _("Ingreso por habitación disponible"), "icon": "chart"},
-        {"label": _("Llegadas hoy"), "value": "—", "hint": _("Fase 1"), "icon": "key"},
-    ]
+    kpis = []
+    month = None
+    if prop is not None:
+        from datetime import timedelta
+
+        from django.db.models import Count, Q
+
+        from apps.reports import services as rep
+        from apps.reservations.models import Reservation
+
+        month = rep.kpis(prop, today.replace(day=1), today + timedelta(days=1))
+        day = month["days"][-1]
+        counts = Reservation.objects.filter(property=prop).aggregate(
+            arrivals=Count("pk", filter=Q(arrival=today, status__in=Reservation.PRE_ARRIVAL_STATUSES)),
+            departures=Count("pk", filter=Q(departure=today, status="checked_in")),
+            in_house=Count("pk", filter=Q(status="checked_in")),
+        )
+        kpis = [
+            {
+                "label": _("Ocupación hoy"),
+                "value": f"{day.occupancy}%",
+                "hint": _("%(s)s de %(a)s habitaciones") % {"s": day.sold, "a": day.available},
+                "icon": "bed",
+            },
+            {
+                "label": _("ADR del mes"),
+                "value": f"S/ {month['adr']:,.2f}",
+                "hint": _("Tarifa promedio"),
+                "icon": "tag",
+            },
+            {
+                "label": _("RevPAR del mes"),
+                "value": f"S/ {month['revpar']:,.2f}",
+                "hint": _("Ingreso por habitación disponible"),
+                "icon": "chart",
+            },
+            {
+                "label": _("Llegadas hoy"),
+                "value": counts["arrivals"],
+                "hint": _("%(n)s salidas · %(h)s en casa")
+                % {"n": counts["departures"], "h": counts["in_house"]},
+                "icon": "key",
+            },
+        ]
     recent = AuditLog.objects.filter(property=request.property).select_related("user")[:8]
     if not request.user.has_pms_perm(request.property, "audit.view"):
         recent = []
@@ -46,6 +85,7 @@ def dashboard(request):
             "today": today,
             "usd_rate": usd,
             "kpis": kpis,
+            "month": month,
             "recent_activity": recent,
         },
     )

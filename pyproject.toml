@@ -16,7 +16,7 @@ extend-exclude = ["migrations", "node_modules", "static"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "S"]
-ignore = ["S101", "E501"]
+ignore = ["S101", "E501", "DJ006"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S105", "S106"]

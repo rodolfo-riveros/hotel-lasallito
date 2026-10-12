@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Calendario" %}{% endblock %}
+{% block content %}
+{% can "reservations.edit" as can_edit %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="page-title">{% trans "Calendario de habitaciones" %}</h1>
+    <p class="page-subtitle">{% trans "Arrastre una reserva a otra habitación o día. Arrastre el borde derecho para extender la estadía." %}</p>
+  </div>
+  <div class="flex flex-wrap items-center gap-2">
+    <a href="?start={{ prev|date:'Y-m-d' }}&days={{ span }}" class="btn-secondary btn-sm">← 7</a>
+    <form method="get" class="flex items-center gap-2"><input type="date" name="start" value="{{ start|date:'Y-m-d' }}" class="!py-1.5" onchange="this.form.submit()">
+      <select name="days" class="!w-auto !py-1.5" onchange="this.form.submit()"><option value="14" {% if span == 14 %}selected{% endif %}>14 {% trans "días" %}</option><option value="21" {% if span == 21 %}selected{% endif %}>21</option><option value="31" {% if span == 31 %}selected{% endif %}>31</option></select></form>
+    <a href="?start={{ next|date:'Y-m-d' }}&days={{ span }}" class="btn-secondary btn-sm">7 →</a>
+    <a href="{% url 'reservations:reservation_create' %}" class="btn-primary btn-sm">{% icon "plus" "w-4 h-4" %}{% trans "Reserva" %}</a>
+  </div>
+</div>
+
+<div class="mb-3 flex flex-wrap gap-2 text-xs">
+  {% status_badge "reservation" "pending" %}{% status_badge "reservation" "confirmed" %}{% status_badge "reservation" "checked_in" %}{% status_badge "reservation" "checked_out" %}{% status_badge "room" "out_of_order" %}
+</div>
+
+<div class="card overflow-x-auto" x-data="tape('{% url 'reservations:tape_move' %}', {{ can_edit|yesno:'true,false' }})">
+  <div class="min-w-max">
+    <div class="grid text-xs" style="grid-template-columns: 7rem repeat({{ span }}, minmax(3.25rem, 1fr));">
+      <div class="sticky left-0 z-10 border-b border-r border-ink-200 bg-ink-50 px-2 py-2 font-semibold dark:border-ink-800 dark:bg-ink-900">{% trans "Hab." %}</div>
+      {% for d in days %}
+        <div class="border-b border-r border-ink-100 px-1 py-1 text-center dark:border-ink-800 {% if d == today %}bg-brand-50 font-semibold text-brand-800 dark:bg-brand-900/30 dark:text-brand-200{% elif d.weekday >= 5 %}bg-ink-50 dark:bg-ink-900/60{% endif %}">
+          <div class="uppercase">{{ d|date:"D" }}</div><div class="text-sm font-semibold">{{ d|date:"d" }}</div><div class="text-[10px] text-ink-400">{{ d|date:"M" }}</div>
+        </div>
+      {% endfor %}
+
+      {% for row in rooms %}
+        <div class="sticky left-0 z-10 flex items-center gap-1 border-b border-r border-ink-200 bg-white px-2 dark:border-ink-800 dark:bg-ink-900" style="grid-column:1; grid-row: {{ forloop.counter|add:1 }};">
+          <span class="font-semibold">{{ row.room.number }}</span><span class="truncate text-[10px] text-ink-400">{{ row.room.room_type.code|upper }}</span>
+        </div>
+        {% for d in days %}
+          <div class="h-11 border-b border-r border-ink-100 dark:border-ink-800 {% if d == today %}bg-brand-50/50 dark:bg-brand-900/10{% endif %}"
+               style="grid-column: {{ forloop.counter|add:1 }}; grid-row: {{ forloop.parentloop.counter|add:1 }};"
+               data-room="{{ row.room.pk }}" data-date="{{ d|date:'Y-m-d' }}"
+               @dragover.prevent="over($event)" @dragleave="leave($event)" @drop.prevent="drop($event)"
+               {% if can_edit %}@dblclick="location='{% url 'reservations:reservation_create' %}?room={{ row.room.pk }}&arrival={{ d|date:'Y-m-d' }}'"{% endif %}></div>
+        {% endfor %}
+        {% for blk in row.blocks %}
+          <div class="status status-blocked pointer-events-none z-[5] m-1 !rounded-md !text-[10px]" style="grid-row: {{ forloop.parentloop.counter|add:1 }}; grid-column: {{ blk.col }} / span {{ blk.span }};">{% icon "lock" "w-3 h-3" %}{{ blk.b.get_kind_display }}</div>
+        {% endfor %}
+        {% for bar in row.bars %}
+          <a href="{% url 'reservations:reservation_detail' bar.r.pk %}" draggable="{{ can_edit|yesno:'true,false' }}"
+             @dragstart="start($event, {{ bar.r.pk }}, 'move')"
+             class="status status-{{ bar.tone }} group relative z-[6] m-1 flex !justify-start overflow-hidden !rounded-md !px-2 !text-[11px] {% if bar.cut_left %}!rounded-l-none{% endif %} {% if bar.cut_right %}!rounded-r-none{% endif %}"
+             style="grid-row: {{ forloop.parentloop.counter|add:1 }}; grid-column: {{ bar.col }} / span {{ bar.span }};"
+             title="{{ bar.r.code }} · {{ bar.r.guest.full_name }} · {{ bar.r.arrival|date:'d/m' }}–{{ bar.r.departure|date:'d/m' }}">
+            <span class="truncate">{{ bar.r.guest.last_name }}{% if bar.r.guest.is_vip %} ★{% endif %}</span>
+            {% if can_edit and not bar.cut_right %}
+              <span draggable="true" @dragstart.stop="start($event, {{ bar.r.pk }}, 'extend')" class="absolute inset-y-0 right-0 w-2 cursor-ew-resize bg-current opacity-0 group-hover:opacity-30" title="{% trans 'Extender' %}"></span>
+            {% endif %}
+          </a>
+        {% endfor %}
+      {% endfor %}
+    </div>
+
+    <div class="grid border-t-2 border-ink-200 text-xs dark:border-ink-700" style="grid-template-columns: 7rem repeat({{ span }}, minmax(3.25rem, 1fr));">
+      {% for a in availability %}
+        <div class="sticky left-0 border-b border-r border-ink-200 bg-ink-50 px-2 py-1.5 font-medium dark:border-ink-800 dark:bg-ink-900">{% trans "Libres" %} {{ a.type.code|upper }}</div>
+        {% for n in a.cells %}<div class="border-b border-r border-ink-100 py-1.5 text-center font-semibold tabular-nums dark:border-ink-800 {% if n <= 0 %}bg-state-danger/10 text-state-danger{% elif n <= 1 %}text-state-dirty{% else %}text-state-available{% endif %}">{{ n }}</div>{% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+  <p x-show="error" x-text="error" x-cloak class="m-3 rounded-lg bg-state-danger/10 p-3 text-sm text-state-danger"></p>
+</div>
+
+{% if unassigned %}
+<section class="card mt-6">
+  <div class="card-header"><h2 class="card-title">{% trans "Reservas sin habitación asignada" %}</h2></div>
+  <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+    {% for r in unassigned %}
+      <li class="flex items-center justify-between px-5 py-2.5"><span><a href="{% url 'reservations:reservation_detail' r.pk %}" draggable="true" @dragstart="start($event, {{ r.pk }}, 'move')" class="font-medium hover:underline">{{ r.code }}</a> · {{ r.guest.full_name }} · {{ r.room_type }} · {{ r.arrival|date:"d/m" }}–{{ r.departure|date:"d/m" }}</span>{% status_badge "reservation" r.status %}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener("alpine:init", () => {
+  Alpine.data("tape", (url, canEdit) => ({
+    error: "",
+    start(e, id, mode) {
+      if (!canEdit) { e.preventDefault(); return; }
+      e.dataTransfer.setData("text/plain", JSON.stringify({ id, mode }));
+      e.dataTransfer.effectAllowed = "move";
+    },
+    over(e) { e.target.classList.add("bg-gold-100"); },
+    leave(e) { e.target.classList.remove("bg-gold-100"); },
+    async drop(e) {
+      this.leave(e);
+      let payload; try { payload = JSON.parse(e.dataTransfer.getData("text/plain")); } catch { return; }
+      const body = new FormData();
+      body.append("reservation", payload.id); body.append("mode", payload.mode);
+      body.append("room", e.target.dataset.room); body.append("date", e.target.dataset.date);
+      const token = document.cookie.split("; ").find(c => c.startsWith("csrftoken="))?.split("=")[1];
+      const r = await fetch(url, { method: "POST", body, headers: { "X-CSRFToken": token } });
+      const data = await r.json();
+      if (data.ok) location.reload(); else this.error = data.error;
+    },
+  }));
+});
+</script>
+{% endblock %}

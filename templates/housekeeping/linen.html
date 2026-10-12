@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Lencería" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4"><div><a href="{% url 'housekeeping:board' %}" class="text-sm text-ink-500 hover:text-ink-800">← Housekeeping</a>
+  <h1 class="page-title mt-2">{% trans "Lencería y lavandería" %}</h1><p class="page-subtitle">RF-HK-07</p></div>
+  <a href="{% url 'housekeeping:linentype_list' %}" class="btn-secondary">{% trans "Tipos de prenda" %}</a></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <form method="post" class="card h-fit">{% csrf_token %}
+    <div class="card-header"><h2 class="card-title">{% trans "Registrar movimiento" %}</h2></div>
+    <div class="card-body space-y-3">
+      <select name="linen" required>{% for t in types %}<option value="{{ t.pk }}">{{ t.name }}</option>{% endfor %}</select>
+      <select name="direction">{% for k, v in directions %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+      <div class="grid grid-cols-2 gap-2"><input type="number" name="quantity" min="1" placeholder="{% trans 'Cantidad' %}" required><input type="number" name="floor" placeholder="{% trans 'Piso' %}"></div>
+      <input name="notes" placeholder="{% trans 'Notas' %}"><button class="btn-primary w-full">{% trans "Registrar" %}</button></div></form>
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card overflow-hidden"><table class="table"><thead><tr><th>{% trans "Prenda" %}</th><th class="!text-right">{% trans "Total" %}</th><th class="!text-right">{% trans "En lavandería" %}</th><th class="!text-right">{% trans "Disponible" %}</th><th class="!text-right">{% trans "Ideal" %}</th></tr></thead>
+      <tbody>{% for s in stock %}<tr><td>{{ s.linen.name }}</td><td class="text-right">{{ s.total }}</td><td class="text-right">{{ s.at_laundry }}</td><td class="text-right font-semibold {% if s.below_par %}text-state-danger{% endif %}">{{ s.available }}</td><td class="text-right text-ink-500">{{ s.linen.par_level }}</td></tr>{% empty %}<tr><td colspan="5" class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Últimos movimientos" %}</h2></div>
+      <table class="table"><tbody>{% for m in movements %}<tr><td class="text-xs">{{ m.created_at|date:"d/m H:i" }}</td><td>{{ m.get_direction_display }}</td><td>{{ m.quantity }} {{ m.linen }}</td><td class="text-xs">{% if m.floor %}{% trans "piso" %} {{ m.floor }}{% endif %} {{ m.notes }}</td></tr>{% empty %}<tr><td class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+  </div>
+</div>
+{% endblock %}

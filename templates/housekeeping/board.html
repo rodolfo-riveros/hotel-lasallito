@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}Housekeeping{% endblock %}
+{% block content %}
+{% can "housekeeping.edit" as can_edit %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{{ day|date:"l d/m/Y" }}</p>
+    <h1 class="page-title">Housekeeping</h1><p class="page-subtitle">{{ done }} / {{ tasks|length }} {% trans "tareas terminadas" %}</p></div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'housekeeping:my_tasks' %}" class="btn-secondary">{% icon "user" "w-4 h-4" %}{% trans "Mis habitaciones" %}</a>
+    <a href="{% url 'housekeeping:minibar' %}" class="btn-secondary">{% trans "Minibar" %}</a>
+    <a href="{% url 'housekeeping:linen' %}" class="btn-secondary">{% trans "Lencería" %}</a>
+    <a href="{% url 'housekeeping:lost_list' %}" class="btn-secondary">{% trans "Objetos perdidos" %}</a>
+    {% if can_edit %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="generate"><button class="btn-primary">{% icon "sparkles" "w-4 h-4" %}{% trans "Generar plan del día" %}</button></form>{% endif %}
+  </div>
+</div>
+<div class="mb-6 flex flex-wrap gap-2">{% for key, n in summary.items %}<span class="inline-flex items-center gap-1">{% status_badge "room" key %}<b class="text-sm">{{ n }}</b></span>{% endfor %}</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-hidden lg:col-span-2">
+    <div class="card-header"><h2 class="card-title">{% trans "Tareas del día" %}</h2><span class="text-xs text-ink-400">{% trans "Prioridad: salidas, llegadas tempranas y VIP primero" %}</span></div>
+    <div class="overflow-x-auto"><table class="table">
+      <thead><tr><th>{% trans "Hab." %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Prioridad" %}</th><th>{% trans "Asignada" %}</th><th>{% trans "Estado" %}</th><th>{% trans "Tiempo" %}</th><th></th></tr></thead>
+      <tbody>{% for t in tasks %}
+        <tr><td class="font-semibold">{{ t.room.number }}</td><td>{{ t.get_kind_display }}</td><td class="text-xs">{{ t.priority }}{% if t.priority_reason %} · {{ t.priority_reason }}{% endif %}</td>
+          <td>{% if can_edit %}<form method="post">{% csrf_token %}<input type="hidden" name="action" value="reassign"><input type="hidden" name="task" value="{{ t.pk }}">
+            <select name="maid" class="!w-36 !py-1 text-xs" onchange="this.form.submit()"><option value="">—</option>{% for m in maids %}<option value="{{ m.pk }}" {% if t.assigned_to_id == m.pk %}selected{% endif %}>{{ m }}</option>{% endfor %}</select></form>{% else %}{{ t.assigned_to|default:"—" }}{% endif %}</td>
+          <td><span class="status {% if t.status == 'inspected' %}status-inspected{% elif t.status == 'done' %}status-available{% elif t.status == 'in_progress' %}status-cleaning{% elif t.status == 'rejected' %}status-danger{% else %}status-dirty{% endif %}">{{ t.get_status_display }}</span></td>
+          <td class="text-xs">{% if t.minutes is not None %}{{ t.minutes }} min{% endif %}</td>
+          <td class="text-right"><a href="{% url 'housekeeping:task_detail' t.pk %}" class="btn-ghost btn-sm">{% trans "Abrir" %}</a></td></tr>
+      {% empty %}<tr><td colspan="7">{% trans "No hay tareas. Genere el plan del día." as msg %}{% include "components/empty.html" with icon_name="sparkles" message=msg %}</td></tr>{% endfor %}</tbody>
+    </table></div>
+  </section>
+  <aside class="space-y-6">
+    {% if can_edit %}
+    <form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="assign">
+      <div class="card-header"><h2 class="card-title">{% trans "Repartir tareas" %}</h2></div>
+      <div class="card-body space-y-2 text-sm">{% for m in maids %}<label class="flex items-center gap-2"><input type="checkbox" name="maids" value="{{ m.pk }}" checked>{{ m }}</label>{% empty %}<p class="text-ink-500">{% trans "No hay usuarios con rol Housekeeping." %}</p>{% endfor %}
+        <p class="text-xs text-ink-500">{% trans "Balance por carga: salida = 2, estadía = 1, profunda = 4 créditos; agrupa por piso." %}</p>
+        <button class="btn-primary w-full">{% trans "Asignar automáticamente" %}</button></div></form>
+    {% endif %}
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Cambio rápido de estado" %}</h2></div>
+      <ul class="max-h-96 divide-y divide-ink-100 overflow-y-auto text-sm dark:divide-ink-800">
+        {% for item in rooms %}<li class="flex items-center justify-between gap-2 px-5 py-2"><span class="font-semibold">{{ item.room.number }}</span>{% status_badge "room" item.status %}
+          {% if can_edit %}<form method="post" action="{% url 'rooms:set_hk_status' item.room.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+            <select name="status" class="!w-28 !py-1 text-xs" onchange="this.form.submit()">{% for k, v in item.room.HKStatus.choices %}<option value="{{ k }}" {% if item.room.hk_status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></form>{% endif %}</li>{% endfor %}
+      </ul></section>
+  </aside>
+</div>
+{% endblock %}

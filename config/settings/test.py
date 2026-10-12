@@ -17,3 +17,6 @@ AXES_ENABLED = True
 
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_USE_FINDERS = True
+
+CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
+SESSION_ENGINE = "django.contrib.sessions.backends.db"

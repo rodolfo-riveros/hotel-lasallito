@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ crud.title_plural }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    {% if crud.back_url %}<a href="{{ crud.back_url }}" class="text-sm text-ink-500 hover:text-ink-800 dark:hover:text-ink-200">← {% trans "Volver" %}</a>{% endif %}
+    <h1 class="page-title {% if crud.back_url %}mt-2{% endif %}">{{ crud.title_plural }}</h1>
+    {% if crud.help_text %}<p class="page-subtitle">{{ crud.help_text }}</p>{% endif %}
+  </div>
+  {% if can_create %}
+    <a href="{{ create_url }}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo" %} <span class="kbd !border-white/30 !bg-white/10 !text-white">n</span></a>
+  {% endif %}
+</div>
+
+<div class="card overflow-hidden">
+  {% if crud.search or filters %}
+  <form method="get" class="flex flex-wrap items-end gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    {% if crud.search %}
+    <label class="relative block w-full max-w-xs">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-400">{% icon "search" "w-4 h-4" %}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Buscar' %}" class="!pl-9" data-search aria-label="{% trans 'Buscar' %}">
+    </label>
+    {% endif %}
+    {% for f in filters %}
+      <label class="block">
+        <span class="field-label !mb-1 text-xs">{{ f.label|capfirst }}</span>
+        <select name="{{ f.name }}" onchange="this.form.submit()" class="!py-1.5">
+          <option value="">{% trans "Todos" %}</option>
+          {% for value, label in f.options %}<option value="{{ value }}" {% if f.value == value|stringformat:"s" %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+    {% endfor %}
+    {% if crud.search %}<button class="btn-secondary">{% trans "Buscar" %}</button>{% endif %}
+  </form>
+  {% endif %}
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          {% for label, getter in crud.columns %}<th>{{ label }}</th>{% endfor %}
+          <th><span class="sr-only">{% trans "Acciones" %}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            {% for cell in row.cells %}<td>{{ cell|cell }}</td>{% endfor %}
+            <td class="text-right">
+              <div class="flex justify-end gap-1">
+                {% if can_edit %}<a href="{% url edit_url_name row.obj.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a>{% endif %}
+                {% if can_delete %}
+                  <form method="post" action="{% url delete_url_name row.obj.pk %}" data-confirm="{% trans '¿Eliminar este registro? Quedará en la auditoría.' %}">
+                    {% csrf_token %}<button class="btn-ghost btn-sm text-state-danger">{% trans "Eliminar" %}</button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="{{ crud.columns|length|add:1 }}">{% trans "No hay registros." as msg %}{% include "components/empty.html" with message=msg %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" %}
+</div>
+{% endblock %}

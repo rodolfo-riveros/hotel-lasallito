@@ -1,0 +1,26 @@
+{% load i18n %}{# Firma digital con dedo o mouse. Uso: include con name="signature" #}
+<div x-data="signaturePad('{{ name|default:"signature" }}')" class="space-y-2">
+  <p class="field-label">{% trans "Firma del huésped" %}</p>
+  <canvas x-ref="pad" width="600" height="180" class="h-40 w-full touch-none rounded-lg border-2 border-dashed border-ink-300 bg-white dark:border-ink-600"
+          @pointerdown="down($event)" @pointermove="move($event)" @pointerup="up()" @pointerleave="up()"
+          aria-label="{% trans 'Área de firma' %}"></canvas>
+  <input type="hidden" :name="name" x-ref="out">
+  <div class="flex items-center justify-between text-xs text-ink-500">
+    <span>{% trans "Firme dentro del recuadro." %}</span>
+    <button type="button" class="btn-ghost btn-sm" @click="clear()">{% trans "Borrar firma" %}</button>
+  </div>
+</div>
+<script>
+document.addEventListener("alpine:init", () => {
+  if (Alpine.__sigReady) return; Alpine.__sigReady = true;
+  Alpine.data("signaturePad", (name) => ({
+    name, drawing: false, ctx: null,
+    init() { this.ctx = this.$refs.pad.getContext("2d"); this.ctx.lineWidth = 2.5; this.ctx.lineCap = "round"; this.ctx.strokeStyle = "#1c1917"; },
+    pos(e) { const r = this.$refs.pad.getBoundingClientRect(); return [(e.clientX - r.left) * this.$refs.pad.width / r.width, (e.clientY - r.top) * this.$refs.pad.height / r.height]; },
+    down(e) { this.drawing = true; const [x, y] = this.pos(e); this.ctx.beginPath(); this.ctx.moveTo(x, y); },
+    move(e) { if (!this.drawing) return; const [x, y] = this.pos(e); this.ctx.lineTo(x, y); this.ctx.stroke(); },
+    up() { if (!this.drawing) return; this.drawing = false; this.$refs.out.value = this.$refs.pad.toDataURL("image/png"); },
+    clear() { this.ctx.clearRect(0, 0, this.$refs.pad.width, this.$refs.pad.height); this.$refs.out.value = ""; },
+  }));
+});
+</script>

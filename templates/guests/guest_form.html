@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% if object %}{{ object }}{% else %}{% trans "Nuevo huésped" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% if object %}{% url 'guests:guest_detail' object.pk %}{% else %}{% url 'guests:guest_list' %}{% endif %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Volver" %}</a>
+  <h1 class="page-title mt-2">{% if object %}{{ object }}{% else %}{% trans "Nuevo huésped" %}{% endif %}</h1></div>
+<form method="post" class="space-y-6">{% csrf_token %}
+  {% if duplicates %}
+    <div class="card border-state-dirty/40 p-5"><p class="font-semibold text-state-dirty">{% trans "Perfiles parecidos encontrados (RF-HUE-02)" %}</p>
+      <ul class="mt-2 space-y-1 text-sm">{% for d in duplicates %}<li><a href="{% url 'guests:guest_detail' d.pk %}" target="_blank" class="hover:underline">{{ d.full_name }}</a> · {{ d.get_doc_type_display }} {{ d.masked_doc }} · {{ d.email }} · {{ d.phone }}</li>{% endfor %}</ul>
+      <label class="mt-3 flex items-center gap-2 text-sm"><input type="checkbox" name="confirm_duplicate" value="1">{% trans "Es otra persona: crear igual" %}</label></div>
+  {% endif %}
+  {% include "components/form_errors.html" %}
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Identificación" %}</h2></div><div class="card-body grid gap-5 sm:grid-cols-3">
+    {% include "components/field.html" with field=form.first_name %}{% include "components/field.html" with field=form.last_name %}{% include "components/field.html" with field=form.gender %}
+    {% include "components/field.html" with field=form.doc_type %}{% include "components/field.html" with field=form.doc_number %}{% include "components/field.html" with field=form.birth_date %}
+    {% include "components/field.html" with field=form.nationality %}{% include "components/field.html" with field=form.residence_country %}{% include "components/field.html" with field=form.language %}</div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Contacto y viaje" %}</h2></div><div class="card-body grid gap-5 sm:grid-cols-3">
+    {% include "components/field.html" with field=form.email %}{% include "components/field.html" with field=form.phone %}{% include "components/field.html" with field=form.company %}
+    {% include "components/field.html" with field=form.address %}{% include "components/field.html" with field=form.city %}{% include "components/field.html" with field=form.tam_number %}
+    {% include "components/field.html" with field=form.peru_entry_date %}{% include "components/field.html" with field=form.origin %}{% include "components/field.html" with field=form.next_destination %}</div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Salud, preferencias y etiquetas" %}</h2></div><div class="card-body grid gap-5 sm:grid-cols-2">
+    {% include "components/field.html" with field=form.allergies %}{% include "components/field.html" with field=form.medical_conditions %}
+    {% include "components/field.html" with field=form.preferences wrapper_class="sm:col-span-2" %}{% include "components/field.html" with field=form.tags %}
+    <div class="space-y-3">{% include "components/field.html" with field=form.is_blacklisted %}{% include "components/field.html" with field=form.blacklist_reason %}</div>
+    {% include "components/field.html" with field=form.notes wrapper_class="sm:col-span-2" %}
+    {% include "components/field.html" with field=form.data_consent %}{% include "components/field.html" with field=form.marketing_consent %}</div></section>
+  <div class="flex justify-end"><button class="btn-primary">{% trans "Guardar huésped" %}</button></div>
+</form>
+{% endblock %}

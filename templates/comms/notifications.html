@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Notificaciones" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex items-end justify-between"><h1 class="page-title">{% trans "Notificaciones" %}</h1>
+  <form method="post">{% csrf_token %}<button class="btn-secondary btn-sm">{% trans "Marcar todas como leídas" %}</button></form></div>
+<ul class="space-y-2">{% for n in items %}
+  <li><form method="post" action="{% url 'comms:notification_open' n.pk %}">{% csrf_token %}<button class="card flex w-full items-start gap-3 p-4 text-left {% if request.user not in n.read_by.all %}border-l-4 border-l-brand-600{% else %}opacity-70{% endif %}">
+    <div class="flex-1"><p class="font-medium">{{ n.title }}</p><p class="text-sm text-ink-500">{{ n.body }}</p></div><span class="text-xs text-ink-400">{{ n.created_at|timesince }}</span></button></form></li>
+{% empty %}<li class="text-ink-500">{% trans "Sin notificaciones." %}</li>{% endfor %}</ul>
+{% endblock %}

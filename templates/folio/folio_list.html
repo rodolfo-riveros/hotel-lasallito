@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Folios" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><h1 class="page-title">{% trans "Folios y caja" %}</h1></div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'folio:cash' %}" class="btn-secondary">{% icon "wallet" "w-4 h-4" %}{% trans "Mi caja" %}</a>
+    <a href="{% url 'folio:receivables' %}" class="btn-secondary">{% icon "document" "w-4 h-4" %}{% trans "Cuentas por cobrar" %}</a>
+    <a href="{% url 'folio:concept_list' %}" class="btn-secondary">{% trans "Conceptos" %}</a>
+    <a href="{% url 'folio:folio_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Folio de empresa / interno" %}</a>
+  </div>
+</div>
+<div class="card overflow-hidden">
+  <form class="flex flex-wrap gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Folio, nombre o reserva' %}" class="!w-72" data-search>
+    <select name="status" class="!w-auto" onchange="this.form.submit()"><option value="open" {% if status == 'open' %}selected{% endif %}>{% trans "Abiertos" %}</option><option value="closed" {% if status == 'closed' %}selected{% endif %}>{% trans "Cerrados" %}</option><option value="all" {% if status == 'all' %}selected{% endif %}>{% trans "Todos" %}</option></select>
+  </form>
+  <div class="overflow-x-auto"><table class="table">
+    <thead><tr><th>{% trans "Folio" %}</th><th>{% trans "A nombre de" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Reserva" %}</th><th class="!text-right">{% trans "Saldo" %}</th></tr></thead>
+    <tbody>{% for f in folios %}<tr class="cursor-pointer" onclick="location='{% url 'folio:folio_detail' f.pk %}'"><td class="font-mono text-xs">{{ f.number }}</td><td>{{ f.name }}</td><td>{{ f.get_kind_display }}</td><td class="text-xs">{{ f.reservation.code|default:"—" }}</td><td class="text-right tabular-nums">{{ f.balance|money }}</td></tr>
+    {% empty %}<tr><td colspan="5" class="text-ink-500">{% trans "Sin folios." %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

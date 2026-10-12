@@ -36,7 +36,7 @@ y sus consultas (RUC, DNI, tipo de cambio) se simulan; todo lo demás funciona c
 ## Comandos
 
 ```bash
-.venv/Scripts/python manage.py runserver          # servidor (SQLite si DATABASE_URL está vacío)
+.venv/Scripts/python manage.py runserver --nothreading   # reutiliza la conexión a Supabase
 .venv/Scripts/python manage.py seed_pms --demo    # roles, hotel de ejemplo, usuarios de práctica
 .venv/Scripts/python -m pytest                    # pruebas (nunca contra Supabase)
 .venv/Scripts/ruff check . && .venv/Scripts/black --check .
@@ -62,3 +62,7 @@ Es un monolito modular. Hay una app de Django por módulo (sección 8.2 del docu
   - Uso en plantillas: `{% status_badge "room" "dirty" %}`.
 - **Íconos:** `{% icon "nombre" %}` (`apps/core/templatetags/pms.py`).
 - **Montos:** `{{ valor|money:"USD" }}`.
+- **Catálogos:** `apps/core/crud.py` (`Crud(...)`) genera listas y formularios con permisos y auditoría.
+- **Rendimiento:** cada consulta a Supabase cuesta ~200 ms. Use `select_related`, las anotaciones de
+  `apps/folio/queries.py` y respete `test_query_budget.py`.
+- **Datos de práctica:** `apps/core/demo.py` (se cargan con `seed_pms --demo`).

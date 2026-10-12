@@ -1,0 +1,16 @@
+{% load i18n pms %}
+<tr>
+  <td class="font-semibold">{{ r.room.number|default:"—" }}</td>
+  <td><a href="{% url 'reservations:reservation_detail' r.pk %}" class="font-medium text-ink-900 hover:underline dark:text-ink-100">{{ r.guest.full_name }}</a>
+    {% if r.guest.is_vip %}<span class="badge bg-gold-100 text-gold-800">VIP</span>{% endif %}
+    <p class="text-xs text-ink-500">{{ r.code }} · {{ r.room_type.code|upper }} · {{ r.adults }}AD{% if r.children %} {{ r.children }}NI{% endif %} · {{ r.nights }}N{% if r.company %} · {{ r.company }}{% endif %}</p></td>
+  <td class="text-sm">{% if mode == "arrival" %}{{ r.eta|time:"H:i"|default:"—" }}{% else %}{{ r.departure|date:"d/m" }}{% endif %}</td>
+  <td>{% if r.room %}{% status_badge "room" r.room|hk_key %}{% else %}<span class="text-xs text-ink-400">{% trans "Sin asignar" %}</span>{% endif %}</td>
+  <td class="tabular-nums text-sm">{% with b=r.balance %}<span class="{% if b > 0 %}text-state-danger font-semibold{% endif %}">{{ b|money }}</span>{% endwith %}</td>
+  <td class="text-right">
+    {% if mode == "arrival" and r.status != "checked_in" %}<a href="{% url 'frontdesk:check_in' r.pk %}" class="btn-primary btn-sm">Check-in</a>
+    {% elif mode == "arrival" %}{% status_badge "reservation" r.status %}
+    {% elif r.status == "checked_in" %}<a href="{% url 'frontdesk:check_out' r.pk %}" class="btn-secondary btn-sm">Check-out</a>
+    {% else %}{% status_badge "reservation" r.status %}{% endif %}
+  </td>
+</tr>

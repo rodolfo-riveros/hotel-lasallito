@@ -1,0 +1,5 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Comanda {{ o.number }}</title>
+<style>body{font-family:monospace;width:76mm;margin:0 auto;font-size:14px}h1{font-size:16px;text-align:center}hr{border:0;border-top:1px dashed #000}li{margin:6px 0}</style></head>
+<body onload="window.print()"><h1>{% if station == "bar" %}BARRA{% else %}COCINA{% endif %}</h1>
+<p>{% if o.table %}Mesa {{ o.table.number }}{% else %}{{ o.number }}{% endif %} · {{ o.waiter }} · {% now "H:i" %}</p><hr>
+<ul>{% for i in items %}<li><b>{{ i.quantity }} × {{ i.menu_item.name }}</b>{% if i.notes %}<br>  → {{ i.notes }}{% endif %}</li>{% endfor %}</ul></body></html>

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Grupos" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'reservations:reservation_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Reservas" %}</a>
+    <h1 class="page-title mt-2">{% trans "Grupos y bloqueos" %}</h1><p class="page-subtitle">{% trans "Cupos con fecha de liberación y rooming list (RF-RES-04)." %}</p></div>
+  <a href="{% url 'reservations:group_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo grupo" %}</a>
+</div>
+<div class="card overflow-x-auto">
+  <table class="table">
+    <thead><tr><th>{% trans "Código" %}</th><th>{% trans "Grupo" %}</th><th>{% trans "Empresa" %}</th><th>{% trans "Fechas" %}</th><th>{% trans "Liberación" %}</th><th>{% trans "Cupos" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+    <tbody>
+      {% for g in groups %}
+        <tr><td class="font-mono text-xs"><a class="hover:underline" href="{% url 'reservations:group_detail' g.pk %}">{{ g.code }}</a></td><td class="font-medium">{{ g.name }}</td><td>{{ g.company|default:"—" }}</td>
+          <td>{{ g.arrival|date:"d/m" }}–{{ g.departure|date:"d/m/Y" }}</td><td>{{ g.release_date|date:"d/m/Y" }}</td>
+          <td class="text-xs">{% for a in g.allotments.all %}{{ a.quantity }} {{ a.room_type.code|upper }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+          <td>{{ g.get_status_display }}</td></tr>
+      {% empty %}<tr><td colspan="7">{% trans "No hay grupos." as msg %}{% include "components/empty.html" with icon_name="users" message=msg %}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

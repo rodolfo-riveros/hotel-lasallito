@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Mis habitaciones" %}{% endblock %}
+{% block content %}
+<h1 class="page-title">{% trans "Mis habitaciones" %}</h1>
+<p class="page-subtitle mb-5">{{ day|date:"l d/m" }} · {{ tasks|length }} {% trans "tareas" %}</p>
+<ul class="space-y-3">
+  {% for t in tasks %}
+    <li><a href="{% url 'housekeeping:task_detail' t.pk %}" class="card flex items-center gap-4 p-4 active:scale-[0.99]">
+      <span class="font-display text-4xl font-semibold">{{ t.room.number }}</span>
+      <div class="min-w-0 flex-1"><p class="font-medium">{{ t.get_kind_display }} · {{ t.room.room_type.code|upper }}</p><p class="truncate text-xs text-ink-500">{{ t.priority_reason|default:"" }}</p></div>
+      <span class="status {% if t.status == 'inspected' %}status-inspected{% elif t.status == 'done' %}status-available{% elif t.status == 'in_progress' %}status-cleaning{% elif t.status == 'rejected' %}status-danger{% else %}status-dirty{% endif %}">{{ t.get_status_display }}</span>
+    </a></li>
+  {% empty %}<li class="card p-8 text-center text-ink-500">{% trans "No tiene habitaciones asignadas hoy." %}</li>{% endfor %}
+</ul>
+{% endblock %}

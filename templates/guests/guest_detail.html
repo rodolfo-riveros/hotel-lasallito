@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ guest }}{% endblock %}
+{% block content %}
+{% can "guests.edit" as can_edit %}{% can "guests.void" as can_void %}{% can "reservations.create" as can_book %}
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div><a href="{% url 'guests:guest_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Huéspedes" %}</a>
+    <div class="mt-2 flex flex-wrap items-center gap-2"><h1 class="page-title">{{ guest.full_name }}</h1>{% for t in guest.tags %}<span class="badge bg-gold-100 text-gold-800">{{ t }}</span>{% endfor %}{% if guest.is_blacklisted %}<span class="badge bg-state-danger/10 text-state-danger">{% trans "Lista negra" %}: {{ guest.blacklist_reason }}</span>{% endif %}</div>
+    <p class="page-subtitle">{{ guest.nationality.name|default:"" }} · {{ guest.get_language_display }} · {% if guest.data_consent_at %}{% trans "consentimiento" %} {{ guest.data_consent_at|date:"d/m/Y" }}{% else %}<span class="text-state-dirty">{% trans "sin consentimiento de datos" %}</span>{% endif %}</p></div>
+  <div class="flex gap-2">{% if can_book %}<a href="{% url 'reservations:reservation_create' %}?guest={{ guest.pk }}" class="btn-primary">{% icon "plus" "w-4 h-4" %}{% trans "Reservar" %}</a>{% endif %}{% if can_edit %}<a href="{% url 'guests:guest_edit' guest.pk %}" class="btn-secondary">{% trans "Editar" %}</a>{% endif %}</div>
+</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-4">
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Estadías" %}</p><p class="font-display text-3xl font-semibold">{{ guest.total_stays }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Noches" %}</p><p class="font-display text-3xl font-semibold">{{ guest.total_nights }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Gasto total" %}</p><p class="font-display text-3xl font-semibold">{{ guest.total_spent|money }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Puntos" %}</p><p class="font-display text-3xl font-semibold">{{ guest.loyalty_points }}</p></div>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Historial de estadías" %}</h2></div>
+      <table class="table"><tbody>{% for r in stays %}<tr class="cursor-pointer" onclick="location='{% url 'reservations:reservation_detail' r.pk %}'"><td class="font-mono text-xs">{{ r.code }}</td><td>{{ r.property }}</td><td>{{ r.arrival|date:"d/m/Y" }}–{{ r.departure|date:"d/m/Y" }}</td><td>{{ r.room.number|default:r.room_type }}</td><td class="text-right tabular-nums">{{ r.total_amount|money:r.currency }}</td><td>{% status_badge "reservation" r.status %}</td></tr>
+      {% empty %}<tr><td class="text-ink-500">{% trans "Sin estadías." %}</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Auditoría del perfil" %}</h2></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">{% for log in history %}<li class="px-5 py-2">{{ log.timestamp|date:"d/m/Y H:i" }} · {{ log.username }} · {{ log.get_action_display }}{% if log.reason %} · <span class="text-ink-500">{{ log.reason }}</span>{% endif %}</li>{% empty %}<li class="px-5 py-3 text-ink-500">—</li>{% endfor %}</ul></section>
+  </div>
+  <aside class="space-y-6">
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Datos" %}</h2>{% if not show_sensitive %}<a href="?ver=1" class="text-xs text-brand-700 hover:underline">{% trans "Ver datos protegidos" %}</a>{% endif %}</div>
+      <dl class="card-body space-y-2 text-sm">
+        <div><dt class="text-ink-500">{{ guest.get_doc_type_display }}</dt><dd class="font-mono">{% if show_sensitive %}{{ guest.doc_number }}{% else %}{{ guest.masked_doc }}{% endif %}</dd></div>
+        <div><dt class="text-ink-500">{% trans "Contacto" %}</dt><dd>{{ guest.email }}<br>{{ guest.phone }}</dd></div>
+        {% if guest.birth_date %}<div><dt class="text-ink-500">{% trans "Nacimiento" %}</dt><dd>{{ guest.birth_date|date:"d/m/Y" }}</dd></div>{% endif %}
+        {% if guest.tam_number or guest.peru_entry_date %}<div><dt class="text-ink-500">TAM · {% trans "ingreso" %}</dt><dd>{{ guest.tam_number }} · {{ guest.peru_entry_date|date:"d/m/Y" }}</dd></div>{% endif %}
+        {% if show_sensitive %}<div><dt class="text-ink-500">{% trans "Alergias / salud" %}</dt><dd class="text-state-danger">{{ guest.allergies }} {{ guest.medical_conditions }}</dd></div>{% elif guest.allergies or guest.medical_conditions %}<p class="text-xs text-state-dirty">{% trans "Tiene información de salud registrada." %}</p>{% endif %}
+        {% if guest.preferences %}<div><dt class="text-ink-500">{% trans "Preferencias" %}</dt><dd>{{ guest.preferences }}</dd></div>{% endif %}
+        {% if guest.company %}<div><dt class="text-ink-500">{% trans "Empresa" %}</dt><dd>{{ guest.company }}</dd></div>{% endif %}
+        {% if show_sensitive %}<p class="text-xs text-ink-400">{% trans "Este acceso quedó registrado en la auditoría." %}</p>{% endif %}
+      </dl></section>
+    {% if duplicates and can_edit %}
+    <section class="card border-state-dirty/40"><div class="card-header"><h2 class="card-title">{% trans "Posibles duplicados" %}</h2></div>
+      <ul class="card-body space-y-2 text-sm">{% for d in duplicates %}<li class="flex items-center justify-between gap-2"><a href="{% url 'guests:guest_detail' d.pk %}" class="hover:underline">{{ d.full_name }}</a>
+        <form method="post" action="{% url 'guests:guest_merge' guest.pk %}" data-confirm="{% trans '¿Fusionar este perfil con el actual?' %}">{% csrf_token %}<input type="hidden" name="duplicate" value="{{ d.pk }}"><button class="btn-secondary btn-sm">{% trans "Fusionar aquí" %}</button></form></li>{% endfor %}</ul></section>
+    {% endif %}
+    {% if can_void %}
+    <form method="post" action="{% url 'guests:guest_anonymize' guest.pk %}" class="card" data-confirm="{% trans '¿Eliminar los datos personales? No se puede deshacer.' %}">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Derecho de eliminación (Ley 29733)" %}</h2></div>
+      <div class="card-body space-y-3"><input name="reason" placeholder="{% trans 'Motivo / solicitud' %}" required><button class="btn-danger w-full">{% trans "Anonimizar" %}</button></div></form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="mb-6">{% if back %}<a href="{{ back }}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Volver" %}</a>{% endif %}
+  <h1 class="page-title mt-2">{{ title }}</h1>{% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}</div>
+<form method="post" enctype="multipart/form-data" class="card max-w-3xl">{% csrf_token %}
+  <div class="card-body">{% include "components/form_errors.html" %}{% include "components/form_grid.html" %}</div>
+  <div class="flex justify-end gap-2 border-t border-ink-100 px-5 py-4 dark:border-ink-800">
+    {% if back %}<a href="{{ back }}" class="btn-secondary">{% trans "Cancelar" %}</a>{% endif %}
+    <button class="btn-primary">{{ submit|default:_("Guardar") }}</button></div>
+</form>
+{% endblock %}

@@ -59,7 +59,7 @@ class Command(BaseCommand):
             defaults={
                 "name": "Hotel La Sallito",
                 "legal_name": "Hotel La Sallito S.A.C. (ficticio)",
-                "ruc": "20600000001",
+                "ruc": "20600000005",
                 "kind": Property.Kind.HOTEL,
                 "category_stars": 3,
                 "address": "Av. Mariscal Castilla 000, Urubamba",
@@ -107,6 +107,12 @@ class Command(BaseCommand):
 
         if options["demo"]:
             self._create_demo_users(hotel)
+            from apps.core.demo import load_bookings, load_operations
+
+            _types, _rack, guests = load_operations(hotel)
+            admin = User.objects.filter(username="admin").first()
+            n = load_bookings(hotel, admin, guests)
+            self.stdout.write(f"Hotel de práctica cargado ({n} reservas nuevas).")
 
         self.stdout.write(self.style.SUCCESS("Datos iniciales listos."))
 

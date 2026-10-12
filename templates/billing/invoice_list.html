@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Comprobantes" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Administración" %}</p>
+    <h1 class="page-title">{% trans "Facturación electrónica" %}</h1></div>
+  <div class="flex flex-wrap gap-2">
+    {% if pending %}<form method="post" action="{% url 'billing:retry_pending' %}">{% csrf_token %}<button class="btn-primary">{% icon "arrow-right" "w-4 h-4" %}{% trans "Reenviar pendientes" %} ({{ pending }})</button></form>{% endif %}
+    <a href="{% url 'billing:simulator' %}" class="btn-secondary">{% icon "cog" "w-4 h-4" %}{% trans "Simulador SUNAT" %}</a>
+    <a href="{% url 'billing:ple' %}" class="btn-secondary">{% icon "download" "w-4 h-4" %}PLE</a>
+    <a href="{% url 'billing:series_list' %}" class="btn-secondary">{% trans "Series" %}</a>
+  </div>
+</div>
+<div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario: nada se envía a SUNAT ni a un OSE." %}</div>
+<div class="card overflow-hidden">
+  <form class="flex flex-wrap items-end gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Cliente, documento o serie' %}" class="!w-64" data-search>
+    <select name="doc_type" class="!w-auto" onchange="this.form.submit()"><option value="">{% trans "Todos los tipos" %}</option>{% for k, v in doc_types %}<option value="{{ k }}" {% if request.GET.doc_type == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+    <select name="status" class="!w-auto" onchange="this.form.submit()"><option value="">{% trans "Todos los estados" %}</option>{% for k, v in statuses %}<option value="{{ k }}" {% if request.GET.status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select>
+    <input type="date" name="date" value="{{ request.GET.date }}" class="!w-auto" onchange="this.form.submit()">
+    <span class="ml-auto text-sm text-ink-500">{% trans "Total" %}: <b class="text-ink-900 dark:text-ink-100">{{ totals.total|default:0|money }}</b> · IGV {{ totals.igv|default:0|money }}</span>
+  </form>
+  <div class="overflow-x-auto"><table class="table">
+    <thead><tr><th>{% trans "Número" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Fecha" %}</th><th>{% trans "Cliente" %}</th><th class="!text-right">{% trans "Total" %}</th><th>{% trans "SUNAT" %}</th></tr></thead>
+    <tbody>{% for inv in page %}
+      <tr class="cursor-pointer" onclick="location='{% url 'billing:invoice_detail' inv.pk %}'"><td class="font-mono text-xs">{{ inv.full_number }}</td><td>{{ inv.get_doc_type_display }}</td><td>{{ inv.issue_date|date:"d/m/Y" }}</td>
+        <td>{{ inv.customer_name }}<p class="text-xs text-ink-500">{{ inv.get_customer_doc_type_display }} {{ inv.customer_doc }}</p></td>
+        <td class="text-right tabular-nums">{{ inv.currency }} {{ inv.total }}</td>
+        <td><span class="status {% if inv.status == 'accepted' %}status-confirmed{% elif inv.status == 'pending' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></td></tr>
+    {% empty %}<tr><td colspan="6">{% trans "Sin comprobantes." as msg %}{% include "components/empty.html" with icon_name="receipt" message=msg %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% include "components/pagination.html" %}
+</div>
+{% endblock %}

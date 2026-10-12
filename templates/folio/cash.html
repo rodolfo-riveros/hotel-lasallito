@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Caja" %}{% endblock %}
+{% block content %}
+<div class="mb-6"><a href="{% url 'folio:folio_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Folios" %}</a>
+  <h1 class="page-title mt-2">{% trans "Caja" %}</h1><p class="page-subtitle">{% trans "Apertura, caja chica y cierre por turno y usuario (RF-CAJ-01, RF-CAJ-04)." %}</p></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6">
+    {% if session %}
+      <section class="card">
+        <div class="card-header"><h2 class="card-title">{% trans "Mi turno" %}</h2><span class="badge bg-state-available/10 text-state-available">{% trans "Abierta" %}</span></div>
+        <dl class="card-body space-y-1 text-sm">
+          <div class="flex justify-between"><dt>{% trans "Caja" %}</dt><dd>{{ session.register }}</dd></div>
+          <div class="flex justify-between"><dt>{% trans "Apertura" %}</dt><dd>{{ session.opened_at|date:"d/m H:i" }}</dd></div>
+          <div class="flex justify-between"><dt>{% trans "Fondo" %}</dt><dd>S/ {{ session.opening_pen }} · US$ {{ session.opening_usd }}</dd></div>
+          <hr class="my-2 border-ink-100 dark:border-ink-800">
+          {% for m, label in methods %}{% with v=expected|dictget:m %}{% if v %}<div class="flex justify-between"><dt>{{ label }}</dt><dd class="tabular-nums">{{ v }}</dd></div>{% endif %}{% endwith %}{% endfor %}
+        </dl>
+        <div class="px-5 pb-5"><a href="{% url 'folio:cash_close' session.pk %}" class="btn-primary w-full">{% trans "Arqueo y cierre de turno" %}</a></div>
+      </section>
+      <form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="expense">
+        <div class="card-header"><h2 class="card-title">{% trans "Gasto de caja chica" %}</h2></div>
+        <div class="card-body space-y-3"><input name="description" placeholder="{% trans 'Descripción' %}" required>
+          <div class="grid grid-cols-2 gap-2"><input name="amount" placeholder="S/" required inputmode="decimal"><input name="receipt" placeholder="{% trans 'Comprobante' %}"></div>
+          <button class="btn-secondary w-full">{% trans "Registrar gasto" %}</button></div></form>
+    {% else %}
+      <form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="open">
+        <div class="card-header"><h2 class="card-title">{% trans "Abrir caja" %}</h2></div>
+        <div class="card-body space-y-3">
+          <label class="block"><span class="field-label">{% trans "Caja" %}</span><select name="register">{% for r in registers %}<option value="{{ r.pk }}">{{ r.name }}</option>{% endfor %}</select></label>
+          <div class="grid grid-cols-2 gap-2"><label><span class="field-label">{% trans "Fondo S/" %}</span><input name="opening_pen" value="0" inputmode="decimal"></label><label><span class="field-label">{% trans "Fondo US$" %}</span><input name="opening_usd" value="0" inputmode="decimal"></label></div>
+          <button class="btn-primary w-full">{% trans "Abrir caja" %}</button></div></form>
+    {% endif %}
+  </div>
+  <section class="card overflow-hidden lg:col-span-2">
+    <div class="card-header"><h2 class="card-title">{% trans "Turnos recientes" %}</h2></div>
+    <table class="table"><thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Caja" %}</th><th>{% trans "Cajero" %}</th><th>{% trans "Estado" %}</th><th class="!text-right">{% trans "Diferencia" %}</th></tr></thead>
+      <tbody>{% for s in sessions %}<tr class="cursor-pointer" onclick="location='{% url 'folio:cash_session' s.pk %}'"><td>{{ s.business_date|date:"d/m/Y" }}</td><td>{{ s.register }}</td><td>{{ s.user }}</td><td>{{ s.get_status_display }}</td>
+        <td class="text-right tabular-nums {% if s.difference < 0 %}text-state-danger{% elif s.difference > 0 %}text-state-dirty{% endif %}">{% if s.status == "closed" %}{{ s.difference|money }}{% else %}—{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="5" class="text-ink-500">{% trans "Sin turnos." %}</td></tr>{% endfor %}</tbody></table>
+  </section>
+</div>
+{% endblock %}

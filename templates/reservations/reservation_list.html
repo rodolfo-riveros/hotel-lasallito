@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Reservas" %}{% endblock %}
+{% block content %}
+{% can "reservations.create" as can_create %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Operación" %}</p>
+    <h1 class="page-title">{% trans "Reservas" %}</h1>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'reservations:tape_chart' %}" class="btn-secondary">{% icon "calendar" "w-4 h-4" %}{% trans "Calendario" %}</a>
+    <a href="{% url 'reservations:group_list' %}" class="btn-secondary">{% icon "users" "w-4 h-4" %}{% trans "Grupos" %}</a>
+    <a href="{% url 'reservations:waitlist_list' %}" class="btn-secondary">{% icon "clock" "w-4 h-4" %}{% trans "Lista de espera" %}</a>
+    {% if can_create %}<a href="{% url 'reservations:reservation_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nueva reserva" %} <span class="kbd !border-white/30 !bg-white/10 !text-white">n</span></a>{% endif %}
+  </div>
+</div>
+<div class="card overflow-hidden">
+  <form method="get" class="flex flex-wrap items-end gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    <label class="relative block w-full max-w-xs">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-400">{% icon "search" "w-4 h-4" %}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Código, huésped o referencia' %}" class="!pl-9" data-search>
+    </label>
+    <label><span class="field-label !mb-1 text-xs">{% trans "Estado" %}</span>
+      <select name="status" onchange="this.form.submit()" class="!py-1.5"><option value="">{% trans "Todos" %}</option>
+        {% for k, v in statuses %}<option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}
+      </select></label>
+    <label><span class="field-label !mb-1 text-xs">{% trans "Llegada" %}</span><input type="date" name="arrival" value="{{ request.GET.arrival }}" class="!py-1.5" onchange="this.form.submit()"></label>
+    <button class="btn-secondary">{% trans "Buscar" %}</button>
+  </form>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead><tr><th>{% trans "Código" %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Llegada" %}</th><th>{% trans "Salida" %}</th><th>{% trans "Hab." %}</th><th>{% trans "Canal" %}</th><th class="!text-right">{% trans "Total" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+      <tbody>
+        {% for r in page %}
+          <tr class="cursor-pointer" onclick="location='{% url 'reservations:reservation_detail' r.pk %}'">
+            <td class="font-mono text-xs"><a href="{% url 'reservations:reservation_detail' r.pk %}" class="hover:underline">{{ r.code }}</a></td>
+            <td><span class="font-medium text-ink-900 dark:text-ink-100">{{ r.guest.full_name }}</span>{% if r.guest.is_vip %} <span class="badge bg-gold-100 text-gold-800">VIP</span>{% endif %}</td>
+            <td>{{ r.arrival|date:"d/m/Y" }}</td><td>{{ r.departure|date:"d/m/Y" }}</td>
+            <td>{{ r.room.number|default:r.room_type.code|upper }}</td>
+            <td class="text-xs">{{ r.get_channel_display }}</td>
+            <td class="text-right tabular-nums">{{ r.total_amount|money:r.currency }}</td>
+            <td>{% status_badge "reservation" r.status %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8">{% trans "No hay reservas con esos filtros." as msg %}{% include "components/empty.html" with icon_name="calendar" message=msg %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" %}
+</div>
+{% endblock %}

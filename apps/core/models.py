@@ -165,6 +165,37 @@ class Property(TimeStampedModel, SoftDeleteModel):
     )
     is_active = models.BooleanField(_("activa"), default=True)
 
+    # Operación (fase 1)
+    business_date = models.DateField(
+        _("fecha hotelera"),
+        null=True,
+        blank=True,
+        help_text=_("Día contable vigente. Avanza con el cierre de día (night audit)."),
+    )
+
+    class Rounding(models.TextChoices):
+        CENT = "0.01", _("Al céntimo")
+        TEN_CENTS = "0.10", _("A 10 céntimos")
+        UNIT = "1", _("A la unidad")
+
+    price_rounding = models.CharField(
+        _("redondeo de tarifas"), max_length=5, choices=Rounding.choices, default=Rounding.CENT
+    )
+    early_checkin_fee_percent = models.DecimalField(
+        _("cargo early check-in (% de la noche)"), max_digits=5, decimal_places=2, default=Decimal("50")
+    )
+    late_checkout_fee_percent = models.DecimalField(
+        _("cargo late check-out (% de la noche)"), max_digits=5, decimal_places=2, default=Decimal("50")
+    )
+    overbooking_limit = models.PositiveSmallIntegerField(
+        _("sobreventa permitida (habitaciones)"),
+        default=0,
+        help_text=_("Habitaciones que se pueden sobrevender por noche con aprobación del gerente."),
+    )
+    boleta_dni_threshold = models.DecimalField(
+        _("monto que exige DNI en boleta (S/)"), max_digits=10, decimal_places=2, default=Decimal("700")
+    )
+
     class Meta:
         verbose_name = _("propiedad")
         verbose_name_plural = _("propiedades")
@@ -172,6 +203,43 @@ class Property(TimeStampedModel, SoftDeleteModel):
 
     def __str__(self):
         return self.name
+
+    def current_business_date(self):
+        return self.business_date or timezone.localdate()
+
+    def round_price(self, amount):
+        from decimal import ROUND_HALF_UP
+
+        step = Decimal(self.price_rounding)
+        return (Decimal(amount) / step).quantize(Decimal("1"), rounding=ROUND_HALF_UP) * step
+
+
+class Sequence(models.Model):
+    """Correlativos por propiedad (códigos de reserva, folios, tickets...).
+
+    Se incrementa con `next_value()` dentro de una transacción y con bloqueo de
+    fila, para que dos usuarios nunca obtengan el mismo número (RNF-INT-01).
+    """
+
+    property = models.ForeignKey("core.Property", on_delete=models.CASCADE, related_name="+")
+    key = models.CharField(max_length=40)
+    value = models.PositiveBigIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["property", "key"], name="uniq_sequence_key")]
+
+    def __str__(self):
+        return f"{self.key}={self.value}"
+
+    @classmethod
+    def next_value(cls, property_obj, key: str) -> int:
+        from django.db import transaction
+
+        with transaction.atomic():
+            seq, _created = cls.objects.select_for_update().get_or_create(property=property_obj, key=key)
+            seq.value += 1
+            seq.save(update_fields=["value"])
+            return seq.value
 
 
 # --------------------------------------------------------------------------

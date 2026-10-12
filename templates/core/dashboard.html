@@ -37,28 +37,20 @@
 <div class="mt-6 grid gap-6 lg:grid-cols-3">
   <section class="card lg:col-span-2">
     <div class="card-header">
-      <h2 class="card-title">{% trans "Estado del proyecto" %}</h2>
-      <span class="badge bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200">{% trans "Fase 0 · Base" %}</span>
+      <h2 class="card-title">{% trans "Ocupación del mes" %}</h2>
+      <a href="{% url 'reports:report' 'kpis' %}" class="text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">{% trans "Ver reporte" %}</a>
     </div>
     <div class="card-body">
-      <p class="text-sm text-ink-600 dark:text-ink-400">
-        {% trans "La base del sistema está lista: usuarios, roles por propiedad, auditoría, monedas, impuestos y diseño. Los módulos marcados con F1 en el menú se construyen en la fase 1." %}
-      </p>
-      <ol class="mt-5 grid gap-3 sm:grid-cols-2">
-        <li class="flex items-center gap-3 rounded-lg border border-state-available/30 bg-state-available/5 p-3 text-sm">
-          <span class="text-state-available">{% icon "check-circle" %}</span>{% trans "Fase 0 · Base del sistema" %}
-        </li>
-        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
-          {% icon "clock" %}{% trans "Fase 1 · MVP operativo + restaurante" %}
-        </li>
-        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
-          {% icon "clock" %}{% trans "Fase 2 · Almacén, compras, portal" %}
-        </li>
-        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
-          {% icon "clock" %}{% trans "Fase 3 · Canales y motor web" %}
-        </li>
-      </ol>
-      <a href="{% url 'core:design_system' %}" class="btn-secondary mt-5">{% icon "eye" "w-4 h-4" %}{% trans "Ver guía visual" %}</a>
+      {% if month %}
+        <div class="flex h-40 items-end gap-1">{% for d in month.days %}<div class="group relative flex-1 rounded-t bg-brand-600/80 transition hover:bg-brand-700" style="height: {{ d.occupancy }}%;" title="{{ d.date|date:'d/m' }} · {{ d.occupancy }}% · ADR {{ d.adr }}"></div>{% endfor %}</div>
+        <p class="mt-2 text-xs text-ink-500">{% trans "Ingreso de alojamiento del mes" %}: <b>S/ {{ month.revenue|floatformat:2 }}</b> · {{ month.sold }} {% trans "noches vendidas" %}</p>
+      {% endif %}
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a href="{% url 'frontdesk:panel' %}" class="btn-secondary btn-sm">{% icon "key" "w-4 h-4" %}{% trans "Recepción" %}</a>
+        <a href="{% url 'reservations:tape_chart' %}" class="btn-secondary btn-sm">{% icon "calendar" "w-4 h-4" %}{% trans "Calendario" %}</a>
+        <a href="{% url 'rooms:rack' %}" class="btn-secondary btn-sm">{% icon "bed" "w-4 h-4" %}{% trans "Rack" %}</a>
+        <a href="{% url 'core:design_system' %}" class="btn-ghost btn-sm">{% icon "eye" "w-4 h-4" %}{% trans "Guía visual" %}</a>
+      </div>
     </div>
   </section>
 

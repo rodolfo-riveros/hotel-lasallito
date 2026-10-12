@@ -1,0 +1,13 @@
+{% load i18n pms %}
+<ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
+  {% for i in items %}
+    <li class="flex items-center gap-3 px-5 py-2 {% if i.status == 'void' %}line-through opacity-50{% endif %}">
+      {% if i.status != "void" %}<input type="checkbox" name="items" value="{{ i.pk }}" form="items-form">{% endif %}
+      <span class="flex-1">{{ i.quantity }} × {{ i.menu_item.name }}{% if i.notes %}<span class="block text-xs text-ink-500">{{ i.notes }}</span>{% endif %}</span>
+      <span class="text-[11px] text-ink-500">{{ i.get_status_display }}</span>
+      <span class="w-20 text-right tabular-nums">{{ i.total|money }}</span>
+      {% if i.status == "pending" %}<button formaction="{% url 'pos:order_action' o.pk 'void_item' %}" name="item" value="{{ i.pk }}" form="items-form" class="text-ink-400 hover:text-state-danger" title="{% trans 'Quitar' %}">{% icon "x" "w-4 h-4" %}</button>{% endif %}
+    </li>
+  {% empty %}<li class="px-5 py-6 text-center text-ink-500">{% trans "Agregue platos desde la carta." %}</li>{% endfor %}
+</ul>
+<div class="flex justify-between px-5 py-3 font-semibold"><span>{% trans "Total" %}</span><span class="font-display text-2xl tabular-nums">{{ o.total|money }}</span></div>

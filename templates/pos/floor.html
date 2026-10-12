@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ outlet }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><h1 class="page-title">{{ outlet.name }}</h1><p class="page-subtitle">{% trans "Toque una mesa para abrir o continuar la cuenta." %}</p></div>
+  <div class="flex flex-wrap gap-2">
+    {% for o in outlets %}{% if o != outlet %}<a href="{% url 'pos:floor' o.pk %}" class="btn-ghost btn-sm">{{ o.name }}</a>{% endif %}{% endfor %}
+    <a href="{% url 'pos:kds' %}" class="btn-secondary">{% trans "Cocina" %}</a>
+    <a href="{% url 'pos:public_menu' outlet.pk %}" target="_blank" class="btn-secondary">{% trans "Carta digital" %}</a>
+  </div>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card relative min-h-[26rem] overflow-hidden bg-[radial-gradient(circle_at_1px_1px,rgba(120,113,108,0.18)_1px,transparent_0)] [background-size:20px_20px] lg:col-span-2">
+    {% for row in tables %}
+      {% if row.order %}
+        <a href="{% url 'pos:order' row.order.pk %}" class="absolute flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-2xl border-2 border-state-occupied bg-state-occupied/10 text-state-occupied shadow-soft"
+           style="left: {{ row.t.pos_x }}%; top: {{ row.t.pos_y }}%;"><span class="text-lg font-bold">{{ row.t.number }}</span><span class="text-[11px]">{{ row.order.total|money }}</span></a>
+      {% else %}
+        <form method="post" action="{% url 'pos:order_open' outlet.pk %}" class="absolute -translate-x-1/2 -translate-y-1/2" style="left: {{ row.t.pos_x }}%; top: {{ row.t.pos_y }}%;">{% csrf_token %}
+          <input type="hidden" name="table" value="{{ row.t.pk }}"><input type="hidden" name="covers" value="{{ row.t.seats }}">
+          <button class="flex h-20 w-20 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-state-available/60 bg-white text-state-available shadow-soft hover:bg-state-available/10 dark:bg-ink-900"><span class="text-lg font-bold">{{ row.t.number }}</span><span class="text-[11px]">{{ row.t.seats }} {% trans "pax" %}</span></button></form>
+      {% endif %}
+    {% empty %}<p class="p-8 text-ink-500">{% trans "Configure las mesas en Restaurante → Mesas." %}</p>{% endfor %}
+  </section>
+  <aside class="space-y-6">
+    <form method="post" action="{% url 'pos:order_open' outlet.pk %}" class="card">{% csrf_token %}
+      <div class="card-header"><h2 class="card-title">{% trans "Room service / sin mesa" %}</h2></div>
+      <div class="card-body space-y-3"><select name="reservation"><option value="">{% trans "Cliente externo" %}</option>{% for r in in_house %}<option value="{{ r.pk }}">{{ r.room.number }} · {{ r.guest.full_name }}</option>{% endfor %}</select>
+        <button class="btn-primary w-full">{% trans "Abrir cuenta" %}</button></div></form>
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Cuentas abiertas sin mesa" %}</h2></div>
+      <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">{% for o in others %}<li><a href="{% url 'pos:order' o.pk %}" class="flex justify-between px-5 py-2 hover:bg-ink-50 dark:hover:bg-ink-800"><span>{{ o.number }}{% if o.reservation %} · {% trans "hab." %} {{ o.reservation.room.number }}{% endif %}</span><span class="tabular-nums">{{ o.total|money }}</span></a></li>{% empty %}<li class="px-5 py-3 text-ink-500">—</li>{% endfor %}</ul></section>
+  </aside>
+</div>
+{% endblock %}

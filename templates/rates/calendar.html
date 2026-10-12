@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Tarifas" %}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Ventas" %}</p><h1 class="page-title">{% trans "Tarifas" %}</h1></div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'rates:plan_list' %}" class="btn-secondary">{% trans "Planes" %}</a><a href="{% url 'rates:price_list' %}" class="btn-secondary">{% trans "Precios" %}</a>
+    <a href="{% url 'rates:season_list' %}" class="btn-secondary">{% trans "Temporadas" %}</a><a href="{% url 'rates:restriction_list' %}" class="btn-secondary">{% trans "Restricciones" %}</a>
+    <a href="{% url 'rates:policy_list' %}" class="btn-secondary">{% trans "Cancelación" %}</a><a href="{% url 'rates:promo_list' %}" class="btn-secondary">{% trans "Promociones" %}</a>
+  </div>
+</div>
+<form class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <label><span class="field-label">{% trans "Plan" %}</span><select name="plan" onchange="this.form.submit()" class="!w-56">{% for p in plans %}<option value="{{ p.pk }}" {% if p == plan %}selected{% endif %}>{{ p }}</option>{% endfor %}</select></label>
+  <label><span class="field-label">{% trans "Desde" %}</span><input type="date" name="start" value="{{ days.0|date:'Y-m-d' }}" onchange="this.form.submit()"></label>
+  <a href="?plan={{ plan.pk }}&start={{ prev|date:'Y-m-d' }}" class="btn-ghost btn-sm">←</a><a href="?plan={{ plan.pk }}&start={{ next|date:'Y-m-d' }}" class="btn-ghost btn-sm">→</a>
+  {% if plan %}<span class="ml-auto text-sm text-ink-500">{{ plan.get_meal_plan_display }} · {{ plan.currency_id }}{% if plan.base_plan %} · {{ plan.adjustment_percent|floatformat:"-2" }}% {% trans "sobre" %} {{ plan.base_plan }}{% endif %}</span>{% endif %}
+</form>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Tipo" %}</th>{% for d in days %}<th class="!text-center">{{ d|date:"D" }}<br>{{ d|date:"d/m" }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for row in rows %}<tr><td class="font-medium">{{ row.room_type }}</td>{% for v in row.cells %}<td class="text-center tabular-nums text-xs">{% if v %}{{ v|floatformat:0 }}{% else %}<span class="text-state-danger">—</span>{% endif %}</td>{% endfor %}</tr>
+  {% empty %}<tr><td class="text-ink-500">{% trans "Configure planes y precios." %}</td></tr>{% endfor %}</tbody>
+</table></div>
+<p class="mt-3 text-xs text-ink-500">{% trans "Precio por noche para la ocupación base, incluye IGV. RF-TAR-01/02/05." %}</p>
+{% endblock %}

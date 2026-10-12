@@ -31,7 +31,9 @@ class IdleTimeoutMiddleware:
                     response["HX-Redirect"] = resolve_url(settings.LOGIN_URL)
                     return response
                 return redirect(settings.LOGIN_URL)
-            request.session[SESSION_ACTIVITY_KEY] = now
+            if now - last >= 60 or SESSION_ACTIVITY_KEY not in request.session:
+                # Se actualiza como máximo una vez por minuto para no reescribir la sesión.
+                request.session[SESSION_ACTIVITY_KEY] = now
         return self.get_response(request)
 
 
@@ -46,7 +48,9 @@ class CurrentPropertyMiddleware:
         request.user_properties = []
         user = request.user
         if user.is_authenticated:
-            properties = list(user.accessible_properties())
+            from .cache import properties_for
+
+            properties = properties_for(user)
             request.user_properties = properties
             by_id = {p.pk: p for p in properties}
             chosen = by_id.get(request.session.get(SESSION_PROPERTY_KEY))
@@ -56,6 +60,7 @@ class CurrentPropertyMiddleware:
                 chosen = properties[0]
             request.property = chosen
             if chosen is not None:
-                request.session[SESSION_PROPERTY_KEY] = chosen.pk
+                if request.session.get(SESSION_PROPERTY_KEY) != chosen.pk:
+                    request.session[SESSION_PROPERTY_KEY] = chosen.pk
                 update_request_info(property_id=chosen.pk, user=user)
         return self.get_response(request)
