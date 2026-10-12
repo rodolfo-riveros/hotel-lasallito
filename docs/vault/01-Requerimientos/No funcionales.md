@@ -53,7 +53,7 @@ Fuente: [[Documento de requerimientos]] sección 7.
 - [x] **RNF-MAN-01** código organizado por apps de Django con responsabilidades claras, tipado y estándares (PEP 8, Black, Ruff). — apps por módulo, Ruff + Black ✅ fase 0
 - [ ] **RNF-MAN-02** cobertura de pruebas automáticas mínima de 80% en reglas de negocio (tarifas, disponibilidad, impuestos, folio, facturación).
 - [ ] **RNF-MAN-03** migraciones versionadas, datos de ejemplo (fixtures) y documentación técnica y de usuario. — 🟡 parcial: hecho: migraciones, seed_pms, README; falta manual de usuario
-- [ ] **RNF-MAN-04** despliegue reproducible con Docker, integración continua y entornos de desarrollo, pruebas y producción separados. — 🟡 parcial: hecho: Dockerfile, compose, GitHub Actions; faltan entornos separados
+- [ ] **RNF-MAN-04** despliegue reproducible con Docker, integración continua y entornos de desarrollo, pruebas y producción separados. — 🟡 parcial: hecho: GitHub Actions y entorno reproducible con .venv + requirements (sin Docker por decisión del usuario); faltan entornos separados
 - [ ] **RNF-MAN-05** registros (logs) estructurados y monitoreo de errores (por ejemplo Sentry). — 🟡 parcial: hecho: logging + Sentry opcional
 
 ## Integridad de datos

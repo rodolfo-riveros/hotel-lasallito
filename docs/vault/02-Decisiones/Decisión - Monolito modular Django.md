@@ -13,6 +13,8 @@ tags: [decision, arquitectura]
 - Configuración separada en `config/settings/{base,dev,test,prod}.py` y variables de entorno con
   django-environ.
 - En desarrollo local se usa Python 3.14 (el que tiene el usuario).
-- Docker y CI usan Python 3.12, como pide el documento. Celery y otras librerías tienen mejor soporte ahí.
+- La CI de GitHub usa Python 3.12.
+- **Sin Docker** (decisión del usuario, 2026-10-12): se ejecuta con un entorno virtual de Python
+  (`.venv`) directamente en Windows. RNF-MAN-04 queda cubierto por la CI de GitHub Actions.
 
 **Motivo.** Es más simple de mantener que microservicios y suficiente para el volumen (sección 8).

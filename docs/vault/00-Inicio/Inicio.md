@@ -12,7 +12,7 @@ facturación SUNAT se simula y todo lo demás funciona como un PMS real.
 
 | Fase | Alcance | Estado |
 | --- | --- | --- |
-| 0. Base | Django, Docker, Supabase, usuarios y roles, auditoría, diseño, idiomas | ✅ Terminada, falta aprobar el diseño |
+| 0. Base | Django, Supabase, usuarios y roles, auditoría, diseño, idiomas | ✅ Terminada, falta aprobar el diseño |
 | 1. MVP operativo | Habitaciones, tarifas, reservas, recepción, folio, caja, housekeeping, huéspedes, SUNAT simulado, reportes, **restaurante y bar** | ⏳ Siguiente |
 | 2. Operación completa | Almacén, compras, recetas, mantenimiento, portal, pre-check-in, comunicaciones, pagos en línea | Pendiente |
 | 3. Ventas y crecimiento | Channel manager, motor web, tours, multi-propiedad, fidelidad, pronóstico | Pendiente |

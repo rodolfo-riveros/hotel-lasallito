@@ -4,6 +4,8 @@ tags: [pendientes]
 # Pendientes
 
 ## Para cerrar la fase 0
+- [ ] Decidir qué hacer con las 23 tablas antiguas y vacías de Supabase (`hoteles`, `reservas`, ...). Tienen
+  RLS desactivado y están expuestas.
 - [ ] El usuario conecta Supabase (`DATABASE_URL`) y corre `migrate` y `seed_pms --demo`. Luego verificar
   que la prueba del trigger de auditoría pase en PostgreSQL.
 - [ ] El usuario conecta el repositorio de GitHub y confirma que la CI pasa.
@@ -12,7 +14,7 @@ tags: [pendientes]
 ## Conocidos o diferidos
 - [ ] RF-SEG-03: doble factor opcional para gerencia y finanzas (TOTP). Se puede hacer en la fase 1.
 - [ ] Traducciones en/pt-br (archivos `.po`). Se necesitan para el portal y los correos (fase 2). Requiere
-  instalar gettext en Windows o usar Docker.
+  instalar gettext para Windows.
 - [ ] Crear el bucket `pms-media` en Supabase Storage y las llaves S3 (RF-BD-06).
 - [ ] Proyecto Supabase separado para producción o aula (RF-BD-07).
 - [ ] Respaldos: en el plan gratuito de Supabase hay que revisar retención y pausa por inactividad (RNF-DIS-02).

@@ -8,7 +8,7 @@ La fuente de verdad es el documento de requerimientos (`docs/vault/01-Requerimie
 
 **Estado:** fase 0 (base) terminada. La siguiente es la fase 1 (MVP operativo + restaurante).
 
-## Puesta en marcha (Windows, sin Docker)
+## Puesta en marcha (Windows)
 
 Requisitos: Python 3.12 o superior y Node 20 o superior.
 
@@ -56,21 +56,6 @@ Abra http://127.0.0.1:8000. `seed_pms --demo` crea un usuario de práctica por r
 
 Si en algún momento usa el pooler en modo transacción (puerto 6543), ponga
 `DB_DISABLE_SERVER_SIDE_CURSORS=True`.
-
-## Con Docker
-
-```bash
-docker compose up --build
-```
-
-Levanta la aplicación web, Celery y Redis. La base de datos sigue siendo Supabase (`DATABASE_URL`).
-Para correr las pruebas contra PostgreSQL local:
-
-```bash
-docker compose --profile test up -d db
-```
-
-Luego ejecute las pruebas con `TEST_DATABASE_URL=postgres://pms:pms@localhost:5433/pms_test`.
 
 ## Pruebas y calidad
 
