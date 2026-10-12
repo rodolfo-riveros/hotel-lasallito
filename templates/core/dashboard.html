@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Tablero" %}{% endblock %}
+{% block content %}
+<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{{ today|date:"l j \d\e F \d\e Y" }}</p>
+    <h1 class="page-title">{% blocktrans with name=request.user.first_name|default:request.user.username %}Hola, {{ name }}{% endblocktrans %}</h1>
+    <p class="page-subtitle">{% trans "Resumen de la operación del hotel." %}</p>
+  </div>
+  <div class="card flex items-center gap-4 px-4 py-3">
+    <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-100 text-gold-700 dark:bg-gold-900/30 dark:text-gold-300">{% icon "currency" "w-5 h-5" %}</span>
+    <div>
+      <p class="text-xs text-ink-500">{% trans "Tipo de cambio USD" %}</p>
+      {% if usd_rate %}
+        <p class="text-sm font-semibold tabular-nums text-ink-900 dark:text-ink-100">{% trans "C" %} {{ usd_rate.buy|floatformat:3 }} · {% trans "V" %} {{ usd_rate.sell|floatformat:3 }}</p>
+      {% else %}
+        <p class="text-sm font-semibold text-state-danger">{% trans "Sin registrar hoy" %}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<section aria-label="{% trans 'Indicadores' %}" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% for kpi in kpis %}
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-ink-500">{{ kpi.label }}</p>
+        <span class="text-ink-300 dark:text-ink-600">{% icon kpi.icon "w-5 h-5" %}</span>
+      </div>
+      <p class="mt-3 font-display text-4xl font-semibold tabular-nums text-ink-900 dark:text-ink-50">{{ kpi.value }}</p>
+      <p class="mt-1 text-xs text-ink-400">{{ kpi.hint }}</p>
+    </div>
+  {% endfor %}
+</section>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <section class="card lg:col-span-2">
+    <div class="card-header">
+      <h2 class="card-title">{% trans "Estado del proyecto" %}</h2>
+      <span class="badge bg-brand-50 text-brand-700 dark:bg-brand-900/30 dark:text-brand-200">{% trans "Fase 0 · Base" %}</span>
+    </div>
+    <div class="card-body">
+      <p class="text-sm text-ink-600 dark:text-ink-400">
+        {% trans "La base del sistema está lista: usuarios, roles por propiedad, auditoría, monedas, impuestos y diseño. Los módulos marcados con F1 en el menú se construyen en la fase 1." %}
+      </p>
+      <ol class="mt-5 grid gap-3 sm:grid-cols-2">
+        <li class="flex items-center gap-3 rounded-lg border border-state-available/30 bg-state-available/5 p-3 text-sm">
+          <span class="text-state-available">{% icon "check-circle" %}</span>{% trans "Fase 0 · Base del sistema" %}
+        </li>
+        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
+          {% icon "clock" %}{% trans "Fase 1 · MVP operativo + restaurante" %}
+        </li>
+        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
+          {% icon "clock" %}{% trans "Fase 2 · Almacén, compras, portal" %}
+        </li>
+        <li class="flex items-center gap-3 rounded-lg border border-dashed border-ink-300 p-3 text-sm text-ink-500 dark:border-ink-700">
+          {% icon "clock" %}{% trans "Fase 3 · Canales y motor web" %}
+        </li>
+      </ol>
+      <a href="{% url 'core:design_system' %}" class="btn-secondary mt-5">{% icon "eye" "w-4 h-4" %}{% trans "Ver guía visual" %}</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">{% trans "Actividad reciente" %}</h2>
+      {% can "audit.view" as can_audit %}
+      {% if can_audit %}<a href="{% url 'core:audit_list' %}" class="text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">{% trans "Ver todo" %}</a>{% endif %}
+    </div>
+    <ul class="divide-y divide-ink-100 dark:divide-ink-800">
+      {% for log in recent_activity %}
+        <li class="px-5 py-3">
+          <p class="text-sm text-ink-800 dark:text-ink-200"><span class="font-medium">{{ log.username|default:"—" }}</span> · {{ log.get_action_display }}</p>
+          <p class="truncate text-xs text-ink-500">{{ log.object_repr }} · {{ log.timestamp|timesince }}</p>
+        </li>
+      {% empty %}
+        <li>{% trans "Sin actividad para mostrar." as msg %}{% include "components/empty.html" with icon_name="eye" message=msg %}</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

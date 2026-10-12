@@ -1,0 +1,33 @@
+[project]
+name = "pms-la-sallito"
+version = "0.1.0"
+description = "PMS hotelero para hoteles de Cusco (Django)"
+requires-python = ">=3.12"
+
+[tool.black]
+line-length = 110
+target-version = ["py312"]
+extend-exclude = "migrations"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+extend-exclude = ["migrations", "node_modules", "static"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S"]
+ignore = ["S101", "E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S105", "S106"]
+"conftest.py" = ["S105", "S106"]
+"config/settings/*" = ["F405"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["apps"]
+omit = ["*/migrations/*", "*/tests/*"]

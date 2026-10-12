@@ -1,0 +1,15 @@
+{% load pms %}
+<div class="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-2 p-4 sm:items-end" aria-live="polite">
+  {% for message in messages %}
+    <div x-data="toast({% if message.level >= 40 %}0{% else %}5000{% endif %})" x-show="show" x-transition.opacity.duration.300ms
+         class="pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border bg-white p-4 shadow-soft dark:bg-ink-900
+                {% if message.level >= 40 %}border-state-danger/40{% elif message.level == 25 %}border-state-available/40{% else %}border-ink-200 dark:border-ink-700{% endif %}"
+         role="{% if message.level >= 40 %}alert{% else %}status{% endif %}">
+      <span class="{% if message.level >= 40 %}text-state-danger{% elif message.level == 25 %}text-state-available{% else %}text-state-occupied{% endif %}">
+        {% if message.level >= 40 %}{% icon "x-circle" %}{% elif message.level == 25 %}{% icon "check-circle" %}{% else %}{% icon "info" %}{% endif %}
+      </span>
+      <p class="flex-1 text-sm text-ink-700 dark:text-ink-200">{{ message }}</p>
+      <button type="button" @click="show = false" class="text-ink-400 hover:text-ink-600" aria-label="Cerrar">{% icon "x" "w-4 h-4" %}</button>
+    </div>
+  {% endfor %}
+</div>

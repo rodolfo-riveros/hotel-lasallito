@@ -1,0 +1,6 @@
+{% load pms %}
+<div class="flex flex-col items-center justify-center px-6 py-14 text-center">
+  <span class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-ink-100 text-ink-400 dark:bg-ink-800">{% icon icon_name|default:"info" "w-6 h-6" %}</span>
+  <p class="text-sm font-medium text-ink-700 dark:text-ink-300">{{ message }}</p>
+  {% if hint %}<p class="mt-1 text-sm text-ink-500">{{ hint }}</p>{% endif %}
+</div>

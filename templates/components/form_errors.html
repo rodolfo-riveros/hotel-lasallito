@@ -1,0 +1,7 @@
+{% load pms i18n %}
+{% if form.non_field_errors %}
+  <div class="mb-5 flex items-start gap-3 rounded-lg border border-state-danger/30 bg-state-danger/10 p-4 text-sm text-state-danger" role="alert">
+    {% icon "x-circle" %}
+    <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+  </div>
+{% endif %}

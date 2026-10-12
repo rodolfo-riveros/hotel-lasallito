@@ -1,0 +1,21 @@
+{% load i18n %}
+<div x-show="helpOpen" x-cloak class="fixed inset-0 z-[70] flex items-center justify-center bg-ink-950/50 p-4 backdrop-blur-sm"
+     @click.self="helpOpen = false" x-transition.opacity role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+  <div class="card w-full max-w-md">
+    <div class="card-header">
+      <h2 id="shortcuts-title" class="card-title">{% trans "Atajos de teclado" %}</h2>
+      <button type="button" class="btn-ghost p-1" @click="helpOpen = false" aria-label="{% trans 'Cerrar' %}"><span class="kbd">Esc</span></button>
+    </div>
+    <dl class="card-body grid grid-cols-[auto,1fr] gap-x-6 gap-y-3 text-sm">
+      <dt><span class="kbd">/</span></dt><dd>{% trans "Ir al buscador de la página" %}</dd>
+      <dt><span class="kbd">n</span></dt><dd>{% trans "Crear nuevo registro" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">d</span></dt><dd>{% trans "Tablero" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">f</span></dt><dd>{% trans "Recepción" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">r</span></dt><dd>{% trans "Reservas" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">u</span></dt><dd>{% trans "Usuarios" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">s</span></dt><dd>{% trans "Configuración" %}</dd>
+      <dt><span class="kbd">g</span> <span class="kbd">a</span></dt><dd>{% trans "Auditoría" %}</dd>
+      <dt><span class="kbd">?</span></dt><dd>{% trans "Mostrar u ocultar esta ayuda" %}</dd>
+    </dl>
+  </div>
+</div>

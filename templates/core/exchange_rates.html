@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Tipo de cambio" %}{% endblock %}
+{% block content %}
+{% trans "Tipo de cambio" as title %}
+{% include "core/_settings_tabs.html" %}
+
+<div class="grid gap-6 lg:grid-cols-3">
+  {% if can_edit %}
+  <form method="post" class="card h-fit">
+    {% csrf_token %}
+    <div class="card-header"><h2 class="card-title">{% trans "Registrar tipo de cambio" %}</h2></div>
+    <div class="card-body space-y-4">
+      <p class="text-xs text-ink-500">{% trans "En esta versión el tipo de cambio se ingresa a mano. Si ya existe el del día, se corrige y queda en auditoría." %}</p>
+      {% include "components/form_errors.html" %}
+      {% include "components/field.html" with field=form.date %}
+      {% include "components/field.html" with field=form.currency %}
+      <div class="grid grid-cols-2 gap-4">
+        {% include "components/field.html" with field=form.buy %}
+        {% include "components/field.html" with field=form.sell %}
+      </div>
+      <button type="submit" class="btn-primary w-full">{% trans "Guardar" %}</button>
+    </div>
+  </form>
+  {% endif %}
+
+  <section class="card overflow-hidden {% if can_edit %}lg:col-span-2{% else %}lg:col-span-3{% endif %}">
+    <div class="card-header"><h2 class="card-title">{% trans "Últimos 60 días" %}</h2></div>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead><tr>
+          <th>{% trans "Fecha" %}</th><th>{% trans "Moneda" %}</th>
+          <th class="!text-right">{% trans "Compra" %}</th><th class="!text-right">{% trans "Venta" %}</th>
+          <th>{% trans "Fuente" %}</th><th>{% trans "Registrado por" %}</th>
+        </tr></thead>
+        <tbody>
+          {% for r in rates %}
+            <tr>
+              <td>{{ r.date|date:"d/m/Y" }}</td>
+              <td>{{ r.currency_id }}</td>
+              <td class="text-right font-mono tabular-nums">{{ r.buy|floatformat:4 }}</td>
+              <td class="text-right font-mono tabular-nums">{{ r.sell|floatformat:4 }}</td>
+              <td>{{ r.get_source_display }}</td>
+              <td class="text-xs text-ink-500">{{ r.updated_by|default:"—" }}</td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6">{% trans "Aún no hay tipos de cambio registrados." as msg %}{% include "components/empty.html" with icon_name="currency" message=msg %}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

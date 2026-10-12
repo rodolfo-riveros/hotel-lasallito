@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Auditoría" %}{% endblock %}
+{% block content %}
+{% can "audit.export" as can_export %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Sistema" %}</p>
+    <h1 class="page-title">{% trans "Auditoría" %}</h1>
+    <p class="page-subtitle">{% trans "Registro que no se puede modificar: quién hizo qué, cuándo, desde qué IP y con qué valor anterior." %}</p>
+  </div>
+  {% if can_export %}
+    <a href="?{{ request.GET.urlencode }}{% if request.GET %}&{% endif %}export=csv" class="btn-secondary">{% icon "download" "w-4 h-4" %}{% trans "Exportar CSV" %}</a>
+  {% endif %}
+</div>
+
+<form method="get" class="card mb-6 grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-6">
+  {% include "components/field.html" with field=form.q wrapper_class="lg:col-span-2" %}
+  {% include "components/field.html" with field=form.user %}
+  {% include "components/field.html" with field=form.action %}
+  {% include "components/field.html" with field=form.date_from %}
+  {% include "components/field.html" with field=form.date_to %}
+  <div class="flex gap-2 lg:col-span-6">
+    <button type="submit" class="btn-primary">{% icon "search" "w-4 h-4" %}{% trans "Filtrar" %}</button>
+    <a href="{% url 'core:audit_list' %}" class="btn-ghost">{% trans "Limpiar" %}</a>
+  </div>
+</form>
+
+<section class="card overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead><tr>
+        <th>{% trans "Fecha y hora" %}</th><th>{% trans "Usuario" %}</th><th>{% trans "Acción" %}</th>
+        <th>{% trans "Objeto" %}</th><th>{% trans "Cambios" %}</th><th>{% trans "IP" %}</th>
+      </tr></thead>
+      <tbody>
+        {% for log in page %}
+          <tr class="align-top">
+            <td class="font-mono text-xs tabular-nums">{{ log.timestamp|date:"d/m/Y H:i:s" }}</td>
+            <td>{{ log.username|default:"—" }}</td>
+            <td><span class="badge {% if log.action == 'login_failed' or log.action == 'void' or log.action == 'delete' %}bg-state-danger/10 text-state-danger{% else %}bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300{% endif %}">{{ log.get_action_display }}</span></td>
+            <td class="max-w-[16rem] whitespace-normal">
+              <p class="text-ink-900 dark:text-ink-100">{{ log.object_repr|default:"—" }}</p>
+              <p class="font-mono text-[11px] text-ink-400">{{ log.object_type }}{% if log.object_id %} #{{ log.object_id }}{% endif %}</p>
+            </td>
+            <td class="max-w-md whitespace-normal">
+              {% if log.changes %}
+                <dl class="space-y-0.5 text-xs">
+                  {% for key, value in log.changes.items %}
+                    <div><dt class="inline font-semibold text-ink-600 dark:text-ink-400">{{ key }}:</dt> <dd class="inline break-words font-mono text-ink-500">{{ value }}</dd></div>
+                  {% endfor %}
+                </dl>
+              {% endif %}
+              {% if log.reason %}<p class="mt-1 text-xs italic text-ink-500">{{ log.reason }}</p>{% endif %}
+            </td>
+            <td class="font-mono text-xs text-ink-500">{{ log.ip_address|default:"" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">{% trans "No hay registros con esos filtros." as msg %}{% include "components/empty.html" with icon_name="eye" message=msg %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="flex items-center justify-between border-t border-ink-100 px-5 py-3 text-sm dark:border-ink-800" aria-label="{% trans 'Paginación' %}">
+      <span class="text-ink-500">{% blocktrans with n=page.number total=page.paginator.num_pages %}Página {{ n }} de {{ total }}{% endblocktrans %}</span>
+      <div class="flex gap-2">
+        {% if page.has_previous %}<a class="btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.previous_page_number }}">← {% trans "Anterior" %}</a>{% endif %}
+        {% if page.has_next %}<a class="btn-secondary btn-sm" href="?{% for k, v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page.next_page_number }}">{% trans "Siguiente" %} →</a>{% endif %}
+      </div>
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

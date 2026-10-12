@@ -1,0 +1,11 @@
+{% load i18n %}
+<div class="mb-6">
+  <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Configuración" %}</p>
+  <h1 class="page-title">{{ title }}</h1>
+  <nav class="mt-5 flex gap-1 overflow-x-auto border-b border-ink-200 dark:border-ink-800" aria-label="{% trans 'Secciones de configuración' %}">
+    {% url 'core:property_settings' as u1 %}{% url 'core:exchange_rates' as u2 %}{% url 'core:tax_list' as u3 %}
+    <a href="{{ u1 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium {% if request.path == u1 %}border-brand-700 text-brand-700 dark:border-brand-300 dark:text-brand-200{% else %}border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200{% endif %}">{% trans "Hotel" %}</a>
+    <a href="{{ u2 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium {% if request.path == u2 %}border-brand-700 text-brand-700 dark:border-brand-300 dark:text-brand-200{% else %}border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200{% endif %}">{% trans "Tipo de cambio" %}</a>
+    <a href="{{ u3 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium {% if u3 in request.path %}border-brand-700 text-brand-700 dark:border-brand-300 dark:text-brand-200{% else %}border-transparent text-ink-500 hover:text-ink-800 dark:hover:text-ink-200{% endif %}">{% trans "Impuestos" %}</a>
+  </nav>
+</div>

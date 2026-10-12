@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Impuestos" %}{% endblock %}
+{% block content %}
+{% trans "Impuestos" as title %}
+{% include "core/_settings_tabs.html" %}
+
+<section class="card overflow-hidden">
+  <div class="card-header">
+    <div>
+      <h2 class="card-title">{% trans "Reglas de impuestos" %}</h2>
+      <p class="text-xs text-ink-500">{% trans "El IGV se exonera automáticamente por alojamiento a huéspedes no domiciliados con pasaporte registrado." %}</p>
+    </div>
+    {% if can_edit %}<a href="{% url 'core:tax_create' %}" class="btn-primary btn-sm" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo" %}</a>{% endif %}
+  </div>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead><tr>
+        <th>{% trans "Impuesto" %}</th><th class="!text-right">{% trans "Tasa" %}</th><th>{% trans "Aplica a" %}</th>
+        <th>{% trans "Incluido en precio" %}</th><th>{% trans "Exonerado no domiciliado" %}</th><th>{% trans "Estado" %}</th><th></th>
+      </tr></thead>
+      <tbody>
+        {% for t in taxes %}
+          <tr>
+            <td><span class="font-medium text-ink-900 dark:text-ink-100">{{ t.name }}</span> <span class="font-mono text-xs text-ink-400">{{ t.code }}</span></td>
+            <td class="text-right font-mono tabular-nums">{{ t.rate|floatformat:2 }}%</td>
+            <td>{{ t.get_applies_to_display }}</td>
+            <td>{% if t.is_included_in_price %}{% trans "Sí" %}{% else %}{% trans "No" %}{% endif %}</td>
+            <td>{% if t.exempt_for_non_domiciled %}{% trans "Sí" %}{% else %}{% trans "No" %}{% endif %}</td>
+            <td>{% if t.is_active %}{% status_badge "generic" "active" %}{% else %}{% status_badge "generic" "inactive" %}{% endif %}</td>
+            <td class="text-right">{% if can_edit %}<a href="{% url 'core:tax_edit' t.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a>{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7">{% trans "No hay impuestos configurados." as msg %}{% include "components/empty.html" with icon_name="percent" message=msg %}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% if object %}{{ object }}{% else %}{% trans "Nuevo rol" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a href="{% url 'accounts:role_list' %}" class="text-sm text-ink-500 hover:text-ink-800 dark:hover:text-ink-200">← {% trans "Roles" %}</a>
+  <h1 class="page-title mt-2">{% if object %}{{ object }}{% else %}{% trans "Nuevo rol" %}{% endif %}</h1>
+</div>
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+  <fieldset class="card" {% if not can_edit %}disabled{% endif %}>
+    <div class="card-body">
+      {% include "components/form_errors.html" %}
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {% include "components/field.html" with field=form.name wrapper_class="lg:col-span-2" %}
+        {% include "components/field.html" with field=form.code %}
+        <div class="hidden lg:block"></div>
+        {% include "components/field.html" with field=form.description wrapper_class="sm:col-span-2" %}
+        {% include "components/field.html" with field=form.max_discount_percent %}
+        {% include "components/field.html" with field=form.approval_limit %}
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset class="card overflow-hidden" {% if not can_edit %}disabled{% endif %}>
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">{% trans "Matriz de permisos" %}</h2>
+        <p class="text-xs text-ink-500">{% trans "Marque qué puede hacer este rol en cada módulo." %}</p>
+      </div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{% trans "Módulo" %}</th>
+            {% for code, label in actions %}<th class="!text-center">{{ label }}</th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in matrix %}
+            <tr>
+              <td>
+                <span class="flex items-center gap-2 font-medium text-ink-800 dark:text-ink-200">
+                  {% icon row.module.icon "w-4 h-4 text-ink-400" %}{{ row.module.label }}
+                  {% if row.module.phase > 0 %}<span class="text-[10px] font-semibold text-ink-400">F{{ row.module.phase }}</span>{% endif %}
+                </span>
+              </td>
+              {% for cell in row.cells %}
+                <td class="text-center">
+                  {% if cell.available %}
+                    <input type="checkbox" name="perm" value="{{ cell.code }}" {% if cell.checked %}checked{% endif %} aria-label="{{ cell.code }}">
+                  {% else %}
+                    <span class="text-ink-300 dark:text-ink-700" aria-hidden="true">—</span>
+                  {% endif %}
+                </td>
+              {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+
+  {% if can_edit %}
+    <div class="flex justify-end gap-2">
+      <a href="{% url 'accounts:role_list' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+      <button type="submit" class="btn-primary">{% trans "Guardar rol" %}</button>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

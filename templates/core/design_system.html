@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Guía visual" %}{% endblock %}
+{% block content %}
+<div class="mb-8">
+  <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Fase 0 · Para aprobación" %}</p>
+  <h1 class="page-title">{% trans "Guía visual del sistema" %}</h1>
+  <p class="page-subtitle">{% trans "Componentes, tipografía y colores de estado. Todas las pantallas del PMS se construyen con estas piezas." %}</p>
+</div>
+
+<div class="space-y-8">
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Tipografía" %}</h2></div>
+    <div class="card-body space-y-3">
+      <p class="font-display text-5xl font-semibold text-ink-900 dark:text-white">Hotel La Sallito</p>
+      <p class="font-display text-3xl font-semibold text-ink-900 dark:text-white">{% trans "Títulos en Cormorant Garamond" %}</p>
+      <p class="text-base">{% trans "Texto de trabajo en Inter: legible en tablas, formularios y celulares." %} Ñuñoa · São Paulo · Müller · 山田</p>
+      <p class="font-mono text-sm tabular-nums">S/ 1,234.50 · US$ 329.20 · 12/10/2026 14:00</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Colores de marca" %}</h2></div>
+    <div class="card-body grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div><div class="h-16 rounded-lg bg-brand-900"></div><p class="mt-1 text-xs text-ink-500">brand-900</p></div>
+      <div><div class="h-16 rounded-lg bg-brand-700"></div><p class="mt-1 text-xs text-ink-500">brand-700 · {% trans "principal" %}</p></div>
+      <div><div class="h-16 rounded-lg bg-brand-500"></div><p class="mt-1 text-xs text-ink-500">brand-500</p></div>
+      <div><div class="h-16 rounded-lg bg-gold-500"></div><p class="mt-1 text-xs text-ink-500">gold-500 · {% trans "acento" %}</p></div>
+      <div><div class="h-16 rounded-lg bg-ink-900"></div><p class="mt-1 text-xs text-ink-500">ink-900 · {% trans "menú" %}</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2 class="card-title">{% trans "Colores de estado" %}</h2>
+        <p class="text-xs text-ink-500">{% trans "Siempre color + ícono + texto, para que se distingan también con daltonismo." %}</p>
+      </div>
+    </div>
+    <div class="card-body space-y-6">
+      {% for group, statuses in status_groups.items %}
+        <div>
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-500">
+            {% if group == "room" %}{% trans "Habitaciones" %}{% elif group == "reservation" %}{% trans "Reservas" %}{% else %}{% trans "Genéricos" %}{% endif %}
+          </p>
+          <div class="flex flex-wrap gap-2">
+            {% for key in statuses %}{% status_badge group key %}{% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Botones" %}</h2></div>
+    <div class="card-body flex flex-wrap items-center gap-3">
+      <button class="btn-primary">{% icon "plus" "w-4 h-4" %}{% trans "Principal" %}</button>
+      <button class="btn-secondary">{% trans "Secundario" %}</button>
+      <button class="btn-ghost">{% trans "Discreto" %}</button>
+      <button class="btn-danger">{% trans "Anular" %}</button>
+      <button class="btn-primary" disabled>{% trans "Deshabilitado" %}</button>
+      <button class="btn-secondary btn-sm">{% trans "Pequeño" %}</button>
+      <span class="text-sm text-ink-500">{% trans "Atajo" %} <span class="kbd">g</span> <span class="kbd">d</span></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Formulario" %}</h2></div>
+    <div class="card-body grid gap-5 sm:grid-cols-3">
+      <div><label class="field-label" for="ds-1">{% trans "Nombre del huésped" %} <span class="text-state-danger">*</span></label><input id="ds-1" type="text" placeholder="María Fernanda Quispe"></div>
+      <div><label class="field-label" for="ds-2">{% trans "Nacionalidad" %}</label><select id="ds-2"><option>Perú</option><option>Brasil</option><option>Estados Unidos</option></select></div>
+      <div><label class="field-label" for="ds-3">{% trans "Llegada" %}</label><input id="ds-3" type="date"></div>
+      <div>
+        <label class="field-label" for="ds-4">{% trans "Pasaporte" %}</label><input id="ds-4" type="text" value="AB12" aria-invalid="true" class="!border-state-danger">
+        <p class="field-error">{% icon "x-circle" "w-3.5 h-3.5" %}{% trans "El documento parece incompleto." %}</p>
+      </div>
+      <div><label class="field-label" for="ds-5">{% trans "Observaciones" %}</label><textarea id="ds-5" rows="1"></textarea><p class="field-help">{% trans "Alergias, aclimatación, solicitudes especiales." %}</p></div>
+      <label class="flex items-center gap-3 self-end text-sm"><input type="checkbox" checked>{% trans "Huésped no domiciliado" %}</label>
+    </div>
+  </section>
+
+  <section>
+    <div class="sim-banner">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+    <p class="mt-2 text-xs text-ink-500">{% trans "Esta leyenda aparece solo en comprobantes y pantallas de facturación (RF-SIM-06)." %}</p>
+  </section>
+</div>
+{% endblock %}

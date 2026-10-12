@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Roles" %}{% endblock %}
+{% block content %}
+{% can "accounts.create" as can_create %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <a href="{% url 'accounts:user_list' %}" class="text-sm text-ink-500 hover:text-ink-800 dark:hover:text-ink-200">← {% trans "Usuarios" %}</a>
+    <h1 class="page-title mt-2">{% trans "Roles y permisos" %}</h1>
+    <p class="page-subtitle">{% trans "Cada rol define qué puede ver, crear, editar, anular, aprobar y exportar en cada módulo." %}</p>
+  </div>
+  {% if can_create %}<a href="{% url 'accounts:role_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo rol" %}</a>{% endif %}
+</div>
+<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+  {% for role in roles %}
+    <a href="{% url 'accounts:role_edit' role.pk %}" class="card group block p-5 transition hover:-translate-y-0.5 hover:border-brand-300 dark:hover:border-brand-700">
+      <div class="flex items-start justify-between gap-3">
+        <h2 class="font-semibold text-ink-900 group-hover:text-brand-700 dark:text-ink-100 dark:group-hover:text-brand-300">{{ role.name }}</h2>
+        {% if role.is_system %}<span class="badge bg-ink-100 text-ink-500 dark:bg-ink-800">{% trans "Sistema" %}</span>{% endif %}
+      </div>
+      <p class="mt-2 line-clamp-2 text-sm text-ink-500">{{ role.description }}</p>
+      <div class="mt-4 flex flex-wrap gap-4 text-xs text-ink-500">
+        <span><strong class="text-ink-800 dark:text-ink-200">{{ role.n_perms }}</strong> {% trans "permisos" %}</span>
+        <span><strong class="text-ink-800 dark:text-ink-200">{{ role.n_users }}</strong> {% trans "usuarios" %}</span>
+        {% if role.max_discount_percent %}<span>{% trans "Descuento máx." %} <strong class="text-ink-800 dark:text-ink-200">{{ role.max_discount_percent|floatformat:0 }}%</strong></span>{% endif %}
+      </div>
+    </a>
+  {% endfor %}
+</div>
+{% endblock %}

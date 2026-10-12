@@ -1,0 +1,8 @@
+{# Encabezado de página. Uso: {% include "components/page_header.html" with title="..." subtitle="..." %} #}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    {% if eyebrow %}<p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{{ eyebrow }}</p>{% endif %}
+    <h1 class="page-title">{{ title }}</h1>
+    {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+  </div>
+</div>

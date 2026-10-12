@@ -1,0 +1,148 @@
+{% load static i18n pms %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>{% block title %}{% trans "Inicio" %}{% endblock %} · {{ current_property.name|default:"PMS" }}</title>
+  <script>
+    // Aplica el tema antes de pintar para evitar parpadeo.
+    try {
+      const saved = localStorage.getItem("pms-theme");
+      if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script defer src="{% static 'js/app.js' %}"></script>
+  <script defer src="{% static 'vendor/alpine.min.js' %}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="h-full" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      x-data="shell" @keydown.window="onKey($event)">
+
+  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 btn-primary">{% trans "Saltar al contenido" %}</a>
+
+  {# ---------- Menú lateral (escritorio fijo, celular como cajón) ---------- #}
+  <div x-show="menuOpen" x-cloak class="fixed inset-0 z-40 bg-ink-950/60 backdrop-blur-sm lg:hidden"
+       @click="menuOpen = false" x-transition.opacity></div>
+
+  <aside class="fixed inset-y-0 left-0 z-50 flex w-64 -translate-x-full flex-col bg-ink-900 transition-transform duration-200 lg:translate-x-0 dark:bg-black/40 dark:border-r dark:border-ink-800"
+         :class="{ 'translate-x-0': menuOpen }" aria-label="{% trans 'Menú principal' %}">
+    <div class="flex h-16 items-center gap-3 border-b border-white/10 px-5">
+      {% if current_property.logo %}
+        <img src="{{ current_property.logo.url }}" alt="" class="h-9 w-9 rounded-lg object-cover">
+      {% else %}
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-700 text-gold-200 ring-1 ring-gold-400/30" style="background-color: {{ current_property.brand_color|default:'#7A1E2C' }}">
+          {% icon "mountain" "w-5 h-5" %}
+        </span>
+      {% endif %}
+      <div class="min-w-0">
+        <p class="truncate font-display text-lg font-semibold leading-tight text-white">{{ current_property.name|default:"PMS Hotelero" }}</p>
+        <p class="text-[11px] uppercase tracking-[0.18em] text-gold-300/80">Cusco · PMS</p>
+      </div>
+      <button type="button" class="ml-auto text-ink-400 hover:text-white lg:hidden" @click="menuOpen = false" aria-label="{% trans 'Cerrar menú' %}">
+        {% icon "x" %}
+      </button>
+    </div>
+
+    <nav class="scrollbar-thin flex-1 space-y-6 overflow-y-auto px-3 py-5">
+      {% for section in main_menu %}
+        <div>
+          <p class="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-500">{{ section.label }}</p>
+          <ul class="space-y-0.5">
+            {% for item in section.items %}
+              <li>
+                {% if item.url %}
+                  <a href="{{ item.url }}" {% if item.hotkey %}data-goto="{{ item.hotkey }}"{% endif %} class="nav-link {% if item.active %}nav-link-active{% endif %}"
+                     {% if item.active %}aria-current="page"{% endif %}>
+                    {% icon item.icon "w-[18px] h-[18px]" %}<span>{{ item.label }}</span>
+                  </a>
+                {% else %}
+                  <span class="nav-link-disabled" title="{% blocktrans with phase=item.phase %}Disponible en la fase {{ phase }}{% endblocktrans %}">
+                    {% icon item.icon "w-[18px] h-[18px]" %}<span>{{ item.label }}</span>
+                    <span class="ml-auto rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-semibold text-ink-500">F{{ item.phase }}</span>
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </nav>
+
+    <div class="border-t border-white/10 p-3">
+      <div class="flex items-center gap-3 rounded-lg px-2 py-2">
+        <span class="flex h-9 w-9 items-center justify-center rounded-full bg-gold-500/20 text-sm font-semibold text-gold-200">{{ request.user.initials }}</span>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-medium text-white">{{ request.user }}</p>
+          <p class="truncate text-xs text-ink-400">{% firstof current_role.name _("Superusuario") %}</p>
+        </div>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="rounded-lg p-2 text-ink-400 hover:bg-white/5 hover:text-white" title="{% trans 'Cerrar sesión' %}" aria-label="{% trans 'Cerrar sesión' %}">
+            {% icon "logout" "w-[18px] h-[18px]" %}
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  {# ---------- Contenido ---------- #}
+  <div class="flex min-h-full flex-col lg:pl-64">
+    <header class="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-ink-200/80 bg-white/85 px-4 backdrop-blur sm:px-6 dark:border-ink-800 dark:bg-ink-950/80">
+      <button type="button" class="btn-ghost -ml-2 p-2 lg:hidden" @click="menuOpen = true" aria-label="{% trans 'Abrir menú' %}">
+        {% icon "menu" %}
+      </button>
+
+      {% if user_properties|length > 1 %}
+        <form method="post" action="{% url 'accounts:switch_property' %}" class="hidden sm:block">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label for="property-switch" class="sr-only">{% trans "Propiedad" %}</label>
+          <select id="property-switch" name="property" onchange="this.form.submit()" class="!w-auto !py-1.5 text-sm">
+            {% for p in user_properties %}
+              <option value="{{ p.pk }}" {% if p.pk == current_property.pk %}selected{% endif %}>{{ p.name }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      {% endif %}
+
+      <div class="hidden min-w-0 items-center gap-2 text-sm text-ink-500 md:flex dark:text-ink-400">
+        {% icon "clock" "w-4 h-4" %}
+        <span x-text="clock"></span>
+      </div>
+
+      <div class="ml-auto flex items-center gap-1">
+        <button type="button" class="btn-ghost p-2" @click="helpOpen = true" title="{% trans 'Atajos de teclado' %} (?)" aria-label="{% trans 'Atajos de teclado' %}">
+          <span class="kbd">?</span>
+        </button>
+        <button type="button" class="btn-ghost p-2" @click="toggleTheme()" :aria-label="dark ? '{% trans "Modo claro" %}' : '{% trans "Modo oscuro" %}'">
+          <span x-show="!dark">{% icon "moon" %}</span>
+          <span x-show="dark" x-cloak>{% icon "sun" %}</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div class="mx-auto max-w-7xl">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="border-t border-ink-200/80 px-6 py-4 text-xs text-ink-400 dark:border-ink-800">
+      <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
+        <span>{{ current_property.legal_name }} · RUC {{ current_property.ruc }}</span>
+        <span>{% now "d/m/Y" %} · America/Lima</span>
+      </div>
+    </footer>
+  </div>
+
+  {% include "components/toasts.html" %}
+  {% include "components/shortcuts_help.html" %}
+  {% block scripts %}{% endblock %}
+</body>
+</html>

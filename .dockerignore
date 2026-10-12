@@ -1,0 +1,11 @@
+.git
+.venv
+node_modules
+.env
+db.sqlite3
+media
+staticfiles
+__pycache__
+.pytest_cache
+.ruff_cache
+docs/vault/.obsidian

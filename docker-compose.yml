@@ -1,0 +1,52 @@
+# Desarrollo: docker compose up
+# La base de datos principal es Supabase (DATABASE_URL en .env).
+# El servicio "db" es un PostgreSQL local SOLO para pruebas automáticas:
+#   docker compose --profile test up -d db
+services:
+  web:
+    build:
+      context: .
+      args:
+        REQUIREMENTS: dev
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      REDIS_URL: redis://redis:6379/0
+      CELERY_TASK_ALWAYS_EAGER: "False"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      args:
+        REQUIREMENTS: dev
+    command: celery -A config worker -l info
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      REDIS_URL: redis://redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:17-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: pms
+      POSTGRES_PASSWORD: pms
+      POSTGRES_DB: pms_test
+    ports:
+      - "5433:5432"

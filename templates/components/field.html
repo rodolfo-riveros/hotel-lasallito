@@ -1,0 +1,21 @@
+{% load pms %}{# Campo de formulario. Uso: {% include "components/field.html" with field=form.name %} #}
+<div class="{{ wrapper_class|default:'' }}">
+  {% if field.field.widget.input_type == "checkbox" %}
+    <label class="flex items-start gap-3 text-sm text-ink-700 dark:text-ink-300">
+      {{ field }}
+      <span>
+        <span class="font-medium">{{ field.label }}</span>
+        {% if field.help_text %}<span class="field-help block">{{ field.help_text }}</span>{% endif %}
+      </span>
+    </label>
+  {% else %}
+    <label for="{{ field.id_for_label }}" class="field-label">
+      {{ field.label }}{% if field.field.required %} <span class="text-state-danger" aria-hidden="true">*</span>{% endif %}
+    </label>
+    {{ field }}
+    {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+  {% endif %}
+  {% for error in field.errors %}
+    <p class="field-error">{% icon "x-circle" "w-3.5 h-3.5" %}{{ error }}</p>
+  {% endfor %}
+</div>

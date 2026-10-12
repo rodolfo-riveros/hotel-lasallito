@@ -1,0 +1,239 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fuentes servidas localmente (sin depender de internet). */
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../vendor/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("../vendor/fonts/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-weight: 500;
+  font-display: swap;
+  src: url("../vendor/fonts/cormorant-garamond-latin-500-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-weight: 600;
+  font-display: swap;
+  src: url("../vendor/fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-weight: 700;
+  font-display: swap;
+  src: url("../vendor/fonts/cormorant-garamond-latin-700-normal.woff2") format("woff2");
+}
+
+@layer base {
+  :root {
+    --brand: 122 30 44; /* se sobreescribe con el color de la propiedad */
+  }
+  html {
+    @apply antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  body {
+    @apply bg-ink-50 text-ink-800 dark:bg-ink-950 dark:text-ink-200;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply text-ink-900 dark:text-ink-50;
+  }
+  [x-cloak] {
+    display: none !important;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2 ring-offset-white dark:ring-offset-ink-900;
+  }
+
+  /* Campos de formulario: estilo único para todo el sistema. */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  select,
+  textarea {
+    @apply block w-full rounded-lg border-ink-300 bg-white text-sm text-ink-900 shadow-sm
+      placeholder:text-ink-400 focus:border-brand-500 focus:ring-brand-500
+      disabled:cursor-not-allowed disabled:bg-ink-100 disabled:text-ink-500
+      dark:border-ink-700 dark:bg-ink-900 dark:text-ink-100 dark:disabled:bg-ink-800;
+  }
+  input[type="color"] {
+    @apply h-10 w-20 cursor-pointer rounded-lg border border-ink-300 bg-white p-1 dark:border-ink-700 dark:bg-ink-900;
+  }
+  input[type="checkbox"] {
+    @apply h-4 w-4 rounded border-ink-300 text-brand-700 focus:ring-brand-500 dark:border-ink-600 dark:bg-ink-800;
+  }
+  input[type="file"] {
+    @apply block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-ink-100
+      file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink-700 hover:file:bg-ink-200
+      dark:text-ink-400 dark:file:bg-ink-800 dark:file:text-ink-200;
+  }
+}
+
+@layer components {
+  /* Botones */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium
+      transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-brand-700 text-white shadow-sm hover:bg-brand-800 active:bg-brand-900;
+  }
+  .btn-secondary {
+    @apply btn border border-ink-300 bg-white text-ink-700 shadow-sm hover:bg-ink-50
+      dark:border-ink-700 dark:bg-ink-900 dark:text-ink-200 dark:hover:bg-ink-800;
+  }
+  .btn-ghost {
+    @apply btn text-ink-600 hover:bg-ink-100 hover:text-ink-900 dark:text-ink-400 dark:hover:bg-ink-800 dark:hover:text-ink-100;
+  }
+  .btn-danger {
+    @apply btn bg-state-danger text-white hover:brightness-110;
+  }
+  .btn-sm {
+    @apply px-2.5 py-1.5 text-xs;
+  }
+
+  /* Tarjetas y paneles */
+  .card {
+    @apply rounded-xl border border-ink-200/80 bg-white shadow-soft dark:border-ink-800 dark:bg-ink-900;
+  }
+  .card-header {
+    @apply flex items-center justify-between gap-4 border-b border-ink-100 px-5 py-4 dark:border-ink-800;
+  }
+  .card-body {
+    @apply p-5;
+  }
+  .card-title {
+    @apply text-base font-semibold text-ink-900 dark:text-ink-50;
+  }
+
+  /* Títulos de página */
+  .page-title {
+    @apply font-display text-3xl font-semibold tracking-tight text-ink-900 dark:text-ink-50;
+  }
+  .page-subtitle {
+    @apply mt-1 text-sm text-ink-500 dark:text-ink-400;
+  }
+
+  /* Formularios */
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700 dark:text-ink-300;
+  }
+  .field-help {
+    @apply mt-1 text-xs text-ink-500 dark:text-ink-400;
+  }
+  .field-error {
+    @apply mt-1 flex items-center gap-1 text-xs font-medium text-state-danger;
+  }
+
+  /* Tablas */
+  .table {
+    @apply min-w-full divide-y divide-ink-200 text-sm dark:divide-ink-800;
+  }
+  .table th {
+    @apply whitespace-nowrap bg-ink-50 px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide
+      text-ink-500 dark:bg-ink-900/60 dark:text-ink-400;
+  }
+  .table td {
+    @apply whitespace-nowrap px-4 py-3 text-ink-700 dark:text-ink-300;
+  }
+  .table tbody tr {
+    @apply transition-colors hover:bg-ink-50/70 dark:hover:bg-ink-800/40;
+  }
+  .table tbody {
+    @apply divide-y divide-ink-100 bg-white dark:divide-ink-800 dark:bg-ink-900;
+  }
+
+  /* Menú lateral */
+  .nav-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-300 transition-colors
+      hover:bg-white/5 hover:text-white;
+  }
+  .nav-link-active {
+    @apply bg-white/10 text-white shadow-inner;
+  }
+  .nav-link-disabled {
+    @apply flex cursor-default items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-500;
+  }
+
+  /* Insignias genéricas */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+  .kbd {
+    @apply inline-flex min-w-[1.5rem] items-center justify-center rounded border border-ink-300 bg-ink-50 px-1.5
+      font-mono text-[11px] font-medium text-ink-600 dark:border-ink-600 dark:bg-ink-800 dark:text-ink-300;
+  }
+
+  /* Estados: color + ícono + texto (RNF-UX-04). Única definición del sistema. */
+  .status {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .status-available {
+    @apply border-state-available/30 bg-state-available/10 text-state-available dark:text-emerald-300;
+  }
+  .status-occupied {
+    @apply border-state-occupied/30 bg-state-occupied/10 text-state-occupied dark:text-blue-300;
+  }
+  .status-dirty {
+    @apply border-state-dirty/30 bg-state-dirty/10 text-state-dirty dark:text-amber-300;
+  }
+  .status-cleaning {
+    @apply border-state-cleaning/30 bg-state-cleaning/10 text-state-cleaning dark:text-violet-300;
+  }
+  .status-inspected {
+    @apply border-state-inspected/30 bg-state-inspected/10 text-state-inspected dark:text-cyan-300;
+  }
+  .status-blocked {
+    @apply border-state-blocked/40 bg-state-blocked/10 text-state-blocked dark:text-slate-300;
+    background-image: repeating-linear-gradient(135deg, transparent 0 4px, rgb(71 85 105 / 0.08) 4px 8px);
+  }
+  .status-pending {
+    @apply border-dashed border-state-pending/50 bg-state-pending/10 text-state-pending dark:text-yellow-300;
+  }
+  .status-confirmed {
+    @apply border-state-confirmed/30 bg-state-confirmed/10 text-state-confirmed dark:text-green-300;
+  }
+  .status-danger {
+    @apply border-state-danger/30 bg-state-danger/10 text-state-danger dark:text-orange-300;
+  }
+  .status-neutral {
+    @apply border-ink-300 bg-ink-100 text-ink-600 dark:border-ink-700 dark:bg-ink-800 dark:text-ink-300;
+  }
+
+  /* Leyenda de simulación SUNAT (RF-SIM-06) */
+  .sim-banner {
+    @apply flex items-center gap-2 rounded-lg border border-dashed border-gold-400 bg-gold-50 px-3 py-2 text-xs
+      font-semibold uppercase tracking-wide text-gold-800 dark:border-gold-700 dark:bg-gold-900/20 dark:text-gold-300;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(68 64 60) transparent;
+  }
+}

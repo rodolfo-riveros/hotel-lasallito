@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Configuración del hotel" %}{% endblock %}
+{% block content %}
+{% trans "Datos del hotel" as title %}
+{% include "core/_settings_tabs.html" %}
+
+<form method="post" enctype="multipart/form-data" class="space-y-6">
+  {% csrf_token %}
+  {% include "components/form_errors.html" %}
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Identificación" %}</h2></div>
+    <div class="card-body grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {% include "components/field.html" with field=form.name %}
+      {% include "components/field.html" with field=form.legal_name %}
+      {% include "components/field.html" with field=form.ruc %}
+      {% include "components/field.html" with field=form.kind %}
+      {% include "components/field.html" with field=form.category_stars %}
+      {% include "components/field.html" with field=form.base_currency %}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Ubicación y contacto" %}</h2></div>
+    <div class="card-body grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {% include "components/field.html" with field=form.address wrapper_class="sm:col-span-2" %}
+      {% include "components/field.html" with field=form.ubigeo %}
+      {% include "components/field.html" with field=form.district %}
+      {% include "components/field.html" with field=form.city %}
+      {% include "components/field.html" with field=form.phone %}
+      {% include "components/field.html" with field=form.email %}
+      {% include "components/field.html" with field=form.website wrapper_class="sm:col-span-2" %}
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2 class="card-title">{% trans "Operación e identidad visual" %}</h2></div>
+    <div class="card-body grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      {% include "components/field.html" with field=form.check_in_time %}
+      {% include "components/field.html" with field=form.check_out_time %}
+      {% include "components/field.html" with field=form.brand_color %}
+      {% include "components/field.html" with field=form.logo %}
+    </div>
+  </section>
+
+  {% if can_edit %}
+    <div class="flex justify-end">
+      <button type="submit" class="btn-primary">{% trans "Guardar cambios" %}</button>
+    </div>
+  {% endif %}
+</form>
+{% endblock %}

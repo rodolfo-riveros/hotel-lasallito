@@ -1,0 +1,32 @@
+{% load i18n pms %}
+{% for u in users %}
+  <tr>
+    <td>
+      <div class="flex items-center gap-3">
+        <span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-200">{{ u.initials }}</span>
+        <div>
+          <p class="font-medium text-ink-900 dark:text-ink-100">{{ u.get_full_name|default:u.username }}</p>
+          <p class="text-xs text-ink-500">{{ u.email }}</p>
+        </div>
+      </div>
+    </td>
+    <td class="font-mono text-xs">{{ u.username }}</td>
+    <td>
+      <div class="flex flex-wrap gap-1">
+      {% if u.is_superuser %}<span class="badge bg-gold-100 text-gold-800 dark:bg-gold-900/30 dark:text-gold-300">{% trans "Superusuario" %}</span>{% endif %}
+      {% for a in u.property_accesses.all %}
+        <span class="badge bg-ink-100 text-ink-700 dark:bg-ink-800 dark:text-ink-300 {% if not a.is_active %}line-through opacity-60{% endif %}">{{ a.role.name }} · {{ a.property.name }}</span>
+      {% empty %}
+        {% if not u.is_superuser %}<span class="text-xs text-ink-400">{% trans "Sin acceso" %}</span>{% endif %}
+      {% endfor %}
+      </div>
+    </td>
+    <td class="text-xs text-ink-500">{{ u.last_login|date:"d/m/Y H:i"|default:"—" }}</td>
+    <td>{% if u.is_active %}{% status_badge "generic" "active" %}{% else %}{% status_badge "generic" "inactive" %}{% endif %}</td>
+    <td class="text-right">
+      <a href="{% url 'accounts:user_edit' u.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a>
+    </td>
+  </tr>
+{% empty %}
+  <tr><td colspan="6">{% trans "No se encontraron usuarios." as msg %}{% include "components/empty.html" with icon_name="users" message=msg %}</td></tr>
+{% endfor %}

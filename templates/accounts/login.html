@@ -1,0 +1,84 @@
+{% load static i18n pms %}<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% trans "Ingresar" %} · PMS Hotelero Cusco</title>
+  <script>
+    try {
+      const saved = localStorage.getItem("pms-theme");
+      if (saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="h-full bg-white dark:bg-ink-950">
+  <div class="grid min-h-full lg:grid-cols-[1.1fr,1fr]">
+
+    {# Panel de marca #}
+    <section class="relative hidden overflow-hidden bg-brand-900 lg:flex lg:flex-col lg:justify-between">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(207,165,75,0.25),_transparent_55%)]"></div>
+      <svg class="absolute inset-x-0 bottom-0 w-full text-brand-950/70" viewBox="0 0 800 260" fill="currentColor" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 260V170l90-60 70 40 110-110 90 80 60-40 120 110 80-50 100 70 80-60v150Z"/>
+      </svg>
+      <svg class="absolute inset-x-0 bottom-0 w-full text-black/30" viewBox="0 0 800 160" fill="currentColor" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 160V110l120-50 90 40 130-70 110 60 90-30 140 70 120-50v80Z"/>
+      </svg>
+      {# Motivo andino (chakana estilizada) #}
+      <div class="absolute right-10 top-10 grid grid-cols-3 gap-1 opacity-20" aria-hidden="true">
+        <span></span><span class="h-4 w-4 bg-gold-300"></span><span></span>
+        <span class="h-4 w-4 bg-gold-300"></span><span class="h-4 w-4 bg-gold-300"></span><span class="h-4 w-4 bg-gold-300"></span>
+        <span></span><span class="h-4 w-4 bg-gold-300"></span><span></span>
+      </div>
+
+      <div class="relative p-12">
+        <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-gold-200 ring-1 ring-gold-300/30">{% icon "mountain" "w-6 h-6" %}</span>
+      </div>
+      <div class="relative max-w-lg p-12 pb-40">
+        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-gold-300">Cusco · 3 399 msnm</p>
+        <h1 class="mt-4 font-display text-5xl font-semibold leading-[1.05] text-white">Hotel La Sallito</h1>
+        <p class="mt-5 text-base leading-relaxed text-brand-100/80">
+          {% trans "Sistema de gestión hotelera: reservas, recepción, housekeeping, restaurante, caja y facturación en un solo lugar." %}
+        </p>
+      </div>
+    </section>
+
+    {# Formulario #}
+    <main class="flex items-center justify-center px-6 py-12 sm:px-12">
+      <div class="w-full max-w-sm">
+        <div class="mb-10 lg:hidden">
+          <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-gold-200">{% icon "mountain" "w-6 h-6" %}</span>
+          <p class="mt-4 font-display text-3xl font-semibold text-ink-900 dark:text-white">Hotel La Sallito</p>
+        </div>
+
+        <h2 class="font-display text-3xl font-semibold text-ink-900 dark:text-white">{% trans "Bienvenido" %}</h2>
+        <p class="mt-2 text-sm text-ink-500 dark:text-ink-400">{% trans "Ingresa con tu usuario del hotel." %}</p>
+
+        <form method="post" class="mt-8 space-y-5" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="flex items-start gap-3 rounded-lg border border-state-danger/30 bg-state-danger/10 p-3 text-sm text-state-danger" role="alert">
+              {% icon "x-circle" %}
+              <div>{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>
+            </div>
+          {% endif %}
+          {% include "components/field.html" with field=form.username %}
+          {% include "components/field.html" with field=form.password %}
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="btn-primary w-full py-2.5">{% trans "Ingresar" %} {% icon "arrow-right" "w-4 h-4" %}</button>
+        </form>
+
+        {% for message in messages %}
+          <p class="mt-6 rounded-lg bg-ink-100 p-3 text-sm text-ink-600 dark:bg-ink-800 dark:text-ink-300">{{ message }}</p>
+        {% endfor %}
+
+        <p class="mt-10 text-xs leading-relaxed text-ink-400">
+          {% trans "Acceso solo para personal autorizado. Cada acción queda registrada en la auditoría del sistema." %}
+        </p>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

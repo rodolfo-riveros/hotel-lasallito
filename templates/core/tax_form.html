@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Impuesto" %}{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a href="{% url 'core:tax_list' %}" class="text-sm text-ink-500 hover:text-ink-800 dark:hover:text-ink-200">← {% trans "Impuestos" %}</a>
+  <h1 class="page-title mt-2">{% if object %}{{ object.name }}{% else %}{% trans "Nuevo impuesto" %}{% endif %}</h1>
+</div>
+<form method="post" class="card max-w-2xl" data-confirm="{% trans '¿Guardar el cambio? Quedará registrado en la auditoría.' %}">
+  {% csrf_token %}
+  <div class="card-body grid gap-5 sm:grid-cols-2">
+    {% include "components/form_errors.html" %}
+    {% include "components/field.html" with field=form.name %}
+    {% include "components/field.html" with field=form.code %}
+    {% include "components/field.html" with field=form.rate %}
+    {% include "components/field.html" with field=form.applies_to %}
+    {% include "components/field.html" with field=form.order %}
+    <div></div>
+    {% include "components/field.html" with field=form.is_included_in_price %}
+    {% include "components/field.html" with field=form.exempt_for_non_domiciled %}
+    {% include "components/field.html" with field=form.is_active %}
+  </div>
+  <div class="flex justify-end gap-2 border-t border-ink-100 px-5 py-4 dark:border-ink-800">
+    <a href="{% url 'core:tax_list' %}" class="btn-secondary">{% trans "Cancelar" %}</a>
+    <button type="submit" class="btn-primary">{% trans "Guardar" %}</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Usuarios" %}{% endblock %}
+{% block content %}
+{% can "accounts.create" as can_create %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Sistema" %}</p>
+    <h1 class="page-title">{% trans "Usuarios" %}</h1>
+    <p class="page-subtitle">{% trans "Personal con acceso al sistema y su rol en cada propiedad." %}</p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'accounts:role_list' %}" class="btn-secondary">{% icon "shield-check" "w-4 h-4" %}{% trans "Roles y permisos" %}</a>
+    {% if can_create %}
+      <a href="{% url 'accounts:user_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo usuario" %} <span class="kbd !border-white/30 !bg-white/10 !text-white">n</span></a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card overflow-hidden">
+  <div class="border-b border-ink-100 p-4 dark:border-ink-800">
+    <label class="relative block max-w-sm">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-400">{% icon "search" "w-4 h-4" %}</span>
+      <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Buscar por nombre o usuario' %}" class="!pl-9"
+             data-search hx-get="{% url 'accounts:user_list' %}" hx-trigger="input changed delay:250ms, search" hx-target="#user-rows" hx-push-url="true"
+             aria-label="{% trans 'Buscar usuarios' %}">
+    </label>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>{% trans "Nombre" %}</th>
+          <th>{% trans "Usuario" %}</th>
+          <th>{% trans "Rol por propiedad" %}</th>
+          <th>{% trans "Último ingreso" %}</th>
+          <th>{% trans "Estado" %}</th>
+          <th><span class="sr-only">{% trans "Acciones" %}</span></th>
+        </tr>
+      </thead>
+      <tbody id="user-rows">
+        {% include "accounts/partials/user_rows.html" %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
