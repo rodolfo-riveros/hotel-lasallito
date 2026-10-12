@@ -30,7 +30,7 @@ y sus consultas (RUC, DNI, tipo de cambio) se simulan; todo lo demás funciona c
 - Un solo hotel (Hotel La Sallito) por ahora. El modelo ya es multi-propiedad.
 - El POS (restaurante y bar) entra en la **fase 1**. Las recetas que descuentan del almacén van en la fase 2.
 - Pasarela de pagos y channel manager: se eligen más adelante. Por ahora, adaptador con implementación de prueba.
-- Base de datos: Supabase, proyecto `hotel-la-sallito` (ref `aljafshzuqrmmdezjpiw`), conectado por el pooler
+- Base de datos: Supabase, proyecto `hotel-lasallito` (ref `ddddqyowhshjmblixrla`, us-west-2), conectado por el pooler
   en modo sesión.
 
 ## Comandos

@@ -20,6 +20,9 @@ tags: [decision, base-de-datos]
 `perfiles` sobre `auth.users`, triggers y vistas). Estaba vacío y con RLS desactivado. Se eliminó el
 2026-10-12 con la migración `drop_legacy_pms_schema` y se conservó `pg_trgm`.
 
+**Actualización 2026-10-12.** El usuario eliminó el proyecto anterior y creó uno nuevo y vacío:
+`hotel-lasallito`, ref `ddddqyowhshjmblixrla`, región us-west-2. Es el proyecto vigente.
+
 **Cómo se conecta.**
 - Django se conecta por el **pooler en modo sesión (puerto 5432)** con `DATABASE_URL` en `.env` (RF-BD-01, RF-BD-02).
 - La migración `core.0003` crea `btree_gist` (RF-BD-03).
