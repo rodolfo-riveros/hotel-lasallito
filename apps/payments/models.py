@@ -23,9 +23,16 @@ class OnlinePayment(TimeStampedModel, PropertyScopedModel):
 
     token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     provider = models.CharField(_("pasarela"), max_length=20, default="test")
-    reservation = models.ForeignKey("reservations.Reservation", null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="online_payments")
-    folio = models.ForeignKey("folio.Folio", null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    reservation = models.ForeignKey(
+        "reservations.Reservation",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="online_payments",
+    )
+    folio = models.ForeignKey(
+        "folio.Folio", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     amount = models.DecimalField(_("monto"), max_digits=12, decimal_places=2)
     currency = models.CharField(_("moneda"), max_length=3, default="PEN")
     description = models.CharField(_("concepto"), max_length=200)

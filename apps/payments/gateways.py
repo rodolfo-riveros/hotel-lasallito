@@ -44,8 +44,12 @@ class TestGateway(Gateway):
         if number in self.APPROVED:
             import uuid
 
-            return ChargeResult(True, reference=f"TEST-{uuid.uuid4().hex[:10].upper()}", last4=number[-4:],
-                                brand=self.APPROVED[number])
+            return ChargeResult(
+                True,
+                reference=f"TEST-{uuid.uuid4().hex[:10].upper()}",
+                last4=number[-4:],
+                brand=self.APPROVED[number],
+            )
         return ChargeResult(False, error="Use una tarjeta de prueba de la pasarela")
 
 

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ po.number }}{% endblock %}
+{% block content %}
+<a href="{% url 'purchasing:po_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Órdenes de compra" %}</a>
+<div class="mt-2 mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><h1 class="page-title">{{ po.number }} · {{ po.supplier }}</h1><p class="page-subtitle">{{ po.get_status_display }} · {{ po.order_date|date:"d/m/Y" }} · {% trans "destino" %} {{ po.warehouse }} · {% trans "total con IGV" %} {{ po.total|add:igv|money }}</p></div>
+  <div class="flex gap-2"><a href="{% url 'purchasing:po_pdf' po.pk %}" target="_blank" class="btn-secondary">{% icon "document" "w-4 h-4" %}PDF</a>
+    {% if po.status == "sent" %}<form method="post" data-confirm="{% trans '¿Anular la orden?' %}">{% csrf_token %}<button name="action" value="cancel" class="btn-ghost text-state-danger">{% trans "Anular" %}</button></form>{% endif %}</div>
+</div>
+<form method="post" class="card mb-6 overflow-x-auto">{% csrf_token %}<input type="hidden" name="action" value="receive">
+  <div class="card-header"><h2 class="card-title">{% trans "Recepción de mercadería" %}</h2><span class="text-xs text-ink-400">RF-COM-03</span></div>
+  <table class="table"><thead><tr><th>{% trans "Artículo" %}</th><th class="!text-right">{% trans "Pedido" %}</th><th class="!text-right">{% trans "Recibido" %}</th><th class="!text-right">{% trans "P. unit." %}</th>{% if po.status != "received" and po.status != "cancelled" %}<th>{% trans "Recibir ahora" %}</th><th>{% trans "Lote / vence" %}</th>{% endif %}</tr></thead>
+    <tbody>{% for ln in lines %}<tr><td>{{ ln.item.name }} <span class="text-xs text-ink-500">({{ ln.item.purchase_unit }})</span></td><td class="text-right">{{ ln.quantity|floatformat:"-3" }}</td><td class="text-right">{{ ln.received_qty|floatformat:"-3" }}</td><td class="text-right tabular-nums">{{ ln.unit_price }}</td>
+      {% if po.status != "received" and po.status != "cancelled" %}<td><input name="qty-{{ ln.pk }}" value="{{ ln.pending|floatformat:'-3' }}" inputmode="decimal" class="!w-24 text-right"></td>
+      <td>{% if ln.item.is_perishable %}<div class="flex gap-1"><input name="lot-{{ ln.pk }}" placeholder="{% trans 'Lote' %}" class="!w-24"><input type="date" name="exp-{{ ln.pk }}" class="!w-36"></div>{% endif %}</td>{% endif %}</tr>{% endfor %}</tbody></table>
+  {% if po.status != "received" and po.status != "cancelled" %}<div class="flex flex-wrap items-end justify-end gap-3 border-t border-ink-100 px-5 py-4 dark:border-ink-800"><input name="guide" placeholder="{% trans 'Guía de remisión' %}" class="!w-44"><input name="invoice" placeholder="{% trans 'Factura del proveedor' %}" class="!w-44"><button class="btn-primary">{% trans "Ingresar al almacén" %}</button></div>{% endif %}
+</form>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Recepciones" %}</h2></div><ul class="card-body space-y-1 text-sm">{% for r in receipts %}<li>{{ r.date|date:"d/m/Y" }} · {% trans "guía" %} {{ r.guide_number|default:"—" }} · {% trans "factura" %} {{ r.invoice_number|default:"—" }}</li>{% empty %}<li class="text-ink-500">—</li>{% endfor %}</ul></section>
+  <form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="invoice"><div class="card-header"><h2 class="card-title">{% trans "Factura del proveedor" %}</h2></div>
+    <div class="card-body space-y-3">{% for i in invoices %}<p class="text-sm">{{ i.number }} · {{ i.amount|money }} · {% trans "vence" %} {{ i.due_date|date:"d/m/Y" }}{% if i.paid %} · {% trans "pagada" %}{% endif %}</p>{% endfor %}
+      <div class="flex gap-2"><input name="number" placeholder="{% trans 'N.° F001-123' %}" required><input name="amount" inputmode="decimal" placeholder="{% trans 'Importe con IGV' %}" required><button class="btn-secondary whitespace-nowrap">{% trans "Registrar" %}</button></div></div></form>
+</div>
+{% endblock %}

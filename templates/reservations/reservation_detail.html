@@ -134,11 +134,27 @@
       <ul class="card-body space-y-2 text-sm">{% for m in moves %}<li>{{ m.from_room.number }} → {{ m.to_room.number }} · {{ m.get_kind_display }} · <span class="text-ink-500">{{ m.reason }}</span></li>{% endfor %}</ul></section>
     {% endif %}
 
+    <section class="card" x-data="{ copied: false }">
+      <div class="card-header"><h2 class="card-title">{% trans "Portal del huésped" %}</h2>{% if r.precheckin_at %}<span class="badge bg-state-available/10 text-state-available">{% trans "Pre-check-in listo" %}</span>{% endif %}</div>
+      <div class="card-body space-y-2 text-sm">
+        <input readonly value="{{ request.scheme }}://{{ request.get_host }}{% url 'portal:home' r.portal_token %}" x-ref="link" class="text-xs">
+        <div class="flex gap-2"><button type="button" class="btn-secondary btn-sm" @click="navigator.clipboard.writeText($refs.link.value); copied = true">{% trans "Copiar enlace" %}</button>
+          <a href="{% url 'portal:home' r.portal_token %}" target="_blank" class="btn-ghost btn-sm">{% trans "Abrir" %}</a><span x-show="copied" x-cloak class="self-center text-xs text-state-available">✓</span></div>
+        {% if r.precheckin_at %}<p class="text-xs text-ink-500">{% trans "Completado el" %} {{ r.precheckin_at|date:"d/m/Y H:i" }}</p>{% endif %}
+      </div>
+    </section>
+
     <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Mensajes" %}</h2></div>
       <ul class="divide-y divide-ink-100 text-sm dark:divide-ink-800">
         {% for m in messages_log %}<li class="px-5 py-2"><span class="font-medium">{{ m.get_channel_display }}</span> · {{ m.subject|default:m.body|truncatechars:50 }} <span class="text-xs {% if m.status == 'failed' %}text-state-danger{% else %}text-ink-400{% endif %}">{{ m.get_status_display }}</span></li>
         {% empty %}<li class="px-5 py-3 text-ink-500">{% trans "Sin mensajes." %}</li>{% endfor %}
-      </ul></section>
+      </ul>
+      {% can "comms.create" as can_msg %}{% if can_msg %}
+      <form method="post" action="{% url 'comms:compose' r.pk %}" class="space-y-2 border-t border-ink-100 p-4 dark:border-ink-800">{% csrf_token %}
+        <select name="channel" class="!py-1.5 text-sm"><option value="email">{% trans "Correo" %}</option><option value="whatsapp">WhatsApp</option></select>
+        <input name="subject" placeholder="{% trans 'Asunto (correo)' %}" class="!py-1.5 text-sm"><textarea name="body" rows="2" required placeholder="{% trans 'Mensaje al huésped' %}" class="text-sm"></textarea>
+        <button class="btn-secondary btn-sm w-full">{% trans "Enviar" %}</button></form>{% endif %}
+    </section>
   </aside>
 </div>
 {% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Recetas" %}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-4">{% trans "Almacén" %}</h1>
+{% include "inventory/_nav.html" %}
+<p class="mb-4 text-sm text-ink-500">{% trans "Cada venta descuenta los insumos del almacén de cocina o bar (RF-POS-05). El food cost se calcula sobre el precio sin IGV." %}</p>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Plato" %}</th><th>{% trans "Insumos" %}</th><th class="!text-right">{% trans "Precio" %}</th><th class="!text-right">{% trans "Costo" %}</th><th class="!text-right">Food cost</th><th></th></tr></thead>
+  <tbody>{% for row in rows %}<tr><td class="font-medium">{{ row.mi.name }}<p class="text-xs text-ink-500">{{ row.mi.category }}</p></td><td class="whitespace-normal text-xs">{% for ln in row.mi.recipe.all %}{{ ln.quantity|floatformat:"-3" }} {{ ln.item.unit }} {{ ln.item.name }}{% if not forloop.last %} · {% endif %}{% empty %}<span class="text-state-dirty">{% trans "Sin receta" %}</span>{% endfor %}</td>
+    <td class="text-right tabular-nums">{{ row.mi.price|money }}</td><td class="text-right tabular-nums">{{ row.cost|money }}</td><td class="text-right tabular-nums {% if row.food_cost > 35 %}text-state-danger{% endif %}">{{ row.food_cost }}%</td>
+    <td class="text-right"><a href="{% url 'inventory:recipe_edit' row.mi.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a></td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

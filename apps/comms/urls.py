@@ -10,5 +10,6 @@ urlpatterns = [
     path("notificaciones/", views.notifications, name="notifications"),
     path("notificaciones/<int:pk>/", views.notification_open, name="notification_open"),
     path("reserva/<int:reservation_pk>/enviar/", views.compose, name="compose"),
+    path("webhook/whatsapp/", views.whatsapp_webhook, name="whatsapp_webhook"),
     *views.template_crud.urls("plantillas", "template"),
 ]

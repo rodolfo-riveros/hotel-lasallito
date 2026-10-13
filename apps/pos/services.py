@@ -187,6 +187,10 @@ def pay_order(
 
 def _close_table_items(order: Order):
     order.items.filter(status__in=[OrderItem.Status.PENDING]).update(status=OrderItem.Status.SERVED)
+    # RF-POS-05: cada venta descuenta los insumos de la receta del almacén.
+    from apps.inventory.services import consume_recipe
+
+    consume_recipe(order)
 
 
 def breakfast_list(property_obj, day):

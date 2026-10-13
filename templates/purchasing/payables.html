@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Cuentas por pagar" %}{% endblock %}
+{% block content %}
+<div class="mb-4 flex items-end justify-between"><h1 class="page-title">{% trans "Compras" %}</h1><a href="?export=csv" class="btn-secondary">{% icon "download" "w-4 h-4" %}{% trans "Exportar a contabilidad" %}</a></div>
+{% include "purchasing/_nav.html" %}
+<p class="mb-4 text-sm text-ink-500">{% trans "Pendiente de pago" %}: <b>{{ pending|money }}</b> · RF-COM-05</p>
+<div class="card overflow-x-auto"><table class="table"><thead><tr><th>{% trans "Proveedor" %}</th><th>{% trans "Factura" %}</th><th>{% trans "OC" %}</th><th>{% trans "Vence" %}</th><th class="!text-right">{% trans "Importe" %}</th><th></th></tr></thead>
+  <tbody>{% for i in items %}<tr><td>{{ i.supplier }}</td><td>{{ i.number }}</td><td class="text-xs">{{ i.order.number|default:"—" }}</td><td class="{% if not i.paid and i.due_date < today %}text-state-danger font-semibold{% endif %}">{{ i.due_date|date:"d/m/Y" }}</td><td class="text-right tabular-nums">{{ i.amount|money }}</td>
+    <td class="text-right">{% if i.paid %}<span class="text-xs text-state-available">{% trans "Pagada" %} {{ i.paid_at|date:"d/m" }}</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="invoice" value="{{ i.pk }}"><button class="btn-secondary btn-sm">{% trans "Marcar pagada" %}</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin facturas de proveedores." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

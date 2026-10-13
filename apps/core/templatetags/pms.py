@@ -170,3 +170,12 @@ def hk_key(room):
         "cleaning": "cleaning",
         "inspected": "inspected",
     }.get(getattr(room, "hk_status", ""), "vacant_clean")
+
+
+@register.filter
+def mul(a, b):
+    """Multiplica dos montos Decimal (dos decimales)."""
+    try:
+        return (Decimal(str(a)) * Decimal(str(b))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    except (InvalidOperation, TypeError, ValueError):
+        return ""

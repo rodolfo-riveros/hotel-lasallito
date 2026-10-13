@@ -29,9 +29,17 @@ class Asset(TimeStampedModel, PropertyScopedModel):
     code = models.CharField(_("código"), max_length=30)
     name = models.CharField(_("nombre"), max_length=150)
     kind = models.CharField(_("tipo"), max_length=15, choices=Kind.choices, default=Kind.OTHER)
-    room = models.ForeignKey("rooms.Room", verbose_name=_("habitación"), null=True, blank=True, on_delete=models.SET_NULL,
-                             related_name="assets")
-    area = models.CharField(_("área"), max_length=100, blank=True, help_text=_("Si no está en una habitación"))
+    room = models.ForeignKey(
+        "rooms.Room",
+        verbose_name=_("habitación"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assets",
+    )
+    area = models.CharField(
+        _("área"), max_length=100, blank=True, help_text=_("Si no está en una habitación")
+    )
     brand = models.CharField(_("marca / modelo"), max_length=100, blank=True)
     serial = models.CharField(_("serie"), max_length=60, blank=True)
     acquisition_date = models.DateField(_("fecha de compra"), null=True, blank=True)
@@ -77,18 +85,39 @@ class WorkOrder(TimeStampedModel, PropertyScopedModel):
     number = models.CharField(_("número"), max_length=20)
     title = models.CharField(_("problema"), max_length=150)
     description = models.TextField(_("detalle"), blank=True)
-    room = models.ForeignKey("rooms.Room", verbose_name=_("habitación"), null=True, blank=True, on_delete=models.SET_NULL,
-                             related_name="work_orders")
-    asset = models.ForeignKey(Asset, verbose_name=_("equipo"), null=True, blank=True, on_delete=models.SET_NULL,
-                              related_name="work_orders")
-    priority = models.CharField(_("prioridad"), max_length=10, choices=Priority.choices, default=Priority.NORMAL)
+    room = models.ForeignKey(
+        "rooms.Room",
+        verbose_name=_("habitación"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="work_orders",
+    )
+    asset = models.ForeignKey(
+        Asset,
+        verbose_name=_("equipo"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="work_orders",
+    )
+    priority = models.CharField(
+        _("prioridad"), max_length=10, choices=Priority.choices, default=Priority.NORMAL
+    )
     status = models.CharField(_("estado"), max_length=12, choices=Status.choices, default=Status.OPEN)
     source = models.CharField(_("origen"), max_length=15, choices=Source.choices, default=Source.OTHER)
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("responsable"), null=True, blank=True,
-                                    on_delete=models.SET_NULL, related_name="work_orders")
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("responsable"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="work_orders",
+    )
     block_room = models.BooleanField(_("bloquear la habitación mientras esté abierta"), default=False)
-    room_block = models.OneToOneField("rooms.RoomBlock", null=True, blank=True, on_delete=models.SET_NULL,
-                                      related_name="work_order")
+    room_block = models.OneToOneField(
+        "rooms.RoomBlock", null=True, blank=True, on_delete=models.SET_NULL, related_name="work_order"
+    )
     started_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
     resolution = models.TextField(_("solución"), blank=True)
@@ -129,8 +158,14 @@ class PreventivePlan(TimeStampedModel, PropertyScopedModel):
     frequency_days = models.PositiveSmallIntegerField(_("cada (días)"), default=30)
     next_due = models.DateField(_("próxima fecha"))
     checklist = models.TextField(_("checklist"), blank=True, help_text=_("Un paso por línea"))
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("responsable"), null=True, blank=True,
-                                    on_delete=models.SET_NULL, related_name="+")
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("responsable"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     is_active = models.BooleanField(_("activo"), default=True)
 
     class Meta:

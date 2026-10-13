@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Compras" %}{% endblock %}
+{% block content %}
+{% can "purchasing.create" as can_create %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4"><div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Administración" %}</p><h1 class="page-title">{% trans "Compras" %}</h1></div>
+  {% if can_create %}<a href="{% url 'purchasing:requisition_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nueva requisición" %}</a>{% endif %}</div>
+{% include "purchasing/_nav.html" %}
+<div class="card overflow-x-auto">
+  <form class="border-b border-ink-100 p-4 dark:border-ink-800"><select name="status" class="!w-auto" onchange="this.form.submit()"><option value="">{% trans "Todos los estados" %}</option>{% for k, v in statuses %}<option value="{{ k }}" {% if request.GET.status == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></form>
+  <table class="table"><thead><tr><th>N.°</th><th>{% trans "Área" %}</th><th>{% trans "Solicitó" %}</th><th>{% trans "Para" %}</th><th class="!text-right">{% trans "Estimado" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+    <tbody>{% for r in items %}<tr class="cursor-pointer" onclick="location='{% url 'purchasing:requisition_detail' r.pk %}'"><td class="font-mono text-xs">{{ r.number }}</td><td>{{ r.warehouse }}</td><td>{{ r.created_by|default:"—" }}</td><td>{{ r.needed_by|date:"d/m"|default:"—" }}</td><td class="text-right tabular-nums">{{ r.estimated_total|money }}</td>
+      <td><span class="status {% if r.status == 'approved' or r.status == 'ordered' %}status-confirmed{% elif r.status == 'submitted' %}status-pending{% elif r.status == 'rejected' %}status-danger{% else %}status-neutral{% endif %}">{{ r.get_status_display }}</span></td></tr>
+    {% empty %}<tr><td colspan="6">{% trans "Sin requisiciones." as msg %}{% include "components/empty.html" with icon_name="cart" message=msg %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

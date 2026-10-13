@@ -18,17 +18,25 @@ from .models import PreventivePlan, WorkOrder, WorkOrderPart
 
 @transaction.atomic
 def open_work_order(property_obj, *, title, user=None, **fields) -> WorkOrder:
-    wo = WorkOrder.objects.create(property=property_obj,
-                                  number=f"OT{Sequence.next_value(property_obj, 'work_order'):05d}", title=title,
-                                  **fields)
+    wo = WorkOrder.objects.create(
+        property=property_obj,
+        number=f"OT{Sequence.next_value(property_obj, 'work_order'):05d}",
+        title=title,
+        **fields,
+    )
     if wo.block_room and wo.room:
         _block(wo)
     from apps.comms.services import notify_role
 
-    notify_role(property_obj, "maintenance", _("Nueva OT %(n)s: %(t)s") % {"n": wo.number, "t": title},
-                _("Prioridad %(p)s%(r)s") % {"p": wo.get_priority_display(),
-                                             "r": f" · hab. {wo.room.number}" if wo.room else ""},
-                url=f"/mantenimiento/{wo.pk}/", level="warning" if wo.priority in ("high", "urgent") else "info")
+    notify_role(
+        property_obj,
+        "maintenance",
+        _("Nueva OT %(n)s: %(t)s") % {"n": wo.number, "t": title},
+        _("Prioridad %(p)s%(r)s")
+        % {"p": wo.get_priority_display(), "r": f" · hab. {wo.room.number}" if wo.room else ""},
+        url=f"/mantenimiento/{wo.pk}/",
+        level="warning" if wo.priority in ("high", "urgent") else "info",
+    )
     audit.log(AuditLog.Action.CREATE, wo, user=user)
     return wo
 
@@ -38,13 +46,21 @@ def _block(wo: WorkOrder):
     from apps.reservations.availability import overlapping_reservations
 
     today = wo.property.current_business_date()
-    occupied = [r for r in overlapping_reservations(wo.room, today, today + timedelta(days=1))
-                if r.status == "checked_in"]
+    occupied = [
+        r
+        for r in overlapping_reservations(wo.room, today, today + timedelta(days=1))
+        if r.status == "checked_in"
+    ]
     if occupied:
         raise ValidationError(_("La habitación está ocupada: reubique al huésped antes de bloquearla."))
-    block = RoomBlock.objects.create(property=wo.property, room=wo.room, kind=RoomBlock.Kind.MAINTENANCE,
-                                     start_date=today, end_date=today + timedelta(days=30),
-                                     reason=f"{wo.number}: {wo.title}")
+    block = RoomBlock.objects.create(
+        property=wo.property,
+        room=wo.room,
+        kind=RoomBlock.Kind.MAINTENANCE,
+        start_date=today,
+        end_date=today + timedelta(days=30),
+        reason=f"{wo.number}: {wo.title}",
+    )
     wo.room_block = block
     wo.save(update_fields=["room_block"])
 
@@ -64,12 +80,16 @@ def add_part(wo: WorkOrder, item, quantity, user=None) -> WorkOrderPart:
     from apps.inventory import services as inv
     from apps.inventory.models import StockMovement, Warehouse
 
-    warehouse = (Warehouse.objects.filter(property=wo.property, kind="maintenance", is_active=True).first()
-                 or Warehouse.objects.filter(property=wo.property, is_active=True).first())
+    warehouse = (
+        Warehouse.objects.filter(property=wo.property, kind="maintenance", is_active=True).first()
+        or Warehouse.objects.filter(property=wo.property, is_active=True).first()
+    )
     if warehouse is None:
         raise ValidationError(_("Configure un almacén."))
     mv = inv.issue(warehouse, item, quantity, kind=StockMovement.Kind.MAINTENANCE, reference=wo.number)
-    return WorkOrderPart.objects.create(work_order=wo, item=item, quantity=Decimal(quantity), cost=-mv.total_cost)
+    return WorkOrderPart.objects.create(
+        work_order=wo, item=item, quantity=Decimal(quantity), cost=-mv.total_cost
+    )
 
 
 @transaction.atomic
@@ -89,9 +109,16 @@ def close(wo: WorkOrder, user, resolution: str, labor_cost=Decimal("0")) -> Work
         Room.objects.filter(pk=wo.room_id).update(hk_status=Room.HKStatus.DIRTY)
         from apps.comms.services import notify_role
 
-        notify_role(wo.property, "housekeeping", _("Hab. %(n)s liberada por mantenimiento") % {"n": wo.room.number},
-                    _("Requiere limpieza antes de venderse."), url="/housekeeping/")
-    audit.log(AuditLog.Action.UPDATE, wo, changes={"status": ["done"], "costo": str(wo.total_cost)}, user=user)
+        notify_role(
+            wo.property,
+            "housekeeping",
+            _("Hab. %(n)s liberada por mantenimiento") % {"n": wo.room.number},
+            _("Requiere limpieza antes de venderse."),
+            url="/housekeeping/",
+        )
+    audit.log(
+        AuditLog.Action.UPDATE, wo, changes={"status": ["done"], "costo": str(wo.total_cost)}, user=user
+    )
     return wo
 
 
@@ -100,9 +127,15 @@ def generate_preventive(property_obj, today=None) -> list[WorkOrder]:
     today = today or property_obj.current_business_date()
     created = []
     for plan in PreventivePlan.objects.filter(property=property_obj, is_active=True, next_due__lte=today):
-        wo = open_work_order(property_obj, title=f"Preventivo: {plan.name}", description=plan.checklist,
-                             asset=plan.asset, room=plan.asset.room, source=WorkOrder.Source.PREVENTIVE,
-                             assigned_to=plan.assigned_to)
+        wo = open_work_order(
+            property_obj,
+            title=f"Preventivo: {plan.name}",
+            description=plan.checklist,
+            asset=plan.asset,
+            room=plan.asset.room,
+            source=WorkOrder.Source.PREVENTIVE,
+            assigned_to=plan.assigned_to,
+        )
         plan.next_due = today + timedelta(days=plan.frequency_days)
         plan.save(update_fields=["next_due"])
         created.append(wo)
@@ -111,10 +144,16 @@ def generate_preventive(property_obj, today=None) -> list[WorkOrder]:
 
 def cost_history(property_obj):
     """RF-MAN-04: costo e historial por habitación y por equipo."""
-    by_room = (WorkOrder.objects.filter(property=property_obj, room__isnull=False)
-               .values("room__number").annotate(n=Count("pk"), labor=Sum("labor_cost"),
-                                                 parts=Sum("parts__cost")).order_by("room__number"))
-    by_asset = (WorkOrder.objects.filter(property=property_obj, asset__isnull=False)
-                .values("asset__code", "asset__name").annotate(n=Count("pk"), labor=Sum("labor_cost"),
-                                                                parts=Sum("parts__cost")).order_by("asset__code"))
+    by_room = (
+        WorkOrder.objects.filter(property=property_obj, room__isnull=False)
+        .values("room__number")
+        .annotate(n=Count("pk"), labor=Sum("labor_cost"), parts=Sum("parts__cost"))
+        .order_by("room__number")
+    )
+    by_asset = (
+        WorkOrder.objects.filter(property=property_obj, asset__isnull=False)
+        .values("asset__code", "asset__name")
+        .annotate(n=Count("pk"), labor=Sum("labor_cost"), parts=Sum("parts__cost"))
+        .order_by("asset__code")
+    )
     return list(by_room), list(by_asset)

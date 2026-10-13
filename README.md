@@ -6,7 +6,7 @@ porque el sistema se usa para enseñar gestión hotelera.
 
 La fuente de verdad es el documento de requerimientos (`docs/vault/01-Requerimientos`).
 
-**Estado:** fases 0 y 1 terminadas (base y MVP operativo con restaurante). Siguiente: fase 2.
+**Estado:** fases 0, 1 y 2 terminadas (base, operación del hotel con restaurante, almacén, compras, mantenimiento y portal del huésped). Siguiente: fase 3.
 
 ## Puesta en marcha (Windows)
 
@@ -58,6 +58,25 @@ Abra http://127.0.0.1:8000. `seed_pms --demo` crea un usuario de práctica por r
 
 Si en algún momento usa el pooler en modo transacción (puerto 6543), ponga
 `DB_DISABLE_SERVER_SIDE_CURSORS=True`.
+
+## Tareas programadas
+
+Recordatorios 48 h, reenvío a SUNAT, preventivo y alertas de almacén:
+
+```bash
+.venv\Scripts\python manage.py run_scheduler
+```
+
+Prográmelo cada 15 minutos con el Programador de tareas de Windows: programa `.venv\Scripts\python.exe`,
+argumentos `manage.py run_scheduler` e iniciar en la carpeta del proyecto.
+
+## Traducciones del portal
+
+Los textos para el huésped están en `locale/catalog.py`. Después de editarlos:
+
+```bash
+.venv\Scripts\python scripts\compile_translations.py
+```
 
 ## Pruebas y calidad
 

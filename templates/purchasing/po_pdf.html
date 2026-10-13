@@ -1,0 +1,14 @@
+{% load pms %}<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@page { size: a4 portrait; margin: 1.5cm; } body { font-family: Helvetica; font-size: 9.5pt; color: #292524; }
+h1 { color: #7a1e2c; font-size: 16pt; margin: 0; } table.l { width: 100%; border-collapse: collapse; margin-top: 12px; }
+table.l th { background: #f5f5f4; text-align: left; padding: 5px; border-bottom: 1px solid #a8a29e; } table.l td { padding: 5px; border-bottom: 0.5px solid #e7e5e4; }
+.r { text-align: right; } .box { border: 1.5px solid #7a1e2c; padding: 8px; text-align: center; font-weight: bold; }
+</style></head><body>
+<table width="100%"><tr><td width="60%"><h1>{{ property.name }}</h1><p>{{ property.legal_name }} · RUC {{ property.ruc }}<br>{{ property.address }}<br>{{ property.phone }} · {{ property.email }}</p></td>
+<td><div class="box">ORDEN DE COMPRA<br>{{ po.number }}<br>{{ po.order_date|date:"d/m/Y" }}</div></td></tr></table>
+<p><b>Proveedor:</b> {{ po.supplier.name }} · RUC {{ po.supplier.ruc }}<br><b>Entrega:</b> {{ po.warehouse }} · {{ po.expected_date|date:"d/m/Y" }}<br><b>Condición de pago:</b> {{ po.supplier.payment_days }} días</p>
+<table class="l"><tr><th>Cant.</th><th>Unidad</th><th>Descripción</th><th class="r">P. unit.</th><th class="r">Subtotal</th></tr>
+{% for ln in lines %}<tr><td>{{ ln.quantity|floatformat:"-3" }}</td><td>{{ ln.item.purchase_unit }}</td><td>{{ ln.item.name }}</td><td class="r">{{ ln.unit_price }}</td><td class="r">{{ ln.quantity|mul:ln.unit_price }}</td></tr>{% endfor %}
+<tr><td colspan="4" class="r">Subtotal</td><td class="r">{{ po.total }}</td></tr><tr><td colspan="4" class="r">IGV 18%</td><td class="r">{{ igv }}</td></tr><tr><td colspan="4" class="r"><b>TOTAL S/</b></td><td class="r"><b>{{ total }}</b></td></tr></table>
+{% if po.notes %}<p>{{ po.notes }}</p>{% endif %}
+<p style="margin-top:40px">______________________<br>Autorizado</p></body></html>

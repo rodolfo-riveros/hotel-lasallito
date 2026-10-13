@@ -1,0 +1,330 @@
+#
+msgid ""
+msgstr ""
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Saltar al contenido"
+msgstr "Skip to content"
+
+msgid "Idioma"
+msgstr "Language"
+
+msgid "Volver"
+msgstr "Back"
+
+msgid "Enviar"
+msgstr "Send"
+
+msgid "Hola, %(name)s"
+msgstr "Hello, %(name)s"
+
+msgid "Reserva"
+msgstr "Booking"
+
+msgid "Llegada"
+msgstr "Arrival"
+
+msgid "Salida"
+msgstr "Departure"
+
+msgid "desde"
+msgstr "from"
+
+msgid "hasta"
+msgstr "until"
+
+msgid "Habitación"
+msgstr "Room"
+
+msgid "Huéspedes"
+msgstr "Guests"
+
+msgid "Pre-check-in en línea"
+msgstr "Online pre-check-in"
+
+msgid "Completado. ¡Gracias!"
+msgstr "Completed. Thank you!"
+
+msgid "Ahorre tiempo en recepción: datos, pasaporte y firma."
+msgstr "Save time at the front desk: details, passport and signature."
+
+msgid "Pagar en línea"
+msgstr "Pay online"
+
+msgid "Saldo"
+msgstr "Balance"
+
+msgid "Depósito"
+msgstr "Deposit"
+
+msgid "Pedir un servicio"
+msgstr "Request a service"
+
+msgid "Toallas, oxígeno, despertador, traslado..."
+msgstr "Towels, oxygen, wake-up call, transfer..."
+
+msgid "Mi cuenta y comprobantes"
+msgstr "My bill and receipts"
+
+msgid "Consumos y boletas o facturas"
+msgstr "Charges and receipts or invoices"
+
+msgid "Cuéntenos su experiencia"
+msgstr "Tell us about your stay"
+
+msgid "Mis solicitudes"
+msgstr "My requests"
+
+msgid "Consejos para la altura"
+msgstr "Altitude tips"
+
+msgid ""
+"Urubamba está a 2 871 msnm. Beba agua, coma ligero y descanse el primer día."
+" Tenemos mate de coca y oxígeno a su disposición."
+msgstr ""
+"Urubamba is 2,871 m above sea level. Drink water, eat light and rest on your"
+" first day. Coca tea and oxygen are available."
+
+msgid ""
+"Complete sus datos antes de llegar. En recepción solo verificaremos su "
+"documento."
+msgstr ""
+"Complete your details before you arrive. At the front desk we will only "
+"check your ID."
+
+msgid ""
+"Sus datos se guardan cifrados y solo se usan para su registro de huésped."
+msgstr ""
+"Your data is stored encrypted and used only for your guest registration."
+
+msgid "¡Gracias! Su pre-check-in está completo."
+msgstr "Thank you! Your pre-check-in is complete."
+
+msgid "Enviar solicitud"
+msgstr "Send request"
+
+msgid "Recibimos su solicitud."
+msgstr "We received your request."
+
+msgid "Mi cuenta"
+msgstr "My bill"
+
+msgid "Pago"
+msgstr "Payment"
+
+msgid "¿Cómo fue su estadía?"
+msgstr "How was your stay?"
+
+msgid "Califique de 1 (malo) a 5 (excelente)."
+msgstr "Rate from 1 (poor) to 5 (excellent)."
+
+msgid "¡Gracias por su opinión! Esperamos verle de nuevo en el Valle Sagrado."
+msgstr ""
+"Thank you for your feedback! We hope to see you again in the Sacred Valley."
+
+msgid "Nombres"
+msgstr "First name(s)"
+
+msgid "Apellidos"
+msgstr "Last name(s)"
+
+msgid "Documento"
+msgstr "ID document"
+
+msgid "Pasaporte"
+msgstr "Passport"
+
+msgid "Carné de extranjería"
+msgstr "Foreigner ID card"
+
+msgid "Número de documento"
+msgstr "Document number"
+
+msgid "Nacionalidad (código de país, ej. US, BR)"
+msgstr "Nationality (country code, e.g. US, BR)"
+
+msgid "Fecha de nacimiento"
+msgstr "Date of birth"
+
+msgid "Correo"
+msgstr "Email"
+
+msgid "Teléfono / WhatsApp"
+msgstr "Phone / WhatsApp"
+
+msgid "Fecha de ingreso al Perú"
+msgstr "Date of entry into Peru"
+
+msgid "Hora estimada de llegada"
+msgstr "Estimated arrival time"
+
+msgid "Alergias o condiciones de salud"
+msgstr "Allergies or health conditions"
+
+msgid "Foto del documento"
+msgstr "Photo of your ID"
+
+msgid ""
+"Autorizo el tratamiento de mis datos personales según la Ley 29733 y acepto "
+"las normas del hotel"
+msgstr ""
+"I authorize the processing of my personal data under Peruvian Law 29733 and "
+"accept the hotel rules"
+
+msgid "Firma del huésped"
+msgstr "Guest signature"
+
+msgid "Firme dentro del recuadro."
+msgstr "Sign inside the box."
+
+msgid "Borrar firma"
+msgstr "Clear signature"
+
+msgid "Área de firma"
+msgstr "Signature area"
+
+msgid "Este campo es obligatorio."
+msgstr "This field is required."
+
+msgid "tipo"
+msgstr "type"
+
+msgid "detalle"
+msgstr "details"
+
+msgid "para"
+msgstr "for"
+
+msgid "Toallas o amenities"
+msgstr "Towels or amenities"
+
+msgid "Oxígeno"
+msgstr "Oxygen"
+
+msgid "Despertador"
+msgstr "Wake-up call"
+
+msgid "Traslado"
+msgstr "Transfer"
+
+msgid "Limpieza de habitación"
+msgstr "Room cleaning"
+
+msgid "Algo no funciona"
+msgstr "Something is not working"
+
+msgid "Otro"
+msgstr "Other"
+
+msgid "Recibido"
+msgstr "Received"
+
+msgid "En atención"
+msgstr "In progress"
+
+msgid "Atendido"
+msgstr "Done"
+
+msgid "Cancelado"
+msgstr "Cancelled"
+
+msgid "experiencia general"
+msgstr "overall experience"
+
+msgid "habitación"
+msgstr "room"
+
+msgid "limpieza"
+msgstr "cleanliness"
+
+msgid "atención"
+msgstr "service"
+
+msgid "desayuno"
+msgstr "breakfast"
+
+msgid "nos recomendaría"
+msgstr "would recommend us"
+
+msgid "comentarios"
+msgstr "comments"
+
+msgid "Pendiente"
+msgstr "Pending"
+
+msgid "Confirmada"
+msgstr "Confirmed"
+
+msgid "Garantizada"
+msgstr "Guaranteed"
+
+msgid "Check-in"
+msgstr "Checked in"
+
+msgid "Check-out"
+msgstr "Checked out"
+
+msgid "Confirmación de reserva"
+msgstr "Booking confirmation"
+
+msgid ""
+"Estimado(a) %(name)s, gracias por elegirnos. Estos son los datos de su "
+"reserva:"
+msgstr ""
+"Dear %(name)s, thank you for choosing us. These are your booking details:"
+
+msgid "Huésped"
+msgstr "Guest"
+
+msgid "check-in desde"
+msgstr "check-in from"
+
+msgid "check-out hasta"
+msgstr "check-out until"
+
+msgid "Noches"
+msgstr "Nights"
+
+msgid "Personas"
+msgstr "Guests"
+
+msgid "adultos"
+msgstr "adults"
+
+msgid "niños"
+msgstr "children"
+
+msgid "Tarifa"
+msgstr "Rate"
+
+msgid "Total del alojamiento"
+msgstr "Accommodation total"
+
+msgid "Política de cancelación"
+msgstr "Cancellation policy"
+
+msgid ""
+"Urubamba está a 2 871 msnm. Le recomendamos descansar y tomar mate de coca "
+"al llegar. Contamos con oxígeno y custodia de equipaje si viaja a Machu "
+"Picchu."
+msgstr ""
+"Urubamba is 2,871 m above sea level. We recommend resting and drinking coca "
+"tea on arrival. We offer oxygen and luggage storage if you travel to Machu "
+"Picchu."
+
+msgid "Complete su pre-check-in en línea"
+msgstr "Complete your online pre-check-in"
+
+msgid "Solo alojamiento"
+msgstr "Room only"
+
+msgid "Desayuno incluido"
+msgstr "Breakfast included"
+
+msgid "Media pensión"
+msgstr "Half board"
+
+msgid "Pensión completa"
+msgstr "Full board"

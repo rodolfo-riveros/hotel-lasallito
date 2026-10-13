@@ -678,3 +678,304 @@ TEMPLATES = [
         "Multa: S/ {{ reservation.cancellation_penalty }}.",
     ),
 ]
+
+
+@transaction.atomic
+def load_phase2(hotel):
+    """Almacén, recetas, proveedores y equipos de práctica (fase 2)."""
+    from apps.housekeeping.models import MinibarItem
+    from apps.inventory import services as inv
+    from apps.inventory.models import Item, ItemCategory, RecipeLine, Warehouse
+    from apps.maintenance.models import Asset, PreventivePlan
+    from apps.pos.models import MenuItem, Outlet
+    from apps.purchasing.models import Supplier
+    from apps.rooms.models import Room
+
+    if Warehouse.objects.filter(property=hotel).exists():
+        return 0
+    wh = {}
+    for code, name, kind in [
+        ("GEN", "Almacén general", "general"),
+        ("COC", "Cocina", "kitchen"),
+        ("BAR", "Bar", "bar"),
+        ("HK", "Housekeeping", "housekeeping"),
+        ("MAN", "Mantenimiento", "maintenance"),
+    ]:
+        wh[kind] = Warehouse.objects.create(property=hotel, code=code, name=name, kind=kind)
+    Outlet.objects.filter(property=hotel, kind__in=["restaurant", "room_service"]).update(
+        warehouse=wh["kitchen"]
+    )
+    Outlet.objects.filter(property=hotel, kind="bar").update(warehouse=wh["bar"])
+    cats = {
+        n: ItemCategory.objects.create(property=hotel, name=n)
+        for n in ["Abarrotes", "Carnes y pescados", "Verduras", "Bebidas", "Amenities", "Mantenimiento"]
+    }
+    # (código, nombre, categoría, unidad, unidad compra, factor, mín, máx, perecible, almacén, stock, costo unitario)
+    items = [
+        (
+            "LOMO",
+            "Lomo de res",
+            "Carnes y pescados",
+            "g",
+            "kg",
+            1000,
+            2000,
+            8000,
+            True,
+            "kitchen",
+            5000,
+            D("0.045"),
+        ),
+        (
+            "TRUCHA",
+            "Trucha fresca",
+            "Carnes y pescados",
+            "g",
+            "kg",
+            1000,
+            2000,
+            6000,
+            True,
+            "kitchen",
+            4000,
+            D("0.030"),
+        ),
+        (
+            "PAPA",
+            "Papa amarilla",
+            "Verduras",
+            "g",
+            "saco 50 kg",
+            50000,
+            5000,
+            50000,
+            True,
+            "kitchen",
+            20000,
+            D("0.0035"),
+        ),
+        (
+            "ARROZ",
+            "Arroz",
+            "Abarrotes",
+            "g",
+            "saco 50 kg",
+            50000,
+            5000,
+            50000,
+            False,
+            "kitchen",
+            25000,
+            D("0.0042"),
+        ),
+        (
+            "QUINUA",
+            "Quinua",
+            "Abarrotes",
+            "g",
+            "bolsa 5 kg",
+            5000,
+            2000,
+            10000,
+            False,
+            "kitchen",
+            6000,
+            D("0.012"),
+        ),
+        (
+            "PISCO",
+            "Pisco quebranta",
+            "Bebidas",
+            "ml",
+            "botella 700 ml",
+            700,
+            1400,
+            7000,
+            False,
+            "bar",
+            4200,
+            D("0.060"),
+        ),
+        ("LIMON", "Limón", "Verduras", "und", "malla 100", 100, 50, 300, True, "bar", 150, D("0.20")),
+        (
+            "COCA",
+            "Hojas de coca (bolsitas)",
+            "Bebidas",
+            "und",
+            "caja 100",
+            100,
+            100,
+            500,
+            False,
+            "bar",
+            300,
+            D("0.15"),
+        ),
+        (
+            "AGUA",
+            "Agua mineral 625 ml",
+            "Bebidas",
+            "und",
+            "paquete 15",
+            15,
+            30,
+            150,
+            False,
+            "housekeeping",
+            60,
+            D("1.80"),
+        ),
+        (
+            "CUSQ",
+            "Cerveza Cusqueña",
+            "Bebidas",
+            "und",
+            "caja 12",
+            12,
+            24,
+            96,
+            False,
+            "housekeeping",
+            36,
+            D("4.50"),
+        ),
+        (
+            "SHAMP",
+            "Shampoo 30 ml",
+            "Amenities",
+            "und",
+            "caja 100",
+            100,
+            100,
+            600,
+            False,
+            "housekeeping",
+            250,
+            D("0.90"),
+        ),
+        (
+            "JABON",
+            "Jabón 20 g",
+            "Amenities",
+            "und",
+            "caja 100",
+            100,
+            100,
+            600,
+            False,
+            "housekeeping",
+            80,
+            D("0.60"),
+        ),
+        (
+            "FOCO",
+            "Foco LED 9 W",
+            "Mantenimiento",
+            "und",
+            "caja 10",
+            10,
+            10,
+            50,
+            False,
+            "maintenance",
+            20,
+            D("6.50"),
+        ),
+        (
+            "RESIST",
+            "Resistencia de terma",
+            "Mantenimiento",
+            "und",
+            "unidad",
+            1,
+            2,
+            6,
+            False,
+            "maintenance",
+            3,
+            D("45.00"),
+        ),
+    ]
+    objs = {}
+    for code, name, cat, unit, pu, factor, mn, mx, perishable, kind, qty, cost in items:
+        it = Item.objects.create(
+            property=hotel,
+            code=code,
+            name=name,
+            category=cats[cat],
+            unit=unit,
+            purchase_unit=pu,
+            purchase_factor=factor,
+            min_stock=mn,
+            max_stock=mx,
+            is_perishable=perishable,
+        )
+        inv.receive(
+            wh[kind],
+            it,
+            qty,
+            cost,
+            kind="initial",
+            reference="SALDO-INICIAL",
+            lot_code="L001" if perishable else "",
+            expiry=(
+                hotel.current_business_date() + timedelta(days=20 if perishable else 0)
+                if perishable
+                else None
+            ),
+        )
+        objs[code] = it
+    recipes = {
+        "Lomo saltado": [("LOMO", 180), ("PAPA", 200), ("ARROZ", 150)],
+        "Trucha del Urubamba a la plancha": [("TRUCHA", 250), ("PAPA", 150)],
+        "Sopa de quinua": [("QUINUA", 60), ("PAPA", 80)],
+        "Pisco sour": [("PISCO", 90), ("LIMON", 1)],
+        "Mate de coca": [("COCA", 1)],
+    }
+    for dish, lines in recipes.items():
+        mi = MenuItem.objects.filter(property=hotel, name=dish).first()
+        if mi:
+            for code, q in lines:
+                RecipeLine.objects.create(menu_item=mi, item=objs[code], quantity=q)
+    MinibarItem.objects.filter(property=hotel, name__startswith="Agua").update(inventory_item=objs["AGUA"])
+    MinibarItem.objects.filter(property=hotel, name__startswith="Cerveza").update(inventory_item=objs["CUSQ"])
+    for prefix, name, days in [
+        ("2060555111", "Distribuidora Andina de Alimentos S.A.C. (ficticia)", 15),
+        ("2060555222", "Licores del Valle E.I.R.L. (ficticia)", 30),
+        ("2060555333", "Ferretería Urubamba S.R.L. (ficticia)", 0),
+    ]:
+        Supplier.objects.create(
+            property=hotel,
+            ruc=_ruc(prefix),
+            name=name,
+            payment_days=days,
+            email=f"ventas{prefix[-3:]}@example.com",
+            rating=4,
+        )
+    rooms = list(Room.objects.filter(property=hotel)[:3])
+    assets = [
+        ("TER-101", "Terma eléctrica 80 L", "heater", rooms[0] if rooms else None, "", 30),
+        ("CAL-01", "Caldero de agua caliente", "boiler", None, "Sala de máquinas", 90),
+        ("EXT-01", "Extintor PQS 6 kg recepción", "extinguisher", None, "Recepción", 180),
+        ("OXI-01", "Concentrador de oxígeno", "oxygen", None, "Recepción", 30),
+    ]
+    for code, name, kind, room, area, freq in assets:
+        a = Asset.objects.create(
+            property=hotel,
+            code=code,
+            name=name,
+            kind=kind,
+            room=room,
+            area=area,
+            value=D("1500"),
+            acquisition_date=hotel.current_business_date() - timedelta(days=400),
+        )
+        PreventivePlan.objects.create(
+            property=hotel,
+            asset=a,
+            name=f"Revisión de {name.lower()}",
+            frequency_days=freq,
+            next_due=hotel.current_business_date() + timedelta(days=3),
+            checklist="Inspección visual\nPrueba de funcionamiento\nLimpieza",
+        )
+    return len(items)

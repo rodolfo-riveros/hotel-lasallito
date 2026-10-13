@@ -19,6 +19,9 @@ HOTKEYS = {
     "accounts": "u",
     "settings": "s",
     "audit": "a",
+    "maintenance": "m",
+    "inventory": "w",
+    "purchasing": "o",
 }
 
 # Prefijo de URL que marca como activo el ítem (para módulos con varias pantallas).
@@ -36,6 +39,9 @@ ACTIVE_PREFIX = {
     "comms": "/comunicaciones/",
     "billing": "/facturacion/",
     "reports": "/reportes/",
+    "maintenance": "/mantenimiento/",
+    "inventory": "/almacen/",
+    "purchasing": "/compras/",
 }
 
 

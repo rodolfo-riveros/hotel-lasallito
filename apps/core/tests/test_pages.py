@@ -8,13 +8,14 @@ pytestmark = pytest.mark.django_db
 
 @pytest.fixture
 def demo(hotel, roles, make_user):
-    from apps.core.demo import load_bookings, load_operations
+    from apps.core.demo import load_bookings, load_operations, load_phase2
 
     admin = make_user("admin", role="admin")
     hotel.business_date = None
     hotel.save()
     _t, _r, guests = load_operations(hotel)
     load_bookings(hotel, admin, guests)
+    load_phase2(hotel)
     return admin
 
 
@@ -68,6 +69,28 @@ PAGES = [
     "comms:automations",
     "comms:notifications",
     "comms:template_list",
+    "inventory:stock",
+    "inventory:movement",
+    "inventory:alerts",
+    "inventory:counts",
+    "inventory:waste_list",
+    "inventory:recipes",
+    "inventory:item_list",
+    "inventory:valuation",
+    "inventory:warehouse_list",
+    "purchasing:requisition_list",
+    "purchasing:requisition_create",
+    "purchasing:po_list",
+    "purchasing:payables",
+    "purchasing:supplier_list",
+    "maintenance:wo_list",
+    "maintenance:wo_create",
+    "maintenance:costs",
+    "maintenance:asset_list",
+    "maintenance:plan_list",
+    "portal:staff_requests",
+    "portal:staff_surveys",
+    "portal:staff_complaints",
 ]
 
 

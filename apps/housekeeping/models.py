@@ -176,6 +176,13 @@ class MinibarItem(PropertyScopedModel):
 
     name = models.CharField(_("artículo"), max_length=100)
     price = models.DecimalField(_("precio"), max_digits=10, decimal_places=2)
+    inventory_item = models.ForeignKey(
+        "inventory.Item",
+        verbose_name=_("artículo de almacén"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     is_active = models.BooleanField(_("activo"), default=True)
 
     class Meta:

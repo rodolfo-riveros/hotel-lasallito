@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ count }}{% endblock %}
+{% block content %}
+<a href="{% url 'inventory:counts' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Inventarios" %}</a>
+<h1 class="page-title mt-2">{{ count }}</h1><p class="page-subtitle mb-6">{{ count.get_status_display }} · RF-ALM-06</p>
+<form method="post" class="card overflow-hidden">{% csrf_token %}
+  <table class="table"><thead><tr><th>{% trans "Artículo" %}</th><th class="!text-right">{% trans "Sistema" %}</th><th class="!text-right">{% trans "Contado" %}</th><th class="!text-right">{% trans "Diferencia" %}</th></tr></thead>
+    <tbody>{% for ln in lines %}<tr><td>{{ ln.item.name }} <span class="text-xs text-ink-500">{{ ln.item.get_unit_display }}</span></td><td class="text-right tabular-nums">{{ ln.system_qty|floatformat:"-3" }}</td>
+      <td class="text-right">{% if count.status == "open" %}<input name="line-{{ ln.pk }}" value="{{ ln.counted_qty|default_if_none:''|floatformat:'-3' }}" inputmode="decimal" class="!w-28 text-right">{% else %}{{ ln.counted_qty|floatformat:"-3" }}{% endif %}</td>
+      <td class="text-right tabular-nums {% if ln.difference < 0 %}text-state-danger{% elif ln.difference > 0 %}text-state-dirty{% endif %}">{{ ln.difference|default_if_none:"—" }}</td></tr>{% endfor %}</tbody></table>
+  {% if count.status == "open" %}<div class="flex justify-end gap-2 border-t border-ink-100 px-5 py-4 dark:border-ink-800"><button class="btn-secondary">{% trans "Guardar avance" %}</button>
+    <button name="close" value="1" class="btn-primary" onclick="return confirm('{% trans '¿Cerrar el inventario? Se ajustará el stock con las diferencias.' %}')">{% trans "Cerrar y ajustar" %}</button></div>{% endif %}
+</form>
+{% endblock %}

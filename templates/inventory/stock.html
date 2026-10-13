@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Almacén" %}{% endblock %}
+{% block content %}
+{% can "inventory.create" as can_move %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Administración" %}</p><h1 class="page-title">{% trans "Almacén" %}</h1>
+    <p class="page-subtitle">{% trans "Valor del inventario" %}: <b>{{ total|money }}</b>{% if low %} · <a href="{% url 'inventory:alerts' %}" class="text-state-danger hover:underline">{{ low }} {% trans "bajo mínimo" %}</a>{% endif %}{% if expiring %} · <a href="{% url 'inventory:alerts' %}" class="text-state-dirty hover:underline">{{ expiring }} {% trans "lotes por vencer" %}</a>{% endif %}</p></div>
+  {% if can_move %}<div class="flex flex-wrap gap-2">
+    <a href="{% url 'inventory:movement' %}?kind=in" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Ingreso" %}</a>
+    <a href="{% url 'inventory:movement' %}?kind=out" class="btn-secondary">{% trans "Salida" %}</a>
+    <a href="{% url 'inventory:movement' %}?kind=transfer" class="btn-secondary">{% trans "Transferencia" %}</a></div>{% endif %}
+</div>
+{% include "inventory/_nav.html" %}
+<div class="card overflow-hidden">
+  <form class="flex flex-wrap gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Buscar artículo' %}" class="!w-64" data-search>
+    <select name="warehouse" class="!w-auto" onchange="this.form.submit()"><option value="">{% trans "Todos los almacenes" %}</option>{% for w in warehouses %}<option value="{{ w.pk }}" {% if wh == w.pk|stringformat:"s" %}selected{% endif %}>{{ w }}</option>{% endfor %}</select>
+  </form>
+  <div class="overflow-x-auto"><table class="table">
+    <thead><tr><th>{% trans "Artículo" %}</th><th>{% trans "Almacén" %}</th><th class="!text-right">{% trans "Cantidad" %}</th><th>{% trans "Unidad" %}</th><th class="!text-right">{% trans "Costo prom." %}</th><th class="!text-right">{% trans "Valor" %}</th><th>{% trans "Estado" %}</th></tr></thead>
+    <tbody>{% for s in rows %}
+      <tr class="cursor-pointer" onclick="location='{% url 'inventory:kardex' s.item.pk %}'"><td><span class="font-medium">{{ s.item.name }}</span><p class="font-mono text-xs text-ink-500">{{ s.item.code }}</p></td><td>{{ s.warehouse }}</td>
+        <td class="text-right tabular-nums">{{ s.quantity|floatformat:"-3" }}</td><td>{{ s.item.get_unit_display }}</td><td class="text-right tabular-nums">{{ s.avg_cost|floatformat:4 }}</td><td class="text-right tabular-nums">{{ s.value|money }}</td>
+        <td>{% if s.quantity < 0 %}<span class="status status-danger">{% trans "Negativo" %}</span>{% elif s.item.min_stock and s.quantity < s.item.min_stock %}<span class="status status-dirty">{% trans "Bajo mínimo" %}</span>{% else %}<span class="status status-available">OK</span>{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="7">{% trans "Sin stock registrado." as msg %}{% include "components/empty.html" with icon_name="box" message=msg %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</div>
+{% endblock %}

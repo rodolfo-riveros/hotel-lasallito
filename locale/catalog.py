@@ -1,0 +1,156 @@
+"""Catálogo de traducciones de lo que ve el huésped (RNF-I18N-01).
+
+Texto en español → (inglés, portugués). Para agregar un idioma, añada una columna
+y su código en LANGS. Compile con:  python scripts/compile_translations.py
+"""
+
+LANGS = ("en", "pt_BR")
+
+CATALOG = {
+    # Portal: navegación y textos generales
+    "Saltar al contenido": ("Skip to content", "Pular para o conteúdo"),
+    "Idioma": ("Language", "Idioma"),
+    "Volver": ("Back", "Voltar"),
+    "Enviar": ("Send", "Enviar"),
+    "Hola, %(name)s": ("Hello, %(name)s", "Olá, %(name)s"),
+    "Reserva": ("Booking", "Reserva"),
+    "Llegada": ("Arrival", "Chegada"),
+    "Salida": ("Departure", "Saída"),
+    "desde": ("from", "a partir das"),
+    "hasta": ("until", "até"),
+    "Habitación": ("Room", "Quarto"),
+    "Huéspedes": ("Guests", "Hóspedes"),
+    "Pre-check-in en línea": ("Online pre-check-in", "Pré-check-in on-line"),
+    "Completado. ¡Gracias!": ("Completed. Thank you!", "Concluído. Obrigado!"),
+    "Ahorre tiempo en recepción: datos, pasaporte y firma.": (
+        "Save time at the front desk: details, passport and signature.",
+        "Economize tempo na recepção: dados, passaporte e assinatura.",
+    ),
+    "Pagar en línea": ("Pay online", "Pagar on-line"),
+    "Saldo": ("Balance", "Saldo"),
+    "Depósito": ("Deposit", "Depósito"),
+    "Pedir un servicio": ("Request a service", "Solicitar um serviço"),
+    "Toallas, oxígeno, despertador, traslado...": (
+        "Towels, oxygen, wake-up call, transfer...",
+        "Toalhas, oxigênio, despertador, traslado...",
+    ),
+    "Mi cuenta y comprobantes": ("My bill and receipts", "Minha conta e comprovantes"),
+    "Consumos y boletas o facturas": ("Charges and receipts or invoices", "Consumos e notas fiscais"),
+    "Cuéntenos su experiencia": ("Tell us about your stay", "Conte-nos sobre sua estadia"),
+    "Mis solicitudes": ("My requests", "Minhas solicitações"),
+    "Consejos para la altura": ("Altitude tips", "Dicas para a altitude"),
+    "Urubamba está a 2 871 msnm. Beba agua, coma ligero y descanse el primer día. Tenemos mate de coca y oxígeno a su disposición.": (
+        "Urubamba is 2,871 m above sea level. Drink water, eat light and rest on your first day. Coca tea and oxygen are available.",
+        "Urubamba fica a 2.871 m de altitude. Beba água, coma leve e descanse no primeiro dia. Temos chá de coca e oxigênio à disposição.",
+    ),
+    "Complete sus datos antes de llegar. En recepción solo verificaremos su documento.": (
+        "Complete your details before you arrive. At the front desk we will only check your ID.",
+        "Preencha seus dados antes de chegar. Na recepção só verificaremos seu documento.",
+    ),
+    "Sus datos se guardan cifrados y solo se usan para su registro de huésped.": (
+        "Your data is stored encrypted and used only for your guest registration.",
+        "Seus dados são armazenados criptografados e usados apenas para seu registro.",
+    ),
+    "¡Gracias! Su pre-check-in está completo.": (
+        "Thank you! Your pre-check-in is complete.",
+        "Obrigado! Seu pré-check-in está concluído.",
+    ),
+    "Enviar solicitud": ("Send request", "Enviar solicitação"),
+    "Recibimos su solicitud.": ("We received your request.", "Recebemos sua solicitação."),
+    "Mi cuenta": ("My bill", "Minha conta"),
+    "Pago": ("Payment", "Pagamento"),
+    "¿Cómo fue su estadía?": ("How was your stay?", "Como foi sua estadia?"),
+    "Califique de 1 (malo) a 5 (excelente).": (
+        "Rate from 1 (poor) to 5 (excellent).",
+        "Avalie de 1 (ruim) a 5 (excelente).",
+    ),
+    "¡Gracias por su opinión! Esperamos verle de nuevo en el Valle Sagrado.": (
+        "Thank you for your feedback! We hope to see you again in the Sacred Valley.",
+        "Obrigado pela sua opinião! Esperamos vê-lo novamente no Vale Sagrado.",
+    ),
+    # Formulario de pre-check-in
+    "Nombres": ("First name(s)", "Nome(s)"),
+    "Apellidos": ("Last name(s)", "Sobrenome(s)"),
+    "Documento": ("ID document", "Documento"),
+    "Pasaporte": ("Passport", "Passaporte"),
+    "Carné de extranjería": ("Foreigner ID card", "Carteira de estrangeiro"),
+    "Número de documento": ("Document number", "Número do documento"),
+    "Nacionalidad (código de país, ej. US, BR)": (
+        "Nationality (country code, e.g. US, BR)",
+        "Nacionalidade (código do país, ex. US, BR)",
+    ),
+    "Fecha de nacimiento": ("Date of birth", "Data de nascimento"),
+    "Correo": ("Email", "E-mail"),
+    "Teléfono / WhatsApp": ("Phone / WhatsApp", "Telefone / WhatsApp"),
+    "Fecha de ingreso al Perú": ("Date of entry into Peru", "Data de entrada no Peru"),
+    "Hora estimada de llegada": ("Estimated arrival time", "Horário previsto de chegada"),
+    "Alergias o condiciones de salud": ("Allergies or health conditions", "Alergias ou condições de saúde"),
+    "Foto del documento": ("Photo of your ID", "Foto do documento"),
+    "Autorizo el tratamiento de mis datos personales según la Ley 29733 y acepto las normas del hotel": (
+        "I authorize the processing of my personal data under Peruvian Law 29733 and accept the hotel rules",
+        "Autorizo o tratamento dos meus dados pessoais conforme a Lei 29733 e aceito as normas do hotel",
+    ),
+    "Firma del huésped": ("Guest signature", "Assinatura do hóspede"),
+    "Firme dentro del recuadro.": ("Sign inside the box.", "Assine dentro do quadro."),
+    "Borrar firma": ("Clear signature", "Apagar assinatura"),
+    "Área de firma": ("Signature area", "Área de assinatura"),
+    "Este campo es obligatorio.": ("This field is required.", "Este campo é obrigatório."),
+    # Solicitudes de servicio
+    "tipo": ("type", "tipo"),
+    "detalle": ("details", "detalhes"),
+    "para": ("for", "para"),
+    "Toallas o amenities": ("Towels or amenities", "Toalhas ou amenities"),
+    "Oxígeno": ("Oxygen", "Oxigênio"),
+    "Despertador": ("Wake-up call", "Despertador"),
+    "Traslado": ("Transfer", "Traslado"),
+    "Limpieza de habitación": ("Room cleaning", "Limpeza do quarto"),
+    "Algo no funciona": ("Something is not working", "Algo não funciona"),
+    "Otro": ("Other", "Outro"),
+    "Recibido": ("Received", "Recebido"),
+    "En atención": ("In progress", "Em atendimento"),
+    "Atendido": ("Done", "Atendido"),
+    "Cancelado": ("Cancelled", "Cancelado"),
+    # Encuesta
+    "experiencia general": ("overall experience", "experiência geral"),
+    "habitación": ("room", "quarto"),
+    "limpieza": ("cleanliness", "limpeza"),
+    "atención": ("service", "atendimento"),
+    "desayuno": ("breakfast", "café da manhã"),
+    "nos recomendaría": ("would recommend us", "nos recomendaria"),
+    "comentarios": ("comments", "comentários"),
+    # Estados de reserva
+    "Pendiente": ("Pending", "Pendente"),
+    "Confirmada": ("Confirmed", "Confirmada"),
+    "Garantizada": ("Guaranteed", "Garantida"),
+    "Check-in": ("Checked in", "Check-in"),
+    "Check-out": ("Checked out", "Check-out"),
+    # PDF de confirmación
+    "Confirmación de reserva": ("Booking confirmation", "Confirmação de reserva"),
+    "Estimado(a) %(name)s, gracias por elegirnos. Estos son los datos de su reserva:": (
+        "Dear %(name)s, thank you for choosing us. These are your booking details:",
+        "Prezado(a) %(name)s, obrigado por nos escolher. Estes são os dados da sua reserva:",
+    ),
+    "Huésped": ("Guest", "Hóspede"),
+    "check-in desde": ("check-in from", "check-in a partir das"),
+    "check-out hasta": ("check-out until", "check-out até"),
+    "Noches": ("Nights", "Noites"),
+    "Personas": ("Guests", "Pessoas"),
+    "adultos": ("adults", "adultos"),
+    "niños": ("children", "crianças"),
+    "Tarifa": ("Rate", "Tarifa"),
+    "Total del alojamiento": ("Accommodation total", "Total da hospedagem"),
+    "Política de cancelación": ("Cancellation policy", "Política de cancelamento"),
+    "Urubamba está a 2 871 msnm. Le recomendamos descansar y tomar mate de coca al llegar. Contamos con oxígeno y custodia de equipaje si viaja a Machu Picchu.": (
+        "Urubamba is 2,871 m above sea level. We recommend resting and drinking coca tea on arrival. We offer oxygen and luggage storage if you travel to Machu Picchu.",
+        "Urubamba fica a 2.871 m de altitude. Recomendamos descansar e tomar chá de coca ao chegar. Temos oxigênio e guarda-volumes se você for a Machu Picchu.",
+    ),
+    "Complete su pre-check-in en línea": (
+        "Complete your online pre-check-in",
+        "Faça seu pré-check-in on-line",
+    ),
+    # Planes de alimentación
+    "Solo alojamiento": ("Room only", "Somente hospedagem"),
+    "Desayuno incluido": ("Breakfast included", "Café da manhã incluído"),
+    "Media pensión": ("Half board", "Meia pensão"),
+    "Pensión completa": ("Full board", "Pensão completa"),
+}

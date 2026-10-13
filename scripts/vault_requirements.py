@@ -14,7 +14,7 @@ text = src.read_text(encoding="utf-8")
 if text.startswith("---"):
     text = text.split("---", 2)[2].lstrip()
 
-F0, F1 = "fase 0", "fase 1"
+F0, F1, F2 = "fase 0", "fase 1", "fase 2"
 DONE = {
     # Fase 0
     "RF-SEG-01": F0,
@@ -67,25 +67,36 @@ DONE = {
     "RNF-UX-03": F1,
     "RNF-UX-05": F1,
     "RNF-I18N-03": F1,
+    # Fase 2
+    **{f"RF-ALM-{n:02d}": F2 for n in range(1, 11)},
+    **{f"RF-COM-{n:02d}": F2 for n in range(1, 6)},
+    **{f"RF-MAN-{n:02d}": F2 for n in range(1, 5)},
+    **{f"RF-POR-{n:02d}": F2 for n in range(1, 4)},
+    "RF-POS-05": F2,
+    "RF-HK-05": F2,
+    "RF-REC-05": F2,
+    "RF-REC-10": F2,
+    "RF-HUE-05": F2,
+    "RF-COMU-02": F2,
+    "RF-COMU-03": F2,
+    "RF-WEB-03": F2,
+    "RF-WEB-05": F2,
+    "RNF-REN-04": F2,
+    "RNF-I18N-01": F2,
 }
 PARTIAL = {
+    "RNF-UX-06": "portal con etiquetas, contraste y salto al contenido; falta auditoría WCAG formal (fase 4)",
     "RF-SEG-03": "pendiente: doble factor (TOTP)",
     "RNF-SEG-01": "Argon2, bloqueo, inactividad y HTTPS en prod; falta probar despliegue",
-    "RF-REC-05": "el enlace al portal sale en la confirmación; el portal es de la fase 2",
-    "RF-REC-10": "folio final, cobro y comprobante listos; encuesta en la fase 2",
     "RF-REC-13": "cargos, no shows, control de caja y reporte listos; falta respaldo automático",
-    "RF-HK-05": "minibar al folio listo; descuento de almacén en la fase 2",
     "RF-FAC-06": "facturación por cargos seleccionados y con crédito; falta agrupar varios folios",
     "RF-REP-06": "exportación PDF/Excel/CSV lista; falta envío programado",
-    "RF-COMU-02": "eventos y on/off listos; recordatorio 48 h requiere el programador (fase 2)",
-    "RF-COMU-03": "bandeja de enviados lista; mensajes entrantes en la fase 2",
     "RF-SIM-01": "hotel de ejemplo con seed_pms --demo; falta botón de restablecer",
     "RF-TUR-04": "tren y Machu Picchu en la reserva, box lunch y despertador; agenda en la fase 3",
     "RF-WEB-04": "códigos promocionales en el motor de tarifas; venta web en la fase 3",
     "RF-MUL-01": "modelo multi-propiedad con series y tarifas por hotel; vista consolidada en la fase 3",
-    "RF-COM-01": "límite de aprobación por rol; requisiciones en la fase 2",
-    "RNF-I18N-01": "plantillas, carta y PDF en 3 idiomas; traducción de la interfaz del portal en la fase 2",
-    "RNF-MAN-02": "129 pruebas de reglas de negocio; falta medir cobertura",
+    "RNF-MAN-02": "156 pruebas de reglas de negocio; falta medir cobertura",
+    "RF-WEB-01": "disponibilidad y precio en tiempo real en el motor de tarifas; sitio público en la fase 3",
     "RNF-MAN-03": "migraciones, datos de ejemplo y README; falta manual de usuario",
     "RNF-MAN-04": "GitHub Actions y .venv reproducible; faltan entornos separados",
     "RNF-MAN-05": "logging + Sentry opcional",

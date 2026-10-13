@@ -185,6 +185,7 @@ class Reservation(TimeStampedModel, SoftDeleteModel, PropertyScopedModel):
     train_time = models.TimeField(_("hora del tren"), null=True, blank=True)
     machu_picchu_date = models.DateField(_("ingreso a Machu Picchu"), null=True, blank=True)
     portal_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    precheckin_at = models.DateTimeField(_("pre-check-in en línea"), null=True, blank=True)
     language = models.CharField(_("idioma de comunicación"), max_length=5, default="es")
 
     class Meta:

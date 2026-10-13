@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Requisición" %}{% endblock %}
+{% block content %}
+<a href="{% url 'purchasing:requisition_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Compras" %}</a>
+<h1 class="page-title mt-2 mb-6">{% if object %}{{ object.number }}{% else %}{% trans "Nueva requisición" %}{% endif %}</h1>
+<form method="post" class="space-y-6">{% csrf_token %}
+  <section class="card"><div class="card-body">{% include "components/form_errors.html" %}<div class="grid gap-5 sm:grid-cols-3">{% include "components/field.html" with field=form.warehouse %}{% include "components/field.html" with field=form.needed_by %}{% include "components/field.html" with field=form.notes %}</div></div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Artículos" %}</h2></div>
+    <div class="card-body space-y-3">{{ formset.management_form }}{% for f in formset %}<div class="grid items-end gap-3 sm:grid-cols-4">{{ f.id }}{% include "components/field.html" with field=f.item wrapper_class="sm:col-span-2" %}{% include "components/field.html" with field=f.quantity %}{% include "components/field.html" with field=f.estimated_cost %}</div>{% endfor %}</div></section>
+  <div class="flex justify-end gap-2"><button class="btn-secondary">{% trans "Guardar borrador" %}</button><button name="submit" value="1" class="btn-primary">{% trans "Enviar a aprobación" %}</button></div>
+</form>
+{% endblock %}

@@ -63,11 +63,13 @@ class Item(TimeStampedModel, PropertyScopedModel):
 
     code = models.CharField(_("código"), max_length=30)
     name = models.CharField(_("nombre"), max_length=150)
-    category = models.ForeignKey(ItemCategory, verbose_name=_("categoría"), null=True, blank=True,
-                                 on_delete=models.SET_NULL)
+    category = models.ForeignKey(
+        ItemCategory, verbose_name=_("categoría"), null=True, blank=True, on_delete=models.SET_NULL
+    )
     unit = models.CharField(_("unidad de consumo"), max_length=5, choices=Unit.choices, default=Unit.UNIT)
-    purchase_unit = models.CharField(_("unidad de compra"), max_length=30, default="caja",
-                                     help_text=_("Ej. caja, saco, botella"))
+    purchase_unit = models.CharField(
+        _("unidad de compra"), max_length=30, default="caja", help_text=_("Ej. caja, saco, botella")
+    )
     purchase_factor = models.DecimalField(_("unidades por unidad de compra"), default=Decimal("1"), **QTY)
     min_stock = models.DecimalField(_("stock mínimo"), default=ZERO, **QTY)
     max_stock = models.DecimalField(_("stock máximo"), default=ZERO, **QTY)
@@ -141,8 +143,12 @@ class StockMovement(TimeStampedModel, PropertyScopedModel):
         INITIAL = "initial", _("Saldo inicial")
 
     date = models.DateField(_("fecha"))
-    warehouse = models.ForeignKey(Warehouse, verbose_name=_("almacén"), on_delete=models.PROTECT, related_name="movements")
-    item = models.ForeignKey(Item, verbose_name=_("artículo"), on_delete=models.PROTECT, related_name="movements")
+    warehouse = models.ForeignKey(
+        Warehouse, verbose_name=_("almacén"), on_delete=models.PROTECT, related_name="movements"
+    )
+    item = models.ForeignKey(
+        Item, verbose_name=_("artículo"), on_delete=models.PROTECT, related_name="movements"
+    )
     kind = models.CharField(_("tipo"), max_length=15, choices=Kind.choices)
     quantity = models.DecimalField(_("cantidad (+ entra / − sale)"), **QTY)
     unit_cost = models.DecimalField(_("costo unitario"), **COST)
@@ -193,6 +199,9 @@ class StockCountLine(models.Model):
     class Meta:
         ordering = ["item__name"]
 
+    def __str__(self):
+        return f"{self.item} {self.counted_qty}"
+
     @property
     def difference(self):
         return None if self.counted_qty is None else self.counted_qty - self.system_qty
@@ -212,8 +221,9 @@ class Waste(TimeStampedModel, PropertyScopedModel):
     reason = models.CharField(_("motivo"), max_length=255)
     photo = models.ImageField(_("foto"), upload_to="inventory/waste/", blank=True)
     status = models.CharField(_("estado"), max_length=10, choices=Status.choices, default=Status.PENDING)
-    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="+")
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         verbose_name = _("merma")

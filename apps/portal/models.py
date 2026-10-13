@@ -28,13 +28,16 @@ class ServiceRequest(TimeStampedModel, PropertyScopedModel):
         DONE = "done", _("Atendido")
         CANCELLED = "cancelled", _("Cancelado")
 
-    reservation = models.ForeignKey("reservations.Reservation", on_delete=models.CASCADE, related_name="requests")
+    reservation = models.ForeignKey(
+        "reservations.Reservation", on_delete=models.CASCADE, related_name="requests"
+    )
     kind = models.CharField(_("tipo"), max_length=15, choices=Kind.choices)
     notes = models.CharField(_("detalle"), max_length=255, blank=True)
     requested_for = models.DateTimeField(_("para"), null=True, blank=True)
     status = models.CharField(_("estado"), max_length=12, choices=Status.choices, default=Status.NEW)
-    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                   related_name="+")
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         verbose_name = _("solicitud de servicio")
@@ -48,7 +51,9 @@ class ServiceRequest(TimeStampedModel, PropertyScopedModel):
 class Survey(TimeStampedModel):
     """RF-HUE-05 / RF-REC-10: encuesta de salida."""
 
-    reservation = models.OneToOneField("reservations.Reservation", on_delete=models.CASCADE, related_name="survey")
+    reservation = models.OneToOneField(
+        "reservations.Reservation", on_delete=models.CASCADE, related_name="survey"
+    )
     overall = models.PositiveSmallIntegerField(_("experiencia general"), validators=SCORE)
     room = models.PositiveSmallIntegerField(_("habitación"), validators=SCORE)
     cleanliness = models.PositiveSmallIntegerField(_("limpieza"), validators=SCORE)
@@ -91,15 +96,18 @@ class Complaint(TimeStampedModel, PropertyScopedModel):
     email = models.EmailField(_("correo"))
     phone = models.CharField(_("teléfono"), max_length=30, blank=True)
     address = models.CharField(_("domicilio"), max_length=255, blank=True)
-    reservation = models.ForeignKey("reservations.Reservation", null=True, blank=True, on_delete=models.SET_NULL)
+    reservation = models.ForeignKey(
+        "reservations.Reservation", null=True, blank=True, on_delete=models.SET_NULL
+    )
     amount = models.DecimalField(_("monto reclamado"), max_digits=10, decimal_places=2, null=True, blank=True)
     description = models.TextField(_("detalle"))
     request = models.TextField(_("pedido del consumidor"))
     status = models.CharField(_("estado"), max_length=10, choices=Status.choices, default=Status.OPEN)
     response = models.TextField(_("respuesta del proveedor"), blank=True)
     responded_at = models.DateTimeField(_("respondido el"), null=True, blank=True)
-    assigned_to = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="+")
+    assigned_to = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         verbose_name = _("reclamo")

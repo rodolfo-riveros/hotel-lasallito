@@ -1,0 +1,12 @@
+{% load i18n %}
+<nav class="mb-6 flex gap-1 overflow-x-auto border-b border-ink-200 text-sm dark:border-ink-800" aria-label="{% trans 'Secciones del almacén' %}">
+  {% url 'inventory:stock' as u1 %}{% url 'inventory:alerts' as u2 %}{% url 'inventory:counts' as u3 %}{% url 'inventory:waste_list' as u4 %}{% url 'inventory:recipes' as u5 %}{% url 'inventory:item_list' as u6 %}{% url 'inventory:valuation' as u7 %}{% url 'inventory:warehouse_list' as u8 %}
+  <a href="{{ u1 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if request.path == u1 %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Stock" %}</a>
+  <a href="{{ u2 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if request.path == u2 %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Alertas y pedidos" %}</a>
+  <a href="{{ u3 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u3 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Inventario físico" %}</a>
+  <a href="{{ u4 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u4 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Mermas" %}</a>
+  <a href="{{ u5 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u5 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Recetas" %}</a>
+  <a href="{{ u6 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u6 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Artículos" %}</a>
+  <a href="{{ u7 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if request.path == u7 %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Valorización" %}</a>
+  <a href="{{ u8 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u8 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Almacenes" %}</a>
+</nav>

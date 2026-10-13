@@ -11,14 +11,32 @@ from .gateways import get_gateway
 from .models import OnlinePayment
 
 
-def create_payment(property_obj, amount, description, *, reservation=None, folio=None, email="", return_url="",
-                   currency="PEN", is_deposit=False) -> OnlinePayment:
+def create_payment(
+    property_obj,
+    amount,
+    description,
+    *,
+    reservation=None,
+    folio=None,
+    email="",
+    return_url="",
+    currency="PEN",
+    is_deposit=False,
+) -> OnlinePayment:
     amount = Decimal(amount).quantize(Decimal("0.01"))
     if amount <= 0:
         raise ValidationError(_("El monto debe ser mayor que cero."))
     return OnlinePayment.objects.create(
-        property=property_obj, provider=get_gateway().code, reservation=reservation, folio=folio, amount=amount,
-        currency=currency, description=description, email=email, return_url=return_url, is_deposit=is_deposit,
+        property=property_obj,
+        provider=get_gateway().code,
+        reservation=reservation,
+        folio=folio,
+        amount=amount,
+        currency=currency,
+        description=description,
+        email=email,
+        return_url=return_url,
+        is_deposit=is_deposit,
     )
 
 
@@ -47,8 +65,12 @@ def complete(payment: OnlinePayment, result) -> OnlinePayment:
         from apps.folio.models import Payment
 
         Payment.objects.create(
-            folio=folio, date=folio.property.current_business_date(), method=Payment.Method.PAYMENT_LINK,
-            currency=payment.currency, amount_original=payment.amount, amount=payment.amount,
+            folio=folio,
+            date=folio.property.current_business_date(),
+            method=Payment.Method.PAYMENT_LINK,
+            currency=payment.currency,
+            amount_original=payment.amount,
+            amount=payment.amount,
             reference=f"{payment.provider} {payment.provider_reference} ****{payment.card_last4}",
             is_deposit=payment.is_deposit,
         )
@@ -56,5 +78,7 @@ def complete(payment: OnlinePayment, result) -> OnlinePayment:
         payment.reservation.status = "guaranteed"
         payment.reservation.guarantee = "card"
         payment.reservation.save(update_fields=["status", "guarantee"])
-    audit.log(AuditLog.Action.CREATE, payment, changes={"monto": str(payment.amount)}, property=payment.property)
+    audit.log(
+        AuditLog.Action.CREATE, payment, changes={"monto": str(payment.amount)}, property=payment.property
+    )
     return payment

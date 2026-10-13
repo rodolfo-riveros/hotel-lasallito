@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}Kardex {{ item.name }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'inventory:stock' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Almacén" %}</a>
+    <h1 class="page-title mt-2">Kardex · {{ item.name }}</h1><p class="page-subtitle">{{ item.code }} · {{ item.get_unit_display }} · {% trans "compra en" %} {{ item.purchase_unit }} × {{ item.purchase_factor|floatformat:"-3" }} · {% trans "costo promedio ponderado" %} (RF-ALM-04)</p></div>
+  <form class="flex gap-2"><select name="warehouse" onchange="this.form.submit()" class="!w-auto"><option value="">{% trans "Todos" %}</option>{% for w in warehouses %}<option value="{{ w.pk }}" {% if wh == w.pk|stringformat:"s" %}selected{% endif %}>{{ w }}</option>{% endfor %}</select></form>
+</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-3">{% for s in stocks %}<div class="card p-4"><p class="text-sm text-ink-500">{{ s.warehouse }}</p><p class="font-display text-2xl font-semibold tabular-nums">{{ s.quantity|floatformat:"-3" }}</p><p class="text-xs text-ink-500">{{ s.value|money }}</p></div>{% endfor %}</div>
+{% if lots %}<section class="card mb-6 overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Lotes vigentes" %}</h2></div><table class="table"><tbody>{% for l in lots %}<tr><td>{{ l.code }}</td><td>{{ l.warehouse }}</td><td>{{ l.expiry_date|date:"d/m/Y" }}</td><td class="text-right">{{ l.quantity|floatformat:"-3" }}</td></tr>{% endfor %}</tbody></table></section>{% endif %}
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Almacén" %}</th><th>{% trans "Movimiento" %}</th><th>{% trans "Documento" %}</th><th class="!text-right">{% trans "Cantidad" %}</th><th class="!text-right">{% trans "C. unit." %}</th><th class="!text-right">{% trans "Total" %}</th><th class="!text-right">{% trans "Saldo" %}</th><th class="!text-right">{% trans "C. prom." %}</th></tr></thead>
+  <tbody>{% for m in moves %}<tr><td class="text-xs">{{ m.date|date:"d/m/Y" }}</td><td class="text-xs">{{ m.warehouse }}</td><td>{{ m.get_kind_display }}{% if m.notes %}<p class="text-xs text-ink-500">{{ m.notes }}</p>{% endif %}</td><td class="text-xs">{{ m.reference }}</td>
+    <td class="text-right tabular-nums {% if m.quantity < 0 %}text-state-danger{% else %}text-state-available{% endif %}">{{ m.quantity|floatformat:"-3" }}</td><td class="text-right tabular-nums text-xs">{{ m.unit_cost|floatformat:4 }}</td><td class="text-right tabular-nums">{{ m.total_cost }}</td><td class="text-right tabular-nums font-medium">{{ m.balance_qty|floatformat:"-3" }}</td><td class="text-right tabular-nums text-xs">{{ m.balance_avg_cost|floatformat:4 }}</td></tr>
+  {% empty %}<tr><td colspan="9" class="text-ink-500">{% trans "Sin movimientos." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

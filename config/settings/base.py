@@ -61,6 +61,11 @@ LOCAL_APPS = [
     "apps.pos",
     "apps.comms",
     "apps.reports",
+    "apps.inventory",
+    "apps.purchasing",
+    "apps.maintenance",
+    "apps.payments",
+    "apps.portal",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -225,6 +230,9 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_BEAT_SCHEDULE = {
+    "pms-scheduler": {"task": "apps.core.tasks.run_scheduler_task", "schedule": 15 * 60},
+}
 
 # --------------------------------------------------------------------------
 # Correo
@@ -240,6 +248,14 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Hotel La Sallito <no-rep
 FIELD_ENCRYPTION_KEY = env("FIELD_ENCRYPTION_KEY", default="")
 # Sección 12: "simulator" o "production". Solo afecta la facturación SUNAT.
 SUNAT_MODE = env("SUNAT_MODE")
+# Pasarela de pagos (sección 9): "test" hasta que el hotel elija Izipay, Niubiz o Culqi.
+PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", default="test")
+# WhatsApp Business Cloud API (RF-COMU-01). Sin credenciales, modo prueba.
+WHATSAPP_TOKEN = env("WHATSAPP_TOKEN", default="")
+WHATSAPP_PHONE_ID = env("WHATSAPP_PHONE_ID", default="")
+WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
+# URL pública del sistema, usada en los enlaces de correos y del portal.
+SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 
 # --------------------------------------------------------------------------
 # Registros (RNF-MAN-05)

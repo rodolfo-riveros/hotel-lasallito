@@ -112,3 +112,28 @@ def notification_open(request, pk):
     n = get_object_or_404(Notification, pk=pk, property=request.property)
     n.read_by.add(request.user)
     return redirect(n.url or "comms:notifications")
+
+
+# --------------------------------------------------------------------------
+# Webhook de WhatsApp Business: mensajes entrantes (RF-COMU-03)
+# --------------------------------------------------------------------------
+import json  # noqa: E402
+
+from django.conf import settings  # noqa: E402
+from django.http import HttpResponse, HttpResponseForbidden  # noqa: E402
+from django.views.decorators.csrf import csrf_exempt  # noqa: E402
+
+
+@csrf_exempt
+def whatsapp_webhook(request):
+    if request.method == "GET":
+        token = getattr(settings, "WHATSAPP_VERIFY_TOKEN", "")
+        if token and request.GET.get("hub.verify_token") == token:
+            return HttpResponse(request.GET.get("hub.challenge", ""))
+        return HttpResponseForbidden()
+    try:
+        payload = json.loads(request.body or b"{}")
+    except ValueError:
+        return HttpResponse(status=400)
+    stored = services.store_inbound_whatsapp(payload)
+    return HttpResponse(f"ok {stored}")

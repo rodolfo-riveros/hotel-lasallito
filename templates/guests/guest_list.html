@@ -4,7 +4,7 @@
 {% block content %}
 <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
   <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">CRM</p><h1 class="page-title">{% trans "Huéspedes" %}</h1></div>
-  <div class="flex gap-2"><a href="{% url 'guests:company_list' %}" class="btn-secondary">{% icon "building" "w-4 h-4" %}{% trans "Empresas y agencias" %}</a>
+  <div class="flex flex-wrap gap-2"><a href="{% url 'portal:staff_surveys' %}" class="btn-secondary">{% trans "Encuestas" %}</a><a href="{% url 'portal:staff_complaints' %}" class="btn-secondary">{% trans "Libro de reclamaciones" %}</a><a href="{% url 'guests:company_list' %}" class="btn-secondary">{% icon "building" "w-4 h-4" %}{% trans "Empresas y agencias" %}</a>
     <a href="{% url 'guests:guest_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nuevo huésped" %}</a></div>
 </div>
 <div class="card overflow-hidden">

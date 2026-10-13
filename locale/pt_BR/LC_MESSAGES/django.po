@@ -1,0 +1,329 @@
+#
+msgid ""
+msgstr ""
+"Language: pt_BR\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Saltar al contenido"
+msgstr "Pular para o conteúdo"
+
+msgid "Idioma"
+msgstr "Idioma"
+
+msgid "Volver"
+msgstr "Voltar"
+
+msgid "Enviar"
+msgstr "Enviar"
+
+msgid "Hola, %(name)s"
+msgstr "Olá, %(name)s"
+
+msgid "Reserva"
+msgstr "Reserva"
+
+msgid "Llegada"
+msgstr "Chegada"
+
+msgid "Salida"
+msgstr "Saída"
+
+msgid "desde"
+msgstr "a partir das"
+
+msgid "hasta"
+msgstr "até"
+
+msgid "Habitación"
+msgstr "Quarto"
+
+msgid "Huéspedes"
+msgstr "Hóspedes"
+
+msgid "Pre-check-in en línea"
+msgstr "Pré-check-in on-line"
+
+msgid "Completado. ¡Gracias!"
+msgstr "Concluído. Obrigado!"
+
+msgid "Ahorre tiempo en recepción: datos, pasaporte y firma."
+msgstr "Economize tempo na recepção: dados, passaporte e assinatura."
+
+msgid "Pagar en línea"
+msgstr "Pagar on-line"
+
+msgid "Saldo"
+msgstr "Saldo"
+
+msgid "Depósito"
+msgstr "Depósito"
+
+msgid "Pedir un servicio"
+msgstr "Solicitar um serviço"
+
+msgid "Toallas, oxígeno, despertador, traslado..."
+msgstr "Toalhas, oxigênio, despertador, traslado..."
+
+msgid "Mi cuenta y comprobantes"
+msgstr "Minha conta e comprovantes"
+
+msgid "Consumos y boletas o facturas"
+msgstr "Consumos e notas fiscais"
+
+msgid "Cuéntenos su experiencia"
+msgstr "Conte-nos sobre sua estadia"
+
+msgid "Mis solicitudes"
+msgstr "Minhas solicitações"
+
+msgid "Consejos para la altura"
+msgstr "Dicas para a altitude"
+
+msgid ""
+"Urubamba está a 2 871 msnm. Beba agua, coma ligero y descanse el primer día."
+" Tenemos mate de coca y oxígeno a su disposición."
+msgstr ""
+"Urubamba fica a 2.871 m de altitude. Beba água, coma leve e descanse no "
+"primeiro dia. Temos chá de coca e oxigênio à disposição."
+
+msgid ""
+"Complete sus datos antes de llegar. En recepción solo verificaremos su "
+"documento."
+msgstr ""
+"Preencha seus dados antes de chegar. Na recepção só verificaremos seu "
+"documento."
+
+msgid ""
+"Sus datos se guardan cifrados y solo se usan para su registro de huésped."
+msgstr ""
+"Seus dados são armazenados criptografados e usados apenas para seu registro."
+
+msgid "¡Gracias! Su pre-check-in está completo."
+msgstr "Obrigado! Seu pré-check-in está concluído."
+
+msgid "Enviar solicitud"
+msgstr "Enviar solicitação"
+
+msgid "Recibimos su solicitud."
+msgstr "Recebemos sua solicitação."
+
+msgid "Mi cuenta"
+msgstr "Minha conta"
+
+msgid "Pago"
+msgstr "Pagamento"
+
+msgid "¿Cómo fue su estadía?"
+msgstr "Como foi sua estadia?"
+
+msgid "Califique de 1 (malo) a 5 (excelente)."
+msgstr "Avalie de 1 (ruim) a 5 (excelente)."
+
+msgid "¡Gracias por su opinión! Esperamos verle de nuevo en el Valle Sagrado."
+msgstr "Obrigado pela sua opinião! Esperamos vê-lo novamente no Vale Sagrado."
+
+msgid "Nombres"
+msgstr "Nome(s)"
+
+msgid "Apellidos"
+msgstr "Sobrenome(s)"
+
+msgid "Documento"
+msgstr "Documento"
+
+msgid "Pasaporte"
+msgstr "Passaporte"
+
+msgid "Carné de extranjería"
+msgstr "Carteira de estrangeiro"
+
+msgid "Número de documento"
+msgstr "Número do documento"
+
+msgid "Nacionalidad (código de país, ej. US, BR)"
+msgstr "Nacionalidade (código do país, ex. US, BR)"
+
+msgid "Fecha de nacimiento"
+msgstr "Data de nascimento"
+
+msgid "Correo"
+msgstr "E-mail"
+
+msgid "Teléfono / WhatsApp"
+msgstr "Telefone / WhatsApp"
+
+msgid "Fecha de ingreso al Perú"
+msgstr "Data de entrada no Peru"
+
+msgid "Hora estimada de llegada"
+msgstr "Horário previsto de chegada"
+
+msgid "Alergias o condiciones de salud"
+msgstr "Alergias ou condições de saúde"
+
+msgid "Foto del documento"
+msgstr "Foto do documento"
+
+msgid ""
+"Autorizo el tratamiento de mis datos personales según la Ley 29733 y acepto "
+"las normas del hotel"
+msgstr ""
+"Autorizo o tratamento dos meus dados pessoais conforme a Lei 29733 e aceito "
+"as normas do hotel"
+
+msgid "Firma del huésped"
+msgstr "Assinatura do hóspede"
+
+msgid "Firme dentro del recuadro."
+msgstr "Assine dentro do quadro."
+
+msgid "Borrar firma"
+msgstr "Apagar assinatura"
+
+msgid "Área de firma"
+msgstr "Área de assinatura"
+
+msgid "Este campo es obligatorio."
+msgstr "Este campo é obrigatório."
+
+msgid "tipo"
+msgstr "tipo"
+
+msgid "detalle"
+msgstr "detalhes"
+
+msgid "para"
+msgstr "para"
+
+msgid "Toallas o amenities"
+msgstr "Toalhas ou amenities"
+
+msgid "Oxígeno"
+msgstr "Oxigênio"
+
+msgid "Despertador"
+msgstr "Despertador"
+
+msgid "Traslado"
+msgstr "Traslado"
+
+msgid "Limpieza de habitación"
+msgstr "Limpeza do quarto"
+
+msgid "Algo no funciona"
+msgstr "Algo não funciona"
+
+msgid "Otro"
+msgstr "Outro"
+
+msgid "Recibido"
+msgstr "Recebido"
+
+msgid "En atención"
+msgstr "Em atendimento"
+
+msgid "Atendido"
+msgstr "Atendido"
+
+msgid "Cancelado"
+msgstr "Cancelado"
+
+msgid "experiencia general"
+msgstr "experiência geral"
+
+msgid "habitación"
+msgstr "quarto"
+
+msgid "limpieza"
+msgstr "limpeza"
+
+msgid "atención"
+msgstr "atendimento"
+
+msgid "desayuno"
+msgstr "café da manhã"
+
+msgid "nos recomendaría"
+msgstr "nos recomendaria"
+
+msgid "comentarios"
+msgstr "comentários"
+
+msgid "Pendiente"
+msgstr "Pendente"
+
+msgid "Confirmada"
+msgstr "Confirmada"
+
+msgid "Garantizada"
+msgstr "Garantida"
+
+msgid "Check-in"
+msgstr "Check-in"
+
+msgid "Check-out"
+msgstr "Check-out"
+
+msgid "Confirmación de reserva"
+msgstr "Confirmação de reserva"
+
+msgid ""
+"Estimado(a) %(name)s, gracias por elegirnos. Estos son los datos de su "
+"reserva:"
+msgstr ""
+"Prezado(a) %(name)s, obrigado por nos escolher. Estes são os dados da sua "
+"reserva:"
+
+msgid "Huésped"
+msgstr "Hóspede"
+
+msgid "check-in desde"
+msgstr "check-in a partir das"
+
+msgid "check-out hasta"
+msgstr "check-out até"
+
+msgid "Noches"
+msgstr "Noites"
+
+msgid "Personas"
+msgstr "Pessoas"
+
+msgid "adultos"
+msgstr "adultos"
+
+msgid "niños"
+msgstr "crianças"
+
+msgid "Tarifa"
+msgstr "Tarifa"
+
+msgid "Total del alojamiento"
+msgstr "Total da hospedagem"
+
+msgid "Política de cancelación"
+msgstr "Política de cancelamento"
+
+msgid ""
+"Urubamba está a 2 871 msnm. Le recomendamos descansar y tomar mate de coca "
+"al llegar. Contamos con oxígeno y custodia de equipaje si viaja a Machu "
+"Picchu."
+msgstr ""
+"Urubamba fica a 2.871 m de altitude. Recomendamos descansar e tomar chá de "
+"coca ao chegar. Temos oxigênio e guarda-volumes se você for a Machu Picchu."
+
+msgid "Complete su pre-check-in en línea"
+msgstr "Faça seu pré-check-in on-line"
+
+msgid "Solo alojamiento"
+msgstr "Somente hospedagem"
+
+msgid "Desayuno incluido"
+msgstr "Café da manhã incluído"
+
+msgid "Media pensión"
+msgstr "Meia pensão"
+
+msgid "Pensión completa"
+msgstr "Pensão completa"

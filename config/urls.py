@@ -18,6 +18,11 @@ urlpatterns = [
     path("restaurante/", include("apps.pos.urls")),
     path("reportes/", include("apps.reports.urls")),
     path("comunicaciones/", include("apps.comms.urls")),
+    path("almacen/", include("apps.inventory.urls")),
+    path("compras/", include("apps.purchasing.urls")),
+    path("mantenimiento/", include("apps.maintenance.urls")),
+    path("pagos/", include("apps.payments.urls")),
+    path("", include("apps.portal.urls")),
     path("", include("apps.core.urls")),
 ]
 

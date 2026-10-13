@@ -1,0 +1,8 @@
+{% load i18n %}
+{% url 'purchasing:requisition_list' as u1 %}{% url 'purchasing:po_list' as u2 %}{% url 'purchasing:payables' as u3 %}{% url 'purchasing:supplier_list' as u4 %}
+<nav class="mb-6 flex gap-1 overflow-x-auto border-b border-ink-200 text-sm dark:border-ink-800" aria-label="{% trans 'Secciones de compras' %}">
+  <a href="{{ u1 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if 'requisicion' in request.path or request.path == u1 %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Requisiciones" %}</a>
+  <a href="{{ u2 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u2 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Órdenes de compra" %}</a>
+  <a href="{{ u3 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u3 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Cuentas por pagar" %}</a>
+  <a href="{{ u4 }}" class="-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 font-medium {% if u4 in request.path %}border-brand-700 text-brand-700{% else %}border-transparent text-ink-500 hover:text-ink-800{% endif %}">{% trans "Proveedores" %}</a>
+</nav>

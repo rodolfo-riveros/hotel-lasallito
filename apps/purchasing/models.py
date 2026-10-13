@@ -48,12 +48,15 @@ class Requisition(TimeStampedModel, PropertyScopedModel):
         ORDERED = "ordered", _("Con orden de compra")
 
     number = models.CharField(_("número"), max_length=20)
-    warehouse = models.ForeignKey("inventory.Warehouse", verbose_name=_("área / almacén"), on_delete=models.PROTECT)
+    warehouse = models.ForeignKey(
+        "inventory.Warehouse", verbose_name=_("área / almacén"), on_delete=models.PROTECT
+    )
     needed_by = models.DateField(_("se necesita para"), null=True, blank=True)
     status = models.CharField(_("estado"), max_length=10, choices=Status.choices, default=Status.DRAFT)
     notes = models.TextField(_("justificación"), blank=True)
-    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-                                    related_name="+")
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     approved_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
@@ -66,7 +69,9 @@ class Requisition(TimeStampedModel, PropertyScopedModel):
 
     @property
     def estimated_total(self) -> Decimal:
-        return sum((ln.quantity * ln.estimated_cost for ln in self.lines.all()), ZERO).quantize(Decimal("0.01"))
+        return sum((ln.quantity * ln.estimated_cost for ln in self.lines.all()), ZERO).quantize(
+            Decimal("0.01")
+        )
 
 
 class RequisitionLine(models.Model):
@@ -106,6 +111,9 @@ class QuotationLine(models.Model):
     quantity = models.DecimalField(**QTY)
     unit_price = models.DecimalField(**MONEY)
 
+    def __str__(self):
+        return f"{self.quantity} {self.item} @ {self.unit_price}"
+
 
 class PurchaseOrder(TimeStampedModel, PropertyScopedModel):
     """RF-COM-02/03: orden de compra con PDF y recepción parcial o total."""
@@ -118,9 +126,13 @@ class PurchaseOrder(TimeStampedModel, PropertyScopedModel):
         CANCELLED = "cancelled", _("Anulada")
 
     number = models.CharField(_("número"), max_length=20)
-    supplier = models.ForeignKey(Supplier, verbose_name=_("proveedor"), on_delete=models.PROTECT, related_name="orders")
+    supplier = models.ForeignKey(
+        Supplier, verbose_name=_("proveedor"), on_delete=models.PROTECT, related_name="orders"
+    )
     requisition = models.ForeignKey(Requisition, null=True, blank=True, on_delete=models.SET_NULL)
-    warehouse = models.ForeignKey("inventory.Warehouse", verbose_name=_("almacén de destino"), on_delete=models.PROTECT)
+    warehouse = models.ForeignKey(
+        "inventory.Warehouse", verbose_name=_("almacén de destino"), on_delete=models.PROTECT
+    )
     order_date = models.DateField(_("fecha"))
     expected_date = models.DateField(_("entrega prevista"), null=True, blank=True)
     status = models.CharField(_("estado"), max_length=10, choices=Status.choices, default=Status.DRAFT)
@@ -146,6 +158,9 @@ class PurchaseOrderLine(models.Model):
     unit_price = models.DecimalField(_("precio unitario (sin IGV)"), **MONEY)
     received_qty = models.DecimalField(_("recibido"), default=ZERO, **QTY)
 
+    def __str__(self):
+        return f"{self.quantity} {self.item} @ {self.unit_price}"
+
     @property
     def pending(self):
         return self.quantity - self.received_qty
@@ -169,8 +184,9 @@ class GoodsReceipt(TimeStampedModel, PropertyScopedModel):
 class SupplierInvoice(TimeStampedModel, PropertyScopedModel):
     """RF-COM-05: cuentas por pagar con vencimientos."""
 
-    supplier = models.ForeignKey(Supplier, verbose_name=_("proveedor"), on_delete=models.PROTECT,
-                                 related_name="invoices")
+    supplier = models.ForeignKey(
+        Supplier, verbose_name=_("proveedor"), on_delete=models.PROTECT, related_name="invoices"
+    )
     order = models.ForeignKey(PurchaseOrder, null=True, blank=True, on_delete=models.SET_NULL)
     number = models.CharField(_("número de factura"), max_length=30)
     issue_date = models.DateField(_("emisión"))
@@ -189,4 +205,7 @@ class SupplierInvoice(TimeStampedModel, PropertyScopedModel):
 
 
 def payables_total(property_obj):
-    return SupplierInvoice.objects.filter(property=property_obj, paid=False).aggregate(s=Sum("amount"))["s"] or ZERO
+    return (
+        SupplierInvoice.objects.filter(property=property_obj, paid=False).aggregate(s=Sum("amount"))["s"]
+        or ZERO
+    )

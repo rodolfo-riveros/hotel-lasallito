@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Costos de mantenimiento" %}{% endblock %}
+{% block content %}
+<a href="{% url 'maintenance:wo_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Mantenimiento" %}</a>
+<h1 class="page-title mt-2 mb-6">{% trans "Historial y costos" %}</h1>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Por habitación" %}</h2></div><table class="table"><thead><tr><th>{% trans "Hab." %}</th><th class="!text-right">{% trans "Órdenes" %}</th><th class="!text-right">{% trans "Mano de obra" %}</th><th class="!text-right">{% trans "Repuestos" %}</th></tr></thead>
+    <tbody>{% for r in by_room %}<tr><td>{{ r.room__number }}</td><td class="text-right">{{ r.n }}</td><td class="text-right tabular-nums">{{ r.labor|default:0|money }}</td><td class="text-right tabular-nums">{{ r.parts|default:0|money }}</td></tr>{% empty %}<tr><td class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Por equipo" %}</h2></div><table class="table"><thead><tr><th>{% trans "Equipo" %}</th><th class="!text-right">{% trans "Órdenes" %}</th><th class="!text-right">{% trans "Mano de obra" %}</th><th class="!text-right">{% trans "Repuestos" %}</th></tr></thead>
+    <tbody>{% for r in by_asset %}<tr><td>{{ r.asset__code }} · {{ r.asset__name }}</td><td class="text-right">{{ r.n }}</td><td class="text-right tabular-nums">{{ r.labor|default:0|money }}</td><td class="text-right tabular-nums">{{ r.parts|default:0|money }}</td></tr>{% empty %}<tr><td class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}

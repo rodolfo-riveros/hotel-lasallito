@@ -237,3 +237,42 @@ def notifications_for(user, property_obj):
 
 def unread_count(user, property_obj) -> int:
     return notifications_for(user, property_obj).exclude(read_by=user).count()
+
+
+def store_inbound_whatsapp(payload: dict) -> int:
+    """Guarda mensajes entrantes de WhatsApp y los asocia al huésped en casa con ese número."""
+    from apps.guests.models import Guest
+    from apps.reservations.models import Reservation
+
+    count = 0
+    for entry in payload.get("entry", []):
+        for change in entry.get("changes", []):
+            for msg in change.get("value", {}).get("messages", []):
+                phone = "+" + "".join(c for c in msg.get("from", "") if c.isdigit())
+                body = (msg.get("text") or {}).get("body", "")
+                guest = Guest.objects.filter(phone__endswith=phone[-9:]).first() if len(phone) > 8 else None
+                reservation = (
+                    Reservation.objects.filter(guest=guest).order_by("-arrival").first() if guest else None
+                )
+                if reservation is None:
+                    continue
+                Message.objects.create(
+                    property=reservation.property,
+                    reservation=reservation,
+                    guest=guest,
+                    channel="whatsapp",
+                    direction=Message.Direction.IN,
+                    to=phone,
+                    body=body,
+                    status=Message.Status.RECEIVED,
+                    sent_at=timezone.now(),
+                )
+                notify_role(
+                    reservation.property,
+                    "receptionist",
+                    f"WhatsApp de {guest}",
+                    body[:200],
+                    url=f"/reservas/{reservation.pk}/",
+                )
+                count += 1
+    return count

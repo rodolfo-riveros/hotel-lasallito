@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Receta" %} {{ mi.name }}{% endblock %}
+{% block content %}
+<a href="{% url 'inventory:recipes' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Recetas" %}</a>
+<h1 class="page-title mt-2 mb-6">{% trans "Receta" %}: {{ mi.name }}</h1>
+<form method="post" class="card max-w-2xl">{% csrf_token %}{{ formset.management_form }}
+  <div class="card-body space-y-3">{% for f in formset %}<div class="grid items-end gap-3 sm:grid-cols-3">{{ f.id }}{% include "components/field.html" with field=f.item %}{% include "components/field.html" with field=f.quantity %}{% if f.instance.pk %}{% include "components/field.html" with field=f.DELETE %}{% endif %}</div>{% endfor %}
+    <p class="text-xs text-ink-500">{% trans "Cantidad por porción en la unidad de consumo del insumo (g, ml, unidades)." %}</p></div>
+  <div class="flex justify-end border-t border-ink-100 px-5 py-4 dark:border-ink-800"><button class="btn-primary">{% trans "Guardar receta" %}</button></div></form>
+{% endblock %}

@@ -107,11 +107,12 @@ class Command(BaseCommand):
 
         if options["demo"]:
             self._create_demo_users(hotel)
-            from apps.core.demo import load_bookings, load_operations
+            from apps.core.demo import load_bookings, load_operations, load_phase2
 
             _types, _rack, guests = load_operations(hotel)
             admin = User.objects.filter(username="admin").first()
             n = load_bookings(hotel, admin, guests)
+            load_phase2(hotel)
             self.stdout.write(f"Hotel de práctica cargado ({n} reservas nuevas).")
 
         self.stdout.write(self.style.SUCCESS("Datos iniciales listos."))

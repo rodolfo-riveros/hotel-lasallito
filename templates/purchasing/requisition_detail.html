@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ req.number }}{% endblock %}
+{% block content %}
+{% can "purchasing.create" as can_create %}
+<a href="{% url 'purchasing:requisition_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Compras" %}</a>
+<div class="mt-2 mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><h1 class="page-title">{% trans "Requisición" %} {{ req.number }}</h1>
+    <p class="page-subtitle">{{ req.warehouse }} · {{ req.get_status_display }} · {% trans "estimado" %} {{ req.estimated_total|money }}{% if req.approved_by %} · {{ req.approved_by }} {{ req.approved_at|date:"d/m H:i" }}{% endif %}</p>{% if req.notes %}<p class="mt-1 text-sm">{{ req.notes }}</p>{% endif %}</div>
+  <div class="flex flex-wrap gap-2">
+    {% if req.status == "draft" and can_create %}<a href="{% url 'purchasing:requisition_edit' req.pk %}" class="btn-secondary">{% trans "Editar" %}</a><form method="post">{% csrf_token %}<button name="action" value="submit" class="btn-primary">{% trans "Enviar a aprobación" %}</button></form>{% endif %}
+    {% if req.status == "submitted" %}{% if can_approve %}<form method="post" class="flex gap-2">{% csrf_token %}<input name="reason" placeholder="{% trans 'Comentario' %}" class="!w-48"><button name="action" value="approve" class="btn-primary">{% trans "Aprobar" %}</button><button name="action" value="reject" class="btn-danger">{% trans "Rechazar" %}</button></form>
+      {% else %}<span class="text-sm text-ink-500">{% trans "Requiere aprobación de un rol con límite suficiente (RF-COM-01)." %}</span>{% endif %}{% endif %}
+  </div>
+</div>
+<section class="card mb-6 overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Cuadro comparativo" %}</h2><span class="text-xs text-ink-400">RF-COM-02</span></div>
+  <table class="table"><thead><tr><th>{% trans "Artículo" %}</th><th class="!text-right">{% trans "Cant." %}</th><th class="!text-right">{% trans "Estimado" %}</th>{% for q in quotes %}<th class="!text-right">{{ q.supplier }}<br><span class="font-normal normal-case">{{ q.delivery_days }} {% trans "días" %}</span></th>{% endfor %}</tr></thead>
+    <tbody>{% for row in compare %}<tr><td>{{ row.line.item.name }}</td><td class="text-right">{{ row.line.quantity|floatformat:"-3" }}</td><td class="text-right tabular-nums">{{ row.line.estimated_cost }}</td>
+      {% for p in row.prices %}<td class="text-right tabular-nums {% if p is not None and p == row.min %}font-semibold text-state-available{% endif %}">{{ p|default_if_none:"—" }}</td>{% endfor %}</tr>{% endfor %}
+      {% if quotes %}<tr class="font-semibold"><td colspan="3" class="text-right">{% trans "Total (sin IGV)" %}</td>{% for q in quotes %}<td class="text-right tabular-nums {% if q == best %}text-state-available{% endif %}">{{ q.total|money }}</td>{% endfor %}</tr>
+      {% if req.status == "approved" and can_create %}<tr><td colspan="3"></td>{% for q in quotes %}<td class="text-right"><form method="post">{% csrf_token %}<input type="hidden" name="quotation" value="{{ q.pk }}"><button name="action" value="order" class="btn-primary btn-sm">{% trans "Emitir OC" %}</button></form></td>{% endfor %}</tr>{% endif %}{% endif %}
+    </tbody></table></section>
+{% if can_create and req.status in "approved submitted draft" %}
+<form method="post" class="card max-w-3xl">{% csrf_token %}<input type="hidden" name="action" value="quote">
+  <div class="card-header"><h2 class="card-title">{% trans "Registrar cotización" %}</h2></div>
+  <div class="card-body space-y-3"><div class="grid gap-3 sm:grid-cols-3">{% include "components/field.html" with field=qform.supplier %}{% include "components/field.html" with field=qform.delivery_days %}{% include "components/field.html" with field=qform.notes %}</div>
+    {% for ln in lines %}<label class="flex items-center justify-between gap-3 text-sm"><span>{{ ln.quantity|floatformat:"-3" }} × {{ ln.item.name }}</span><input name="price-{{ ln.pk }}" inputmode="decimal" placeholder="{% trans 'Precio unitario' %}" class="!w-36 text-right"></label>{% endfor %}
+    <button class="btn-secondary">{% trans "Guardar cotización" %}</button></div></form>
+{% endif %}
+{% endblock %}

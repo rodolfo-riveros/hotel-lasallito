@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Valorización" %}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-4">{% trans "Almacén" %}</h1>
+{% include "inventory/_nav.html" %}
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-hidden lg:col-span-2"><div class="card-header"><h2 class="card-title">{% trans "Valor por almacén" %}</h2></div>
+    <table class="table"><tbody>{% for r in by_wh %}<tr><td>{{ r.warehouse__name }}</td><td class="text-right tabular-nums">{{ r.value|default:0|money }}</td></tr>{% empty %}<tr><td class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+  <div class="card p-5"><p class="text-sm text-ink-500">{% trans "Costo de alimentos y bebidas consumidos este mes" %}</p><p class="font-display text-3xl font-semibold">{{ food_cost|money }}</p><p class="mt-1 text-xs text-ink-500">RF-REP-03</p></div>
+</div>
+{% endblock %}

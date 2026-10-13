@@ -41,6 +41,9 @@ y sus consultas (RUC, DNI, tipo de cambio) se simulan; todo lo demás funciona c
 .venv/Scripts/python -m pytest                    # pruebas (nunca contra Supabase)
 .venv/Scripts/ruff check . && .venv/Scripts/black --check .
 npm run build                                     # CSS de Tailwind + HTMX/Alpine/fuentes en static/vendor
+.venv/Scripts/python manage.py run_scheduler      # tareas periódicas (programar cada 15 min)
+.venv/Scripts/python scripts/compile_translations.py   # compila locale/catalog.py (en, pt_BR)
+.venv/Scripts/python scripts/vault_requirements.py     # regenera casillas de requerimientos en la bóveda
 ```
 
 Después de cambiar plantillas o clases de Tailwind: `npm run build:css`. `static/css/app.css` se versiona

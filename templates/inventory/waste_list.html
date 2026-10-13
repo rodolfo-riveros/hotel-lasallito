@@ -1,0 +1,14 @@
+{% extends "core/crud_list.html" %}
+{% load i18n pms %}
+{% block content %}
+<h1 class="page-title mb-4">{% trans "Almacén" %}</h1>
+{% include "inventory/_nav.html" %}
+{% can "inventory.approve" as can_approve %}
+<div class="mb-4 flex justify-between"><p class="text-sm text-ink-500">{{ crud.help_text }}</p>{% if can_create %}<a href="{{ create_url }}" class="btn-primary">{% icon "plus" "w-4 h-4" %}{% trans "Registrar merma" %}</a>{% endif %}</div>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr>{% for label, getter in crud.columns %}<th>{{ label }}</th>{% endfor %}<th></th></tr></thead>
+  <tbody>{% for row in rows %}<tr>{% for cell in row.cells %}<td>{{ cell|cell }}</td>{% endfor %}
+    <td class="text-right">{% if row.obj.photo %}<a href="{{ row.obj.photo.url }}" target="_blank" class="btn-ghost btn-sm">{% trans "Foto" %}</a>{% endif %}
+      {% if can_approve and row.obj.status == "pending" %}<form method="post" action="{% url 'inventory:waste_decide' row.obj.pk %}" class="inline">{% csrf_token %}<button name="decision" value="approve" class="btn-secondary btn-sm">{% trans "Aprobar" %}</button><button name="decision" value="reject" class="btn-ghost btn-sm text-state-danger">{% trans "Rechazar" %}</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="7" class="text-ink-500">{% trans "Sin mermas." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

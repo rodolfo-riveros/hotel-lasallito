@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ wo.number }}{% endblock %}
+{% block content %}
+{% can "maintenance.edit" as can_edit %}
+<a href="{% url 'maintenance:wo_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Mantenimiento" %}</a>
+<div class="mt-2 mb-6"><h1 class="page-title">{{ wo.number }} · {{ wo.title }}</h1>
+  <p class="page-subtitle">{{ wo.get_status_display }} · {{ wo.get_priority_display }} · {{ wo.get_source_display }}{% if wo.room %} · {% trans "hab." %} {{ wo.room.number }}{% endif %}{% if wo.asset %} · {{ wo.asset }}{% endif %} · {% trans "creada" %} {{ wo.created_at|date:"d/m H:i" }} {% trans "por" %} {{ wo.created_by|default:"—" }}</p>
+  {% if wo.room_block and wo.room_block.is_active %}<p class="mt-2 inline-flex items-center gap-2 rounded-lg bg-state-blocked/10 px-3 py-1 text-sm text-state-blocked">{% icon "lock" "w-4 h-4" %}{% trans "La habitación está bloqueada mientras la orden esté abierta (RF-MAN-03)." %}</p>{% endif %}</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    {% if wo.description %}<section class="card"><p class="card-body whitespace-pre-line text-sm">{{ wo.description }}</p></section>{% endif %}
+    <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Repuestos y materiales" %}</h2><span class="text-sm">{% trans "Total" %}: <b>{{ wo.total_cost|money }}</b></span></div>
+      <table class="table"><tbody>{% for p in parts %}<tr><td>{{ p.quantity|floatformat:"-3" }} {{ p.item.unit }}</td><td>{{ p.item.name }}</td><td class="text-right tabular-nums">{{ p.cost|money }}</td></tr>{% empty %}<tr><td class="text-ink-500">{% trans "Sin repuestos." %}</td></tr>{% endfor %}</tbody></table>
+      {% if can_edit and wo.status != "done" %}<form method="post" class="flex flex-wrap gap-2 border-t border-ink-100 p-4 dark:border-ink-800">{% csrf_token %}<input type="hidden" name="action" value="part"><select name="item" class="!w-64">{% for i in items %}<option value="{{ i.pk }}">{{ i.name }}</option>{% endfor %}</select><input name="quantity" inputmode="decimal" placeholder="{% trans 'Cantidad' %}" class="!w-28"><button class="btn-secondary">{% trans "Descontar del almacén" %}</button></form>{% endif %}</section>
+    {% if wo.resolution %}<section class="card"><div class="card-header"><h2 class="card-title">{% trans "Solución" %}</h2></div><p class="card-body text-sm">{{ wo.resolution }}<br><span class="text-xs text-ink-500">{% trans "Mano de obra" %} {{ wo.labor_cost|money }} · {{ wo.closed_at|date:"d/m/Y H:i" }}</span></p></section>{% endif %}
+    {% if history %}<section class="card"><div class="card-header"><h2 class="card-title">{% trans "Historial de la habitación" %}</h2></div><ul class="card-body space-y-1 text-sm">{% for h in history %}<li><a href="{% url 'maintenance:wo_detail' h.pk %}" class="hover:underline">{{ h.number }}</a> · {{ h.title }} · {{ h.get_status_display }} · {{ h.created_at|date:"d/m/Y" }}</li>{% endfor %}</ul></section>{% endif %}
+  </div>
+  {% if can_edit and wo.status != "done" and wo.status != "cancelled" %}
+  <aside class="space-y-4">
+    <form method="post" class="card">{% csrf_token %}<div class="card-body grid grid-cols-2 gap-2">
+      {% if wo.status == "open" or wo.status == "on_hold" %}<button name="action" value="start" class="btn-primary col-span-2">{% trans "Empezar trabajo" %}</button>{% endif %}
+      {% if wo.status == "in_progress" %}<button name="action" value="hold" class="btn-secondary col-span-2">{% trans "En espera de repuesto" %}</button>{% endif %}</div></form>
+    <form method="post" class="card">{% csrf_token %}<input type="hidden" name="action" value="close"><div class="card-header"><h2 class="card-title">{% trans "Cerrar orden" %}</h2></div>
+      <div class="card-body space-y-3"><textarea name="resolution" rows="3" placeholder="{% trans 'Qué se hizo' %}" required></textarea><input name="labor_cost" inputmode="decimal" placeholder="{% trans 'Mano de obra S/' %}">
+        <button class="btn-primary w-full">{% trans "Cerrar y liberar habitación" %}</button></div></form>
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}

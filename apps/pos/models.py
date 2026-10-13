@@ -27,6 +27,13 @@ class Outlet(TimeStampedModel, PropertyScopedModel):
     concept = models.ForeignKey(
         "folio.Concept", verbose_name=_("concepto de cargo"), null=True, blank=True, on_delete=models.SET_NULL
     )
+    warehouse = models.ForeignKey(
+        "inventory.Warehouse",
+        verbose_name=_("almacén que descuenta las recetas"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
     is_active = models.BooleanField(_("activo"), default=True)
 
     class Meta:

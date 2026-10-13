@@ -1,0 +1,10 @@
+{% extends "core/crud_list.html" %}
+{% load i18n pms %}
+{% block content %}
+{% can "maintenance.create" as can_gen %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4"><div><a href="{% url 'maintenance:wo_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Mantenimiento" %}</a><h1 class="page-title mt-2">{% trans "Mantenimiento preventivo" %}</h1><p class="page-subtitle">{% trans "Calentadores, calderos, extintores, oxígeno... con calendario (RF-MAN-02)." %}</p></div>
+  <div class="flex gap-2">{% if can_gen %}<form method="post" action="{% url 'maintenance:generate' %}">{% csrf_token %}<button class="btn-secondary">{% trans "Generar órdenes vencidas" %}</button></form>{% endif %}{% if can_create %}<a href="{{ create_url }}" class="btn-primary">{% icon "plus" "w-4 h-4" %}{% trans "Nuevo plan" %}</a>{% endif %}</div></div>
+<div class="card overflow-x-auto"><table class="table"><thead><tr>{% for label, g in crud.columns %}<th>{{ label }}</th>{% endfor %}<th></th></tr></thead>
+  <tbody>{% for row in rows %}<tr>{% for cell in row.cells %}<td>{{ cell|cell }}</td>{% endfor %}<td class="text-right">{% if can_edit %}<a href="{% url edit_url_name row.obj.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="7" class="text-ink-500">{% trans "Sin planes." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

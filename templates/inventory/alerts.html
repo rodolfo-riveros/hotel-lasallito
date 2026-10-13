@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Alertas de almacén" %}{% endblock %}
+{% block content %}
+<h1 class="page-title mb-4">{% trans "Almacén" %}</h1>
+{% include "inventory/_nav.html" %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Bajo stock mínimo" %}</h2><span class="text-xs text-ink-400">RF-ALM-07</span></div>
+    <table class="table"><tbody>{% for s in low %}<tr><td><a href="{% url 'inventory:kardex' s.item.pk %}" class="hover:underline">{{ s.item.name }}</a></td><td>{{ s.warehouse }}</td><td class="text-right text-state-danger tabular-nums">{{ s.quantity|floatformat:"-3" }}</td><td class="text-right text-xs text-ink-500">{% trans "mín." %} {{ s.item.min_stock|floatformat:"-3" }}</td></tr>{% empty %}<tr><td class="text-ink-500">{% trans "Todo en orden." %}</td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Lotes por vencer (15 días)" %}</h2><span class="text-xs text-ink-400">RF-ALM-05</span></div>
+    <table class="table"><tbody>{% for l in expiring %}<tr><td>{{ l.item.name }}</td><td>{{ l.code }}</td><td class="text-state-dirty">{{ l.expiry_date|date:"d/m/Y" }}</td><td class="text-right">{{ l.quantity|floatformat:"-3" }}</td></tr>{% empty %}<tr><td class="text-ink-500">{% trans "Sin vencimientos próximos." %}</td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden lg:col-span-2"><div class="card-header"><h2 class="card-title">{% trans "Sugerencia de pedido" %}</h2>{% can "purchasing.create" as can_req %}{% if can_req and suggested %}<a href="{% url 'purchasing:requisition_create' %}?sugerido=1" class="btn-primary btn-sm">{% trans "Crear requisición con la sugerencia" %}</a>{% endif %}</div>
+    <table class="table"><thead><tr><th>{% trans "Artículo" %}</th><th class="!text-right">{% trans "Stock total" %}</th><th class="!text-right">{% trans "Faltan" %}</th><th class="!text-right">{% trans "Pedir" %}</th><th class="!text-right">{% trans "Costo est." %}</th></tr></thead>
+      <tbody>{% for s in suggested %}<tr><td>{{ s.item.name }}</td><td class="text-right">{{ s.current|floatformat:"-3" }}</td><td class="text-right">{{ s.need|floatformat:"-3" }}</td><td class="text-right font-medium">{{ s.packs }} {{ s.item.purchase_unit }}</td><td class="text-right">{{ s.cost|money }}</td></tr>{% empty %}<tr><td colspan="5" class="text-ink-500">{% trans "No hay nada que pedir." %}</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}
