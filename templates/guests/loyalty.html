@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Fidelidad" %} · {{ guest }}{% endblock %}
+{% block content %}
+{% can "folio.create" as can_redeem %}{% can "guests.approve" as can_adjust %}
+<a href="{% url 'guests:guest_detail' guest.pk %}" class="text-sm text-ink-500 hover:text-ink-800">← {{ guest.full_name }}</a>
+<div class="mt-2 mb-6 flex flex-wrap items-end justify-between gap-4"><div><h1 class="page-title">{% trans "Programa de fidelidad" %}</h1><p class="page-subtitle">RF-HUE-04</p></div>
+  <a href="{% url 'guests:tier_list' %}" class="btn-secondary">{% trans "Niveles" %}</a></div>
+<div class="mb-6 grid gap-4 sm:grid-cols-4">
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Puntos disponibles" %}</p><p class="font-display text-3xl font-semibold">{{ guest.loyalty_points }}</p><p class="text-xs text-ink-500">≈ {{ value|money }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Nivel" %}</p><p class="font-display text-3xl font-semibold">{{ tier|default:"—" }}</p>{% if tier.benefits %}<p class="text-xs text-ink-500">{{ tier.benefits }}</p>{% endif %}</div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Acumulados en total" %}</p><p class="font-display text-3xl font-semibold">{{ lifetime }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Siguiente nivel" %}</p><p class="font-display text-xl font-semibold">{% if next_tier %}{{ next_tier }}{% else %}—{% endif %}</p>{% if next_tier %}<p class="text-xs text-ink-500">{% blocktrans with n=to_next %}faltan {{ n }} puntos{% endblocktrans %}</p>{% endif %}</div>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card overflow-x-auto lg:col-span-2"><table class="table"><thead><tr><th>{% trans "Fecha" %}</th><th>{% trans "Tipo" %}</th><th>{% trans "Detalle" %}</th><th>{% trans "Hotel" %}</th><th class="!text-right">{% trans "Puntos" %}</th></tr></thead>
+    <tbody>{% for m in moves %}<tr><td class="text-xs">{{ m.created_at|date:"d/m/Y" }}</td><td>{{ m.get_kind_display }}</td><td class="text-sm">{{ m.description }}</td><td class="text-xs">{{ m.property }}</td><td class="text-right tabular-nums {% if m.points < 0 %}text-state-danger{% endif %}">{{ m.points }}</td></tr>
+    {% empty %}<tr><td colspan="5" class="text-ink-500">{% trans "Sin movimientos." %}</td></tr>{% endfor %}</tbody></table></section>
+  <aside class="space-y-4">
+    {% if can_redeem and folios %}<form method="post" class="card space-y-3 p-4">{% csrf_token %}<input type="hidden" name="action" value="redeem"><h2 class="font-semibold">{% trans "Canjear en el folio" %}</h2>
+      <select name="folio" class="w-full" aria-label="{% trans 'Folio' %}">{% for f in folios %}<option value="{{ f.pk }}">{{ f }} · {{ f.reservation.code }}</option>{% endfor %}</select>
+      <input type="number" name="points" min="1" max="{{ guest.loyalty_points }}" placeholder="{% trans 'Puntos' %}" class="w-full" required><button class="btn-primary w-full">{% trans "Canjear" %}</button></form>{% endif %}
+    {% if can_adjust %}<form method="post" class="card space-y-3 p-4">{% csrf_token %}<input type="hidden" name="action" value="adjust"><h2 class="font-semibold">{% trans "Ajuste manual" %}</h2>
+      <input type="number" name="points" placeholder="{% trans '+/- puntos' %}" class="w-full" required><input name="reason" placeholder="{% trans 'Motivo' %}" class="w-full" required><button class="btn-secondary w-full">{% trans "Registrar" %}</button></form>{% endif %}
+  </aside>
+</div>
+{% endblock %}

@@ -29,7 +29,10 @@ y sus consultas (RUC, DNI, tipo de cambio) se simulan; todo lo demás funciona c
 
 - Un solo hotel (Hotel La Sallito) por ahora. El modelo ya es multi-propiedad.
 - El POS (restaurante y bar) entra en la **fase 1**. Las recetas que descuentan del almacén van en la fase 2.
-- Pasarela de pagos y channel manager: se eligen más adelante. Por ahora, adaptador con implementación de prueba.
+- Pasarela de pagos y channel manager: se eligen más adelante. Por ahora, adaptador con implementación de prueba
+  (`PAYMENT_GATEWAY=test`, `CHANNEL_MANAGER=test`).
+- Modo aula: "restablecer" archiva el hotel y crea uno limpio; nunca se borran datos ni auditoría.
+- La web pública de reservas vive en `/reservar/` (app `booking_engine`); no requiere usuario.
 - Base de datos: Supabase, proyecto `hotel-lasallito` (ref `ddddqyowhshjmblixrla`, us-west-2), conectado por el pooler
   en modo sesión.
 

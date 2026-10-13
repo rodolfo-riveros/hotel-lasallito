@@ -1,0 +1,6 @@
+{% load i18n %}<li class="p-4"><div class="flex flex-wrap items-baseline justify-between gap-2"><p class="font-semibold">{{ item.scenario.title|default:item.run.scenario }}</p>
+  <p class="text-xs text-ink-500">{{ item.run.created_at|date:"d/m H:i" }}{% if item.run.completed_at %} · <span class="font-semibold text-state-available">{% trans "completado" %} {{ item.run.completed_at|date:"H:i" }}</span>{% endif %}</p></div>
+  {% if item.run.data.story %}<p class="mt-1 text-sm text-ink-600">{{ item.run.data.story }}</p>{% elif item.scenario %}<p class="mt-1 text-sm text-ink-600">{{ item.scenario.summary }}</p>{% endif %}
+  {% if item.run.data.error %}<p class="mt-1 text-sm text-state-danger">{{ item.run.data.error }}</p>{% endif %}
+  <ol class="mt-2 space-y-1 text-sm">{% for step, done in item.steps %}<li class="flex gap-2"><span aria-hidden="true">{% if done %}✅{% else %}⬜{% endif %}</span><span><span class="{% if done %}line-through text-ink-500{% endif %}">{{ step.text }}</span><span class="sr-only">{% if done %}{% trans "hecho" %}{% else %}{% trans "pendiente" %}{% endif %}</span>{% if not done %}<br><span class="text-xs text-ink-500">{{ step.hint }}</span>{% endif %}</span></li>{% endfor %}</ol>
+</li>

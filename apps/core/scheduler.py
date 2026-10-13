@@ -52,5 +52,44 @@ def run_all(property_obj) -> dict:
                 url="/almacen/alertas/",
             )
         result["alertas_almacen"] = low + expiring
+    result["canales"] = _push_channels(property_obj)
+    if timezone.localtime().hour >= 18 and _once_per_day(f"tours:{property_obj.pk}"):
+        result["agendas_tours"] = _send_tour_agendas(property_obj)
     log.info("Programador %s: %s", property_obj.code, result)
     return result
+
+
+def _push_channels(property_obj) -> int:
+    """RF-CHA-01: publica en los canales si hubo cambios o si pasó una hora desde la última vez.
+
+    La marca de "cambios pendientes" vive en la caché del proceso web; el programador corre
+    en otro proceso, por eso además se publica al menos una vez por hora.
+    """
+    from datetime import timedelta
+
+    from apps.channels.models import Channel
+    from apps.channels.services import is_dirty, push_all
+
+    channels = Channel.objects.filter(property=property_obj, is_active=True)
+    hour_ago = timezone.now() - timedelta(hours=1)
+    stale = (
+        channels.filter(last_sync_at__isnull=True).exists()
+        or channels.filter(last_sync_at__lt=hour_ago).exists()
+    )
+    if not channels.exists() or not (is_dirty(property_obj) or stale):
+        return 0
+    return len(push_all(property_obj))
+
+
+def _send_tour_agendas(property_obj) -> int:
+    """RF-TUR-03: a partir de las 18:00 envía a cada operador la agenda de recojos de mañana."""
+    from datetime import timedelta
+
+    from apps.tours.models import Operator
+    from apps.tours.services import send_agenda
+
+    tomorrow = property_obj.current_business_date() + timedelta(days=1)
+    return sum(
+        send_agenda(property_obj, tomorrow, op)
+        for op in Operator.objects.filter(property=property_obj, is_active=True).exclude(email="")
+    )

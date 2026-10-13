@@ -175,3 +175,61 @@ class Guest(TimeStampedModel, SoftDeleteModel):
 
     def give_consent(self):
         self.data_consent_at = timezone.now()
+
+
+# --------------------------------------------------------------------------
+# Programa de fidelidad (RF-HUE-04). Es de la cadena, como los huéspedes.
+# --------------------------------------------------------------------------
+
+
+class LoyaltyTier(TimeStampedModel):
+    """Nivel del programa: se alcanza por puntos acumulados en toda la vida del socio."""
+
+    name = models.CharField(_("nivel"), max_length=50)
+    min_points = models.PositiveIntegerField(_("puntos acumulados para alcanzarlo"), default=0)
+    earn_multiplier = models.DecimalField(
+        _("multiplicador de puntos"), max_digits=4, decimal_places=2, default=Decimal("1")
+    )
+    discount_percent = models.DecimalField(
+        _("descuento sugerido (%)"), max_digits=5, decimal_places=2, default=Decimal("0")
+    )
+    benefits = models.TextField(
+        _("beneficios"), blank=True, help_text=_("Ej. late check-out gratis, upgrade sujeto a disponibilidad")
+    )
+
+    class Meta:
+        verbose_name = _("nivel de fidelidad")
+        verbose_name_plural = _("niveles de fidelidad")
+        ordering = ["min_points"]
+
+    def __str__(self):
+        return self.name
+
+
+class LoyaltyTransaction(TimeStampedModel):
+    class Kind(models.TextChoices):
+        EARN = "earn", _("Acumulación por estadía")
+        REDEEM = "redeem", _("Canje")
+        ADJUST = "adjust", _("Ajuste manual")
+        EXPIRE = "expire", _("Vencimiento")
+
+    guest = models.ForeignKey(
+        Guest, verbose_name=_("huésped"), on_delete=models.CASCADE, related_name="loyalty_transactions"
+    )
+    property = models.ForeignKey(
+        "core.Property", verbose_name=_("propiedad"), on_delete=models.PROTECT, related_name="+"
+    )
+    reservation = models.ForeignKey(
+        "reservations.Reservation", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    kind = models.CharField(_("tipo"), max_length=10, choices=Kind.choices)
+    points = models.IntegerField(_("puntos"))
+    description = models.CharField(_("detalle"), max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = _("movimiento de puntos")
+        verbose_name_plural = _("movimientos de puntos")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.guest} {self.points:+d}"

@@ -13,8 +13,8 @@ tags: [requerimientos, indice]
 | [[Facturacion SUNAT]] | 1 | 8/10 |
 | [[Habitaciones]] | 1 | 5/5 |
 | [[Housekeeping]] | 1 | 8/8 |
-| [[Huespedes]] | 1 | 6/7 |
-| [[Modo aula y simulacion]] | 1 | 2/7 |
+| [[Huespedes]] | 1 | 7/7 |
+| [[Modo aula y simulacion]] | 1 | 7/7 |
 | [[Recepcion]] | 1 | 13/14 |
 | [[Reportes]] | 1 | 5/6 |
 | [[Reservas]] | 1 | 11/11 |
@@ -25,7 +25,7 @@ tags: [requerimientos, indice]
 | [[Comunicaciones]] | 2 | 4/4 |
 | [[Mantenimiento]] | 2 | 4/4 |
 | [[Portal del huesped]] | 2 | 3/3 |
-| [[Channel manager]] | 3 | 0/4 |
-| [[Motor de reservas]] | 3 | 2/6 |
-| [[Multi-propiedad]] | 3 | 0/3 |
-| [[Tours y traslados]] | 3 | 0/5 |
+| [[Channel manager]] | 3 | 4/4 |
+| [[Motor de reservas]] | 3 | 6/6 |
+| [[Multi-propiedad]] | 3 | 3/3 |
+| [[Tours y traslados]] | 3 | 5/5 |

@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import Q
@@ -16,7 +16,7 @@ from apps.core.fields import blind_index
 from apps.core.models import AuditLog
 
 from .forms import CompanyForm, GuestForm
-from .models import Company, Guest
+from .models import Company, Guest, LoyaltyTier
 from .services import anonymize, find_duplicates, merge_guests
 
 AUDIT_FIELDS = [
@@ -186,3 +186,71 @@ def guest_anonymize(request, pk):
     anonymize(guest, reason)
     messages.success(request, _("Datos personales eliminados (Ley 29733)."))
     return redirect("guests:guest_detail", pk=guest.pk)
+
+
+# --------------------------------------------------------------------------
+# Programa de fidelidad (RF-HUE-04)
+# --------------------------------------------------------------------------
+
+tier_crud = Crud(
+    model=LoyaltyTier,
+    module="guests",
+    columns=[
+        (gettext_lazy("Nivel"), "name"),
+        (gettext_lazy("Desde (puntos)"), "min_points"),
+        (gettext_lazy("Multiplicador"), "earn_multiplier"),
+        (gettext_lazy("Descuento"), "discount_percent"),
+        (gettext_lazy("Beneficios"), "benefits"),
+    ],
+    help_text=gettext_lazy("Niveles del programa de fidelidad (RF-HUE-04)."),
+)
+
+
+@require_perm("guests.view")
+def guest_loyalty(request, pk):
+    """Movimientos de puntos, nivel, canje en el folio y ajuste manual."""
+    from apps.folio.models import Folio
+
+    from . import loyalty
+
+    guest = get_object_or_404(Guest, pk=pk)
+    prop = request.property
+    folios = Folio.objects.filter(
+        property=prop, status="open", reservation__guest=guest, reservation__status="checked_in"
+    )
+    if request.method == "POST":
+        try:
+            points = int(request.POST.get("points") or 0)
+            if request.POST.get("action") == "redeem":
+                if not request.user.has_pms_perm(prop, "folio.create"):
+                    raise PermissionDenied
+                folio = get_object_or_404(folios, pk=request.POST.get("folio"))
+                loyalty.redeem(guest, folio, points, request.user)
+                messages.success(request, _("Puntos canjeados en el folio."))
+            else:
+                if not request.user.has_pms_perm(prop, "guests.approve"):
+                    raise PermissionDenied
+                loyalty.adjust(guest, prop, points, request.POST.get("reason", "").strip(), request.user)
+                messages.success(request, _("Ajuste registrado."))
+        except (ValueError, ValidationError) as exc:
+            for m in getattr(exc, "messages", [str(exc)]):
+                messages.error(request, m)
+        return redirect("guests:guest_loyalty", pk=guest.pk)
+    lifetime = loyalty.lifetime_points(guest)
+    tiers = list(LoyaltyTier.objects.all())
+    tier = next((t for t in reversed(tiers) if t.min_points <= lifetime), None)
+    upcoming = next((t for t in tiers if t.min_points > lifetime), None)
+    return render(
+        request,
+        "guests/loyalty.html",
+        {
+            "guest": guest,
+            "lifetime": lifetime,
+            "tier": tier,
+            "next_tier": upcoming,
+            "to_next": upcoming.min_points - lifetime if upcoming else 0,
+            "value": loyalty.points_value(guest.loyalty_points),
+            "folios": folios.select_related("reservation"),
+            "moves": guest.loyalty_transactions.select_related("property", "reservation")[:50],
+        },
+    )

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Consolidado de la cadena" %}{% endblock %}
+{% block content %}
+<a href="{% url 'reports:index' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Reportes" %}</a>
+<h1 class="page-title mt-2">{% trans "Consolidado de la cadena" %}</h1><p class="page-subtitle mb-4">RF-MUL-02 · {% trans "solo las propiedades a las que usted tiene acceso" %}</p>
+<form class="card mb-4 flex flex-wrap items-end gap-3 p-4"><label><span class="field-label">{% trans "Desde" %}</span><input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label><label><span class="field-label">{% trans "Hasta" %}</span><input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label><button class="btn-primary">{% trans "Ver" %}</button></form>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Propiedad" %}</th><th class="!text-right">{% trans "Ocupación" %}</th><th class="!text-right">ADR</th><th class="!text-right">RevPAR</th><th class="!text-right">{% trans "Noches vendidas" %}</th><th class="!text-right">{% trans "Alojamiento" %}</th><th class="!text-right">{% trans "Ingreso total" %}</th><th class="!text-right">{% trans "En casa" %}</th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td class="font-semibold">{{ r.property.name }}</td><td class="text-right tabular-nums">{{ r.occupancy }}%</td><td class="text-right tabular-nums">{{ r.adr|money }}</td><td class="text-right tabular-nums">{{ r.revpar|money }}</td><td class="text-right">{{ r.sold }} / {{ r.available }}</td><td class="text-right tabular-nums">{{ r.lodging|money }}</td><td class="text-right tabular-nums">{{ r.total|money }}</td><td class="text-right">{{ r.in_house }}</td></tr>{% endfor %}</tbody>
+  <tfoot><tr class="font-semibold"><td>{% trans "Total del grupo" %}</td><td class="text-right tabular-nums">{{ group.occupancy }}%</td><td class="text-right tabular-nums">{{ group.adr|money }}</td><td class="text-right tabular-nums">{{ group.revpar|money }}</td><td class="text-right">{{ group.sold }} / {{ group.available }}</td><td class="text-right tabular-nums">{{ group.lodging|money }}</td><td class="text-right tabular-nums">{{ group.total|money }}</td><td class="text-right">{{ group.in_house }}</td></tr></tfoot>
+</table></div>
+{% endblock %}

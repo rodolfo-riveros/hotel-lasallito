@@ -1,0 +1,34 @@
+{% extends "booking_engine/base.html" %}
+{% load i18n pms %}
+{% block content %}
+<a href="{{ back }}" class="text-sm text-ink-500">← {% trans "Volver" %}</a>
+<div class="mt-3 grid gap-6 lg:grid-cols-3">
+  <aside class="card h-fit p-5 lg:order-2">
+    <h2 class="font-display text-lg font-semibold">{{ room_type|lang_field:"name" }}</h2>
+    <p class="text-sm text-ink-600">{{ plan|lang_field:"name" }}</p>
+    <dl class="mt-3 space-y-1 text-sm">
+      <div class="flex justify-between"><dt>{% trans "Llegada" %}</dt><dd>{{ arrival|date:"d/m/Y" }}</dd></div>
+      <div class="flex justify-between"><dt>{% trans "Salida" %}</dt><dd>{{ departure|date:"d/m/Y" }}</dd></div>
+      <div class="flex justify-between"><dt>{% trans "Huéspedes" %}</dt><dd>{{ adults }}{% if children %} + {{ children }}{% endif %}</dd></div>
+      {% for n in q.nights %}<div class="flex justify-between text-xs text-ink-500"><dt>{{ n.date|date:"D d/m" }}</dt><dd class="tabular-nums">{{ n.amount|money:q.currency }}</dd></div>{% endfor %}
+      {% if q.discount %}<div class="flex justify-between text-state-available"><dt>{% trans "Descuento" %}</dt><dd>−{{ q.discount|money:q.currency }}</dd></div>{% endif %}
+      <div class="flex justify-between border-t border-ink-100 pt-2 text-base font-semibold"><dt>{% trans "Total" %}</dt><dd class="tabular-nums">{{ q.total|money:q.currency }}</dd></div>
+    </dl>
+    <p class="mt-3 text-xs text-ink-500">{% trans "Política de cancelación" %}: {{ plan.cancellation_policy }}</p>
+    {% if not q.ok %}<p class="mt-3 text-sm text-state-danger" role="alert">{{ q.errors|join:" " }}</p>{% endif %}
+  </aside>
+  <form method="post" class="card space-y-4 p-5 lg:col-span-2" novalidate>{% csrf_token %}
+    <h1 class="page-title">{% trans "Sus datos" %}</h1>
+    {% include "components/form_errors.html" %}
+    <div class="grid gap-4 sm:grid-cols-2">{% for f in form %}{% if f.name in "first_name last_name email phone country" %}{% include "components/field.html" with field=f %}{% endif %}{% endfor %}</div>
+    {% include "components/field.html" with field=form.special_requests %}
+    {% if extras %}<fieldset><legend class="field-label">{% trans "Agregue a su estadía" %}</legend>
+      <div class="grid gap-2 sm:grid-cols-2">{% for s in extras %}<label class="flex items-center justify-between gap-3 rounded-lg border border-ink-200 p-3 text-sm"><span><b>{{ s|lang_field:"name" }}</b><br><span class="text-xs text-ink-500">{{ s.price|money }} {% trans "por persona" %}</span></span>
+        <select name="extra_{{ s.pk }}" aria-label="{% trans 'Personas' %}"><option value="0">—</option>{% for n in "12345678" %}<option value="{{ n }}">{{ n }}</option>{% endfor %}</select></label>{% endfor %}</div></fieldset>{% endif %}
+    {% include "components/field.html" with field=form.payment %}
+    {% include "components/field.html" with field=form.accept %}
+    {{ form.website }}
+    <button class="btn-primary w-full" {% if not q.ok %}disabled{% endif %}>{% trans "Confirmar reserva" %}</button>
+  </form>
+</div>
+{% endblock %}

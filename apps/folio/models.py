@@ -177,6 +177,7 @@ class Payment(TimeStampedModel):
         PLIN = "plin", _("Plin")
         PAYMENT_LINK = "link", _("Enlace de pago / web")
         CITY_LEDGER = "ledger", _("Cuenta corriente (crédito)")
+        POINTS = "points", _("Canje de puntos de fidelidad")
 
     CASH_METHODS = ("cash_pen", "cash_usd")
 

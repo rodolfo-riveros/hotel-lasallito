@@ -327,3 +327,150 @@ msgstr "Meia pensão"
 
 msgid "Pensión completa"
 msgstr "Pensão completa"
+
+msgid "Reserve en línea"
+msgstr "Reserve on-line"
+
+msgid "Valle Sagrado de los Incas, Cusco. Reserve directo al mejor precio."
+msgstr "Vale Sagrado dos Incas, Cusco. Reserve direto pelo melhor preço."
+
+msgid "Grupos y eventos"
+msgstr "Grupos e eventos"
+
+msgid "Libro de reclamaciones"
+msgstr "Livro de reclamações"
+
+msgid "Adultos"
+msgstr "Adultos"
+
+msgid "Niños"
+msgstr "Crianças"
+
+msgid "Moneda"
+msgstr "Moeda"
+
+msgid "Código promocional"
+msgstr "Código promocional"
+
+msgid "Ver disponibilidad"
+msgstr "Ver disponibilidade"
+
+msgid "noche(s)"
+msgstr "noite(s)"
+
+msgid "personas"
+msgstr "pessoas"
+
+msgid "¡Últimas %(n)s habitaciones a este precio!"
+msgstr "Últimos %(n)s quartos por este preço!"
+
+msgid "total con impuestos"
+msgstr "total com impostos"
+
+msgid "Reservar"
+msgstr "Reservar"
+
+msgid ""
+"No hay habitaciones disponibles para esas fechas. Pruebe otras fechas o "
+"escríbanos."
+msgstr ""
+"Não há quartos disponíveis nessas datas. Tente outras datas ou escreva para "
+"nós."
+
+msgid "Reserve directo al mejor precio"
+msgstr "Reserve direto pelo melhor preço"
+
+msgid ""
+"En Urubamba, corazón del Valle Sagrado de los Incas, a un paso del tren a "
+"Machu Picchu."
+msgstr ""
+"Em Urubamba, coração do Vale Sagrado dos Incas, perto do trem para Machu "
+"Picchu."
+
+msgid "Descuento"
+msgstr "Desconto"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Sus datos"
+msgstr "Seus dados"
+
+msgid "País"
+msgstr "País"
+
+msgid "Pedidos especiales (hora de llegada, dieta, tren)"
+msgstr "Pedidos especiais (horário de chegada, dieta, trem)"
+
+msgid "Pagar ahora con tarjeta"
+msgstr "Pagar agora com cartão"
+
+msgid "Pagar en el hotel"
+msgstr "Pagar no hotel"
+
+msgid ""
+"Acepto la política de cancelación y el tratamiento de mis datos personales "
+"(Ley 29733)."
+msgstr ""
+"Aceito a política de cancelamento e o tratamento dos meus dados pessoais "
+"(Lei peruana 29733)."
+
+msgid "Agregue a su estadía"
+msgstr "Adicione à sua estadia"
+
+msgid "por persona"
+msgstr "por pessoa"
+
+msgid "Confirmar reserva"
+msgstr "Confirmar reserva"
+
+msgid "¡Reserva confirmada y pagada!"
+msgstr "Reserva confirmada e paga!"
+
+msgid "Reserva pendiente de pago"
+msgstr "Reserva com pagamento pendente"
+
+msgid "¡Reserva confirmada!"
+msgstr "Reserva confirmada!"
+
+msgid "Gracias, %(name)s. Le enviamos los detalles a su correo."
+msgstr "Obrigado, %(name)s. Enviamos os detalhes para seu e-mail."
+
+msgid "Ir a mi portal: pre-check-in y pagos"
+msgstr "Ir ao meu portal: pré-check-in e pagamentos"
+
+msgid "Cuéntenos de su grupo y le enviaremos una cotización."
+msgstr "Conte-nos sobre seu grupo e enviaremos um orçamento."
+
+msgid "Gracias. Le enviaremos la cotización a su correo."
+msgstr "Obrigado. Enviaremos o orçamento por e-mail."
+
+msgid "La salida debe ser posterior a la llegada."
+msgstr "A saída deve ser posterior à chegada."
+
+msgid "La llegada no puede ser una fecha pasada."
+msgstr "A chegada não pode ser uma data passada."
+
+msgid "contacto"
+msgstr "contato"
+
+msgid "empresa / agencia"
+msgstr "empresa / agência"
+
+msgid "correo"
+msgstr "e-mail"
+
+msgid "teléfono / WhatsApp"
+msgstr "telefone / WhatsApp"
+
+msgid "llegada"
+msgstr "chegada"
+
+msgid "salida"
+msgstr "saída"
+
+msgid "habitaciones"
+msgstr "quartos"
+
+msgid "detalles"
+msgstr "detalhes"

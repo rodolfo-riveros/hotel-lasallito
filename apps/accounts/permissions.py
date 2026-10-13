@@ -57,9 +57,9 @@ MODULES: list[Module] = [
     Module("folio", _("Folios y caja"), "wallet", SECTION_OPERATION, 1, "folio:folio_list"),
     Module("maintenance", _("Mantenimiento"), "wrench", SECTION_OPERATION, 2, "maintenance:wo_list"),
     Module("rates", _("Tarifas"), "tag", SECTION_SALES, 1, "rates:calendar"),
-    Module("tours", _("Tours y traslados"), "map", SECTION_SALES, 3),
-    Module("channels", _("Channel manager"), "share", SECTION_SALES, 3),
-    Module("booking_engine", _("Motor de reservas"), "globe", SECTION_SALES, 3),
+    Module("tours", _("Tours y traslados"), "map", SECTION_SALES, 3, "tours:agenda"),
+    Module("channels", _("Channel manager"), "share", SECTION_SALES, 3, "channels:panel"),
+    Module("booking_engine", _("Motor de reservas"), "globe", SECTION_SALES, 3, "booking_engine:group_list"),
     Module("comms", _("Comunicaciones"), "chat", SECTION_SALES, 1, "comms:inbox"),
     Module("billing", _("Facturación SUNAT"), "receipt", SECTION_BACK, 1, "billing:invoice_list"),
     Module("inventory", _("Almacén"), "box", SECTION_BACK, 2, "inventory:stock"),
@@ -67,6 +67,7 @@ MODULES: list[Module] = [
     Module("reports", _("Reportes"), "document", SECTION_BACK, 1, "reports:index"),
     Module("accounts", _("Usuarios y roles"), "shield-check", SECTION_SYSTEM, 0, "accounts:user_list"),
     Module("settings", _("Configuración"), "cog", SECTION_SYSTEM, 0, "core:property_settings"),
+    Module("classroom", _("Modo aula"), "academic", SECTION_SYSTEM, 3, "classroom:panel"),
     Module(
         "audit", _("Auditoría"), "eye", SECTION_SYSTEM, 0, "core:audit_list", [Action.VIEW, Action.EXPORT]
     ),
@@ -184,6 +185,8 @@ DEFAULT_ROLES = [
                 "rooms": [V],
                 "rates": [V],
                 "tours": [V, C, E],
+                "channels": [V, C, E],
+                "booking_engine": [V, E],
                 "comms": [V, C],
                 "reports": [V, EX],
             }
@@ -243,6 +246,20 @@ DEFAULT_ROLES = [
                 "audit": [V],
             }
         ),
+    },
+    {
+        "code": "teacher",
+        "name": _("Docente"),
+        "description": _(
+            "Ve todos los hoteles de práctica, lanza escenarios y eventos y restablece los datos."
+        ),
+        "permissions": _perms(
+            {
+                **_everything([V, C, E, X, A, EX], exclude=("accounts",)),
+                "accounts": [V, C, E],
+            }
+        ),
+        "max_discount_percent": 100,
     },
 ]
 

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ channel }}{% endblock %}
+{% block content %}
+<a href="{% url 'channels:panel' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Channel manager" %}</a>
+<h1 class="page-title mt-2">{% trans "Publicado en" %} {{ channel }}</h1>
+<p class="page-subtitle mb-6">{% trans "Disponibilidad y precio que ve el canal (extranet simulado)." %}</p>
+<div class="card overflow-x-auto"><table class="table"><thead><tr><th>{% trans "Tipo" %}</th>{% for d in days %}<th class="!text-center">{{ d|date:"d/m" }}</th>{% endfor %}</tr></thead>
+  <tbody>{% for row in rows %}<tr><td>{{ row.rt }}</td>{% for c in row.cells %}<td class="text-center text-xs {% if c and c.closed %}bg-state-danger/10 text-state-danger{% endif %}">{% if c %}<b>{{ c.available }}</b><br>{{ c.price|floatformat:0 }}{% else %}—{% endif %}</td>{% endfor %}</tr>{% empty %}<tr><td class="text-ink-500">{% trans "Sin mapeo." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

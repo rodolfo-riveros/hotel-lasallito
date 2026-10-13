@@ -1,0 +1,12 @@
+{% extends "booking_engine/base.html" %}
+{% load i18n %}
+{% block content %}
+<form method="post" class="card mx-auto max-w-xl space-y-4 p-6" novalidate>{% csrf_token %}
+  <h1 class="page-title">{% trans "Grupos y eventos" %}</h1>
+  <p class="text-sm text-ink-600">{% trans "Cuéntenos de su grupo y le enviaremos una cotización." %}</p>
+  {% include "components/form_errors.html" %}
+  <div class="grid gap-4 sm:grid-cols-2">{% for f in form %}{% if not f.is_hidden %}{% include "components/field.html" with field=f %}{% endif %}{% endfor %}</div>
+  {{ form.website }}
+  <button class="btn-primary w-full">{% trans "Enviar" %}</button>
+</form>
+{% endblock %}

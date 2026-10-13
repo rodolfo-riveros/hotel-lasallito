@@ -1,0 +1,17 @@
+{% extends "booking_engine/base.html" %}
+{% load i18n pms %}
+{% block content %}
+<div class="card mx-auto max-w-xl p-6 text-center">
+  <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gold-600">{% trans "Reserva" %} {{ r.code }}</p>
+  <h1 class="page-title mt-1">{% if paid %}{% trans "¡Reserva confirmada y pagada!" %}{% elif r.status == "pending" %}{% trans "Reserva pendiente de pago" %}{% else %}{% trans "¡Reserva confirmada!" %}{% endif %}</h1>
+  <p class="mt-2 text-sm text-ink-600">{% blocktrans with name=r.guest.first_name %}Gracias, {{ name }}. Le enviamos los detalles a su correo.{% endblocktrans %}</p>
+  <dl class="mt-5 space-y-1 text-left text-sm">
+    <div class="flex justify-between"><dt>{% trans "Habitación" %}</dt><dd>{{ r.room_type|lang_field:"name" }} · {{ r.rate_plan|lang_field:"name" }}</dd></div>
+    <div class="flex justify-between"><dt>{% trans "Llegada" %}</dt><dd>{{ r.arrival|date:"d/m/Y" }} {% trans "desde" %} {{ r.property.check_in_time|time:"H:i" }}</dd></div>
+    <div class="flex justify-between"><dt>{% trans "Salida" %}</dt><dd>{{ r.departure|date:"d/m/Y" }} {% trans "hasta" %} {{ r.property.check_out_time|time:"H:i" }}</dd></div>
+    {% for b in extras %}<div class="flex justify-between"><dt>{{ b.service|lang_field:"name" }} ({{ b.pax }})</dt><dd>{{ b.date|date:"d/m" }}</dd></div>{% endfor %}
+    <div class="flex justify-between border-t border-ink-100 pt-2 font-semibold"><dt>{% trans "Total" %}</dt><dd>{{ r.total_amount|money:r.currency }}</dd></div>
+  </dl>
+  <a href="{{ portal }}" class="btn-primary mt-6 w-full">{% trans "Ir a mi portal: pre-check-in y pagos" %}</a>
+</div>
+{% endblock %}

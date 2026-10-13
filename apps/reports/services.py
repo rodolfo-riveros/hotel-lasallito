@@ -328,3 +328,43 @@ def free_rooms_today(property_obj):
 
 def search_q(q):
     return Q(guest__first_name__icontains=q) | Q(guest__last_name__icontains=q) | Q(code__icontains=q)
+
+
+def consolidated(properties, start, end):
+    """RF-MUL-02: indicadores lado a lado por propiedad y total del grupo."""
+    rows = []
+    for prop in properties:
+        k = kpis(prop, start, end)
+        total = (
+            Charge.objects.filter(
+                folio__property=prop, is_void=False, service_date__gte=start, service_date__lt=end
+            ).aggregate(s=Sum("amount"))["s"]
+            or ZERO
+        )
+        rows.append(
+            {
+                "property": prop,
+                "available": k["available"],
+                "sold": k["sold"],
+                "lodging": k["revenue"],
+                "total": total,
+                "occupancy": k["occupancy"],
+                "adr": k["adr"],
+                "revpar": k["revpar"],
+                "in_house": Reservation.objects.filter(property=prop, status="checked_in").count(),
+            }
+        )
+    available = sum(r["available"] for r in rows)
+    sold = sum(r["sold"] for r in rows)
+    lodging = sum((r["lodging"] for r in rows), ZERO)
+    group = {
+        "available": available,
+        "sold": sold,
+        "lodging": lodging,
+        "total": sum((r["total"] for r in rows), ZERO),
+        "occupancy": pct(sold, available),
+        "adr": div(lodging, sold),
+        "revpar": div(lodging, available),
+        "in_house": sum(r["in_house"] for r in rows),
+    }
+    return rows, group

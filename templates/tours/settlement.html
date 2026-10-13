@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Liquidación de tours" %}{% endblock %}
+{% block content %}
+<a href="{% url 'tours:agenda' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Tours" %}</a>
+<h1 class="page-title mt-2">{% trans "Liquidación por operador" %}</h1><p class="page-subtitle mb-4">RF-TUR-05</p>
+<form class="card mb-4 flex flex-wrap items-end gap-3 p-4"><label><span class="field-label">{% trans "Desde" %}</span><input type="date" name="start" value="{{ start|date:'Y-m-d' }}"></label><label><span class="field-label">{% trans "Hasta" %}</span><input type="date" name="end" value="{{ end|date:'Y-m-d' }}"></label><button class="btn-primary">{% trans "Ver" %}</button></form>
+<div class="card overflow-x-auto"><table class="table"><thead><tr><th>{% trans "Operador" %}</th><th class="!text-right">{% trans "Ventas" %}</th><th class="!text-right">Pax</th><th class="!text-right">{% trans "Vendido" %}</th><th class="!text-right">{% trans "A pagar al operador" %}</th><th class="!text-right">{% trans "Margen" %}</th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td>{{ r.operator }}</td><td class="text-right">{{ r.n }}</td><td class="text-right">{{ r.n_pax }}</td><td class="text-right tabular-nums">{{ r.sales|money }}</td><td class="text-right tabular-nums">{{ r.cost|money }}</td><td class="text-right tabular-nums">{{ r.margin|money }} <span class="text-xs text-ink-500">{{ r.margin_percent }}%</span></td></tr>
+  {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin ventas en el periodo." %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

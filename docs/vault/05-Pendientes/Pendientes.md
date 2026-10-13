@@ -31,3 +31,10 @@ Hacerlo en este orden, con aprobación del usuario antes de empezar:
 8. Housekeeping.
 9. Restaurante y bar.
 10. Reportes.
+
+## Después de la fase 3
+- [ ] Elegir el channel manager real (SiteMinder, Cloudbeds…) y completar su adaptador (`apps/channels/adapters.py`).
+- [ ] Elegir la pasarela real y completar `CulqiGateway` u otro.
+- [ ] Envío programado de reportes por correo (RF-REP-06).
+- [ ] Para publicar la web de reservas: definir dominio y `SITE_URL`, y fotos de los tipos de habitación.
+- [ ] Base de aula separada (RF-BD-07) si los hoteles archivados se acumulan.

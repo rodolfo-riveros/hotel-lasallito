@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Modo aula" %}{% endblock %}
+{% block content %}
+{% can "classroom.create" as can_run %}{% can "classroom.approve" as can_admin %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Sistema" %}</p><h1 class="page-title">{% trans "Modo aula" %}</h1>
+    <p class="page-subtitle">{% trans "Hotel activo" %}: <b>{{ request.property }}</b> · <a class="underline" href="{% url 'classroom:guide' %}">{% trans "Guía del alumno" %}</a></p></div>
+</div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Escenarios en curso" %} (RF-SIM-03)</h2></div>
+      <ul class="divide-y divide-ink-100 dark:divide-ink-800">{% for item in runs %}{% include "classroom/_run.html" %}{% empty %}<li class="p-4 text-sm text-ink-500">{% trans "Aún no hay escenarios en este hotel." %}</li>{% endfor %}</ul></section>
+    <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Avance por alumno" %} (RF-SIM-05)</h2></div>
+      {% for s in students %}<div class="border-t border-ink-100 px-4 py-3 dark:border-ink-800"><div class="flex flex-wrap items-center justify-between gap-2"><p class="font-semibold">{{ s.property }}</p><p class="text-xs text-ink-500">{% blocktrans with c=s.completed n=s.runs|length %}{{ c }} de {{ n }} escenarios completados{% endblocktrans %}</p></div>
+        <table class="table mt-2"><thead><tr><th>{% trans "Alumno" %}</th><th>{% trans "Rol" %}</th><th class="!text-right">{% trans "Acciones" %}</th><th class="!text-right">{% trans "Anulaciones" %}</th><th class="!text-right">{% trans "Descuentos" %}</th><th class="!text-right">{% trans "Cajas descuadradas" %}</th></tr></thead>
+        <tbody>{% for m in s.members %}<tr><td><a class="underline" href="{% url 'classroom:student' s.property.pk m.user.pk %}">{{ m.user.get_full_name|default:m.user.username }}</a></td><td class="text-xs">{{ m.role }}</td><td class="text-right">{{ m.actions }}</td><td class="text-right {% if m.voids %}text-state-danger{% endif %}">{{ m.voids }}</td><td class="text-right">{{ m.discounts }}</td><td class="text-right {% if m.cash_diff %}text-state-danger{% endif %}">{{ m.cash_diff }}</td></tr>
+        {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "Sin alumnos asignados." %}</td></tr>{% endfor %}</tbody></table></div>{% endfor %}</section>
+  </div>
+  <aside class="space-y-6">
+    {% if can_run %}
+    <section class="card p-4"><h2 class="mb-3 font-semibold">{% trans "Lanzar escenario" %}</h2>
+      <form method="post" action="{% url 'classroom:launch' %}" class="space-y-2">{% csrf_token %}{% for s in scenarios %}<button name="scenario" value="{{ s.code }}" class="btn-secondary w-full justify-start text-left">{{ s.title }}</button>{% endfor %}</form></section>
+    <section class="card p-4"><h2 class="mb-3 font-semibold">{% trans "Generar evento" %} (RF-SIM-04)</h2>
+      <form method="post" action="{% url 'classroom:event' %}" class="grid grid-cols-2 gap-2">{% csrf_token %}{% for code, ev in events.items %}<button name="kind" value="{{ code }}" class="btn-secondary btn-sm">{{ ev.0 }}</button>{% endfor %}</form>
+      <ul class="mt-3 space-y-1 text-xs text-ink-600">{% for e in recent_events %}<li>{{ e.created_at|date:"H:i" }} · {{ e.message }}</li>{% endfor %}</ul></section>
+    {% endif %}
+    {% if can_admin %}
+    <section class="card p-4"><h2 class="mb-3 font-semibold">{% trans "Nuevo hotel de práctica" %} (RF-SIM-02)</h2>
+      <form method="post" action="{% url 'classroom:create_property' %}" class="space-y-3">{% csrf_token %}{% for f in form %}{% include "components/field.html" with field=f %}{% endfor %}<button class="btn-primary w-full">{% trans "Crear con datos de ejemplo" %}</button></form></section>
+    <section class="card p-4"><h2 class="mb-1 font-semibold">{% trans "Restablecer datos" %} (RF-SIM-01)</h2>
+      <p class="mb-3 text-xs text-ink-600">{% trans "Archiva este hotel con todo lo que hicieron los alumnos y crea uno limpio con los datos de ejemplo. La auditoría se conserva." %}</p>
+      <form method="post" action="{% url 'classroom:reset' request.property.pk %}" class="space-y-2">{% csrf_token %}<label class="block"><span class="field-label">{% blocktrans with c=request.property.code %}Escriba «{{ c }}» para confirmar{% endblocktrans %}</span><input name="confirm" class="w-full" autocomplete="off"></label><button class="btn-danger w-full">{% trans "Restablecer" %}</button></form>
+      {% if archived %}<p class="mt-3 text-xs text-ink-500">{% trans "Archivados" %}: {% for a in archived %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}</section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

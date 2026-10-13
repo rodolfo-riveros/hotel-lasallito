@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Tours y traslados" %}{% endblock %}
+{% block content %}
+{% can "tours.edit" as can_edit %}{% can "tours.create" as can_sell %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Ventas" %}</p><h1 class="page-title">{% trans "Agenda de recojos" %}</h1>
+    <div class="mt-2 flex items-center gap-2 text-sm"><a href="?fecha={{ prev|date:'Y-m-d' }}" class="btn-ghost btn-sm">←</a><b>{{ day|date:"l d/m/Y" }}</b><a href="?fecha={{ next|date:'Y-m-d' }}" class="btn-ghost btn-sm">→</a></div></div>
+  <div class="flex flex-wrap gap-2"><a href="{% url 'tours:service_list' %}" class="btn-secondary">{% trans "Catálogo" %}</a><a href="{% url 'tours:operator_list' %}" class="btn-secondary">{% trans "Operadores" %}</a><a href="{% url 'tours:settlement' %}" class="btn-secondary">{% trans "Liquidación" %}</a>
+    {% if can_sell %}<a href="{% url 'tours:sell' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Vender" %}</a>{% endif %}</div>
+</div>
+{% if trains %}<div class="mb-6 rounded-xl border border-gold-300 bg-gold-50 p-4 text-sm dark:border-gold-800 dark:bg-gold-900/20"><b>{% trans "Tren a Machu Picchu mañana" %} (RF-TUR-04):</b> {% for r in trains %}{% trans "hab." %} {{ r.room.number }} {{ r.guest.last_name }} {{ r.train_time|time:"H:i" }}{% if not forloop.last %} · {% endif %}{% endfor %} — {% trans "programe desayuno temprano o box lunch, despertador y custodia de equipaje." %}</div>{% endif %}
+<section class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Recojo" %}</th><th>{% trans "Servicio" %}</th><th>{% trans "Pasajero" %}</th><th>Pax</th><th>{% trans "Punto" %}</th><th>{% trans "Operador" %}</th><th>{% trans "Estado" %}</th><th></th></tr></thead>
+  <tbody>{% for b in items %}<tr><td class="font-semibold">{{ b.pickup_time|time:"H:i"|default:"—" }}</td><td>{{ b.service.name }}{% if b.notes %}<p class="text-xs text-ink-500">{{ b.notes }}</p>{% endif %}</td>
+    <td>{{ b.guest_name }}{% if b.reservation.room %} <span class="text-xs text-ink-500">· {% trans "hab." %} {{ b.reservation.room.number }}</span>{% endif %}</td><td>{{ b.pax }}</td><td class="text-xs">{{ b.pickup_point }}</td><td class="text-xs">{{ b.service.operator|default:"—" }}</td><td>{{ b.get_status_display }}</td>
+    <td class="text-right">{% if can_edit %}<form method="post" class="inline">{% csrf_token %}<button name="done" value="{{ b.pk }}" class="btn-ghost btn-sm">✓</button><button name="cancel" value="{{ b.pk }}" class="btn-ghost btn-sm text-state-danger" onclick="return confirm('{% trans '¿Anular el servicio y su cargo?' %}')">✗</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="8">{% trans "Sin recojos este día." as msg %}{% include "components/empty.html" with icon_name="map" message=msg %}</td></tr>{% endfor %}</tbody></table></section>
+{% if can_edit and items %}<div class="mt-4 flex flex-wrap gap-2">{% for op in operators %}<form method="post">{% csrf_token %}<button name="operator" value="{{ op.pk }}" class="btn-secondary btn-sm">{% icon "chat" "w-4 h-4" %}{% trans "Enviar agenda a" %} {{ op }}</button></form>{% endfor %}</div>{% endif %}
+{% endblock %}

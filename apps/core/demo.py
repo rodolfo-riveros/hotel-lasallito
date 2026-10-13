@@ -979,3 +979,177 @@ def load_phase2(hotel):
             checklist="Inspección visual\nPrueba de funcionamiento\nLimpieza",
         )
     return len(items)
+
+
+@transaction.atomic
+def load_phase3(hotel):
+    """Canales con mapeo, tours y traslados, y niveles de fidelidad (fase 3)."""
+    from apps.channels.models import Channel, RateMapping, RoomMapping
+    from apps.guests.models import Company, LoyaltyTier
+    from apps.rates.models import RatePlan
+    from apps.rooms.models import RoomType
+    from apps.tours.models import Operator, Service
+
+    for name, min_points, mult, disc, benefits in [
+        ("Andino", 0, "1", "0", "Bebida de bienvenida"),
+        ("Cóndor", 500, "1.25", "5", "Late check-out a las 13:00 y 5% en la tarifa directa"),
+        (
+            "Inti",
+            1500,
+            "1.5",
+            "10",
+            "Upgrade sujeto a disponibilidad, late check-out 14:00 y 10% en la tarifa directa",
+        ),
+    ]:
+        LoyaltyTier.objects.get_or_create(
+            name=name,
+            defaults={
+                "min_points": min_points,
+                "earn_multiplier": D(mult),
+                "discount_percent": D(disc),
+                "benefits": benefits,
+            },
+        )
+
+    if Channel.objects.filter(property=hotel).exists():
+        return 0
+    types = list(RoomType.objects.filter(property=hotel, is_active=True))
+    rack = RatePlan.objects.filter(property=hotel, code="rack-bb").first()
+    nonref = RatePlan.objects.filter(property=hotel, code="nr").first()
+    agency = Company.objects.filter(kind="agency").first()
+    for code, name, commission, markup in [
+        ("booking", "Booking.com", "15", "12"),
+        ("expedia", "Expedia", "18", "15"),
+        ("airbnb", "Airbnb", "3", "5"),
+        ("agency", "Valle Sagrado Travel (agencia en línea)", "10", "0"),
+    ]:
+        channel = Channel.objects.create(
+            property=hotel,
+            code=code,
+            name=name,
+            hotel_id=f"{code.upper()}-{hotel.pk}0042",
+            commission_percent=D(commission),
+            company=agency if code == "agency" else None,
+        )
+        for rt in types:
+            RoomMapping.objects.create(
+                channel=channel, room_type=rt, external_code=f"{code[:3].upper()}-{rt.code}"
+            )
+        if rack:
+            RateMapping.objects.create(
+                channel=channel, rate_plan=rack, external_code="BAR", markup_percent=D(markup)
+            )
+        if nonref and code in ("booking", "expedia"):
+            RateMapping.objects.create(
+                channel=channel, rate_plan=nonref, external_code="NREF", markup_percent=D(markup)
+            )
+
+    inka = Operator.objects.create(
+        property=hotel,
+        name="Inka Expeditions Operador (ficticio)",
+        ruc="20611223341",
+        contact_name="Rubén Quispe",
+        email="operaciones@inka.example",
+        phone="+51984111222",
+    )
+    traslados = Operator.objects.create(
+        property=hotel,
+        name="Traslados Urubamba (ficticio)",
+        ruc="10456789012",
+        contact_name="Edwin Ccahua",
+        email="traslados@urubamba.example",
+        phone="+51984333444",
+    )
+    services = [
+        (
+            "sacred_valley",
+            "Valle Sagrado: Pisac y Ollantaytambo",
+            "Sacred Valley: Pisac & Ollantaytambo",
+            "Vale Sagrado: Pisac e Ollantaytambo",
+            inka,
+            180,
+            120,
+            time(8, 30),
+            "8",
+        ),
+        (
+            "machu_picchu",
+            "Machu Picchu full day (tren + bus + guía)",
+            "Machu Picchu full day (train + bus + guide)",
+            "Machu Picchu dia inteiro (trem + ônibus + guia)",
+            inka,
+            1150,
+            980,
+            time(5, 30),
+            "14",
+        ),
+        (
+            "rainbow",
+            "Montaña de Colores (Vinicunca)",
+            "Rainbow Mountain (Vinicunca)",
+            "Montanha Colorida (Vinicunca)",
+            inka,
+            160,
+            110,
+            time(3, 30),
+            "13",
+        ),
+        (
+            "city_tour",
+            "City tour Cusco y Sacsayhuamán",
+            "Cusco city tour & Sacsayhuamán",
+            "City tour Cusco e Sacsayhuamán",
+            inka,
+            120,
+            80,
+            time(13, 0),
+            "5",
+        ),
+        (
+            "other",
+            "Maras y Moray",
+            "Maras salt mines & Moray",
+            "Salinas de Maras e Moray",
+            inka,
+            140,
+            90,
+            time(9, 0),
+            "5",
+        ),
+        (
+            "airport",
+            "Traslado aeropuerto Cusco – hotel",
+            "Cusco airport – hotel transfer",
+            "Traslado aeroporto Cusco – hotel",
+            traslados,
+            120,
+            80,
+            None,
+            "1.5",
+        ),
+        (
+            "train",
+            "Traslado a la estación de Ollantaytambo",
+            "Transfer to Ollantaytambo train station",
+            "Traslado à estação de Ollantaytambo",
+            traslados,
+            60,
+            35,
+            time(6, 0),
+            "0.5",
+        ),
+    ]
+    for kind, name, name_en, name_pt, op, price, cost, pickup, hours in services:
+        Service.objects.create(
+            property=hotel,
+            kind=kind,
+            name=name,
+            name_en=name_en,
+            name_pt=name_pt,
+            operator=op,
+            price=D(price),
+            cost=D(cost),
+            pickup_time=pickup,
+            duration_hours=D(hours),
+        )
+    return len(services)

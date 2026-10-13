@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Guía de práctica" %}{% endblock %}
+{% block content %}
+<h1 class="page-title">{% trans "Guía de práctica" %}</h1><p class="page-subtitle mb-4">{% trans "Los pasos se marcan solos cuando el sistema detecta que los hizo." %}</p>
+<ul class="card divide-y divide-ink-100 dark:divide-ink-800">{% for item in runs %}{% include "classroom/_run.html" %}{% empty %}<li class="p-6 text-sm text-ink-500">{% trans "Su docente aún no lanzó escenarios en este hotel." %}</li>{% endfor %}</ul>
+{% endblock %}

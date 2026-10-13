@@ -240,3 +240,14 @@ def report_view(request, key):
             "room_types": RoomType.objects.filter(property=request.property, is_active=True),
         },
     )
+
+
+@require_perm("reports.view")
+def consolidated(request):
+    """RF-MUL-02: vista consolidada de la gerencia y comparativo por propiedad."""
+    start, end = _range(request)
+    properties = [p for p in request.user_properties if request.user.has_pms_perm(p, "reports.view")]
+    rows, group = rep.consolidated(properties, start, end)
+    return render(
+        request, "reports/consolidated.html", {"rows": rows, "group": group, "start": start, "end": end}
+    )

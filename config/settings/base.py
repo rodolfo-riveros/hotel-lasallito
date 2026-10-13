@@ -4,6 +4,7 @@ Todo valor sensible o dependiente del entorno se lee de variables de entorno
 (RNF-SEG-07, RF-BD-01). Ver `.env.example`.
 """
 
+from decimal import Decimal
 from pathlib import Path
 
 import environ
@@ -66,6 +67,10 @@ LOCAL_APPS = [
     "apps.maintenance",
     "apps.payments",
     "apps.portal",
+    "apps.channels",
+    "apps.booking_engine",
+    "apps.tours",
+    "apps.classroom",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -254,6 +259,10 @@ PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", default="test")
 WHATSAPP_TOKEN = env("WHATSAPP_TOKEN", default="")
 WHATSAPP_PHONE_ID = env("WHATSAPP_PHONE_ID", default="")
 WHATSAPP_VERIFY_TOKEN = env("WHATSAPP_VERIFY_TOKEN", default="")
+# Channel manager (sección 9): "test" hasta elegir SiteMinder, Cloudbeds u otro.
+CHANNEL_MANAGER = env("CHANNEL_MANAGER", default="test")
+# True solo si hay Redis y un worker de Celery: publica en los canales segundos después de cada cambio.
+CHANNEL_SYNC_ASYNC = env.bool("CHANNEL_SYNC_ASYNC", default=False)
 # URL pública del sistema, usada en los enlaces de correos y del portal.
 SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 
@@ -272,3 +281,7 @@ LOGGING = {
 }
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
+
+# Fidelidad (RF-HUE-04): puntos por cada sol consumido y valor de canje de cada punto.
+LOYALTY_POINTS_PER_PEN = Decimal(env("LOYALTY_POINTS_PER_PEN", default="0.1"))
+LOYALTY_PEN_PER_POINT = Decimal(env("LOYALTY_PEN_PER_POINT", default="0.10"))

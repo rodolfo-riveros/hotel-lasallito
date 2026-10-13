@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Mapeo" %} {{ channel }}{% endblock %}
+{% block content %}
+<a href="{% url 'channels:panel' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Channel manager" %}</a>
+<h1 class="page-title mt-2 mb-6">{% trans "Mapeo" %} · {{ channel }}</h1>
+<form method="post" class="grid gap-6 lg:grid-cols-2">{% csrf_token %}
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Tipos de habitación" %}</h2></div>
+    <table class="table"><tbody>{% for row in types %}<tr><td>{{ row.rt }}</td><td><input name="room-{{ row.rt.pk }}" value="{{ row.code }}" placeholder="{% trans 'Código en el canal' %}"></td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Planes de tarifa" %}</h2></div>
+    <table class="table"><thead><tr><th>{% trans "Plan" %}</th><th>{% trans "Código" %}</th><th>{% trans "Recargo %" %}</th></tr></thead>
+      <tbody>{% for row in plans %}<tr><td>{{ row.p }}</td><td><input name="rate-{{ row.p.pk }}" value="{{ row.m.external_code|default:'' }}"></td><td><input name="markup-{{ row.p.pk }}" value="{{ row.m.markup_percent|default:'0' }}" class="!w-20"></td></tr>{% endfor %}</tbody></table>
+    <p class="px-5 py-3 text-xs text-ink-500">{% trans "El recargo compensa la comisión del canal (paridad de tarifas)." %}</p></section>
+  <div class="flex justify-end lg:col-span-2"><button class="btn-primary">{% trans "Guardar mapeo" %}</button></div>
+</form>
+{% endblock %}

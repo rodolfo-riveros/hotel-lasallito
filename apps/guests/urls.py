@@ -12,5 +12,7 @@ urlpatterns = [
     path("<int:pk>/editar/", views.guest_edit, name="guest_edit"),
     path("<int:pk>/fusionar/", views.guest_merge, name="guest_merge"),
     path("<int:pk>/anonimizar/", views.guest_anonymize, name="guest_anonymize"),
+    path("<int:pk>/fidelidad/", views.guest_loyalty, name="guest_loyalty"),
     *views.company_crud.urls("empresas", "company"),
+    *views.tier_crud.urls("niveles-fidelidad", "tier"),
 ]

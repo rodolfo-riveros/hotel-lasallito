@@ -1,0 +1,42 @@
+{% extends "booking_engine/base.html" %}
+{% load i18n pms %}
+{% block head %}<script type="application/ld+json">{{ jsonld|safe }}</script>{% endblock %}
+{% block content %}
+<form method="get" class="card mb-6 grid gap-3 p-4 sm:grid-cols-3 lg:grid-cols-7 lg:items-end">
+  <label class="lg:col-span-2"><span class="field-label">{% trans "Llegada" %}</span><input type="date" name="llegada" value="{{ params.llegada }}" required class="w-full"></label>
+  <label class="lg:col-span-2"><span class="field-label">{% trans "Salida" %}</span><input type="date" name="salida" value="{{ params.salida }}" required class="w-full"></label>
+  <label><span class="field-label">{% trans "Adultos" %}</span><input type="number" name="adultos" min="1" max="8" value="{{ params.adultos }}" class="w-full"></label>
+  <label><span class="field-label">{% trans "Niños" %}</span><input type="number" name="ninos" min="0" max="6" value="{{ params.ninos }}" class="w-full"></label>
+  <label><span class="field-label">{% trans "Moneda" %}</span><select name="moneda" class="w-full">{% for c in currencies %}<option value="{{ c }}" {% if c == params.moneda %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></label>
+  <label class="sm:col-span-2 lg:col-span-3"><span class="field-label">{% trans "Código promocional" %}</span><input name="promo" value="{{ params.promo }}" class="w-full"></label>
+  <button class="btn-primary lg:col-span-4">{% trans "Ver disponibilidad" %}</button>
+</form>
+{% if error %}<p class="mb-4 rounded-xl bg-state-danger/10 p-4 text-sm text-state-danger" role="alert">{{ error }}</p>{% endif %}
+{% if searched %}
+  <h1 class="page-title mb-4">{{ nights }} {% trans "noche(s)" %} · {{ params.adultos }} {% trans "adultos" %}{% if params.ninos %} · {{ params.ninos }} {% trans "niños" %}{% endif %}</h1>
+  {% for o in offers %}
+  <article class="card mb-4 overflow-hidden md:flex">
+    {% if o.room_type.photo %}<img src="{{ o.room_type.photo.url }}" alt="{{ o.room_type|lang_field:'name' }}" class="h-48 w-full object-cover md:h-auto md:w-64" loading="lazy">{% endif %}
+    <div class="flex-1 p-5">
+      <h2 class="font-display text-xl font-semibold">{{ o.room_type|lang_field:"name" }}</h2>
+      <p class="mt-1 text-sm text-ink-600">{{ o.room_type|lang_field:"description" }}</p>
+      <p class="mt-1 text-xs text-ink-500">{% if o.room_type.beds %}{{ o.room_type.beds }} · {% endif %}{% if o.room_type.size_m2 %}{{ o.room_type.size_m2 }} m² · {% endif %}{% trans "hasta" %} {{ o.room_type.max_occupancy }} {% trans "personas" %}</p>
+      {% if o.available <= 2 %}<p class="mt-1 text-xs font-semibold text-state-danger">{% blocktrans with n=o.available %}¡Últimas {{ n }} habitaciones a este precio!{% endblocktrans %}</p>{% endif %}
+      <ul class="mt-4 divide-y divide-ink-100">{% for q in o.quotes %}
+        <li class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <div><p class="font-semibold">{{ q.rate_plan|lang_field:"name" }}</p>
+            <p class="text-xs text-ink-500">{% if q.rate_plan.includes_breakfast %}{% trans "Desayuno incluido" %} · {% endif %}{{ q.rate_plan.cancellation_policy }}</p>
+            {% if q.promotion %}<p class="text-xs font-semibold text-state-available">{{ q.promotion.name }} −{{ q.discount_percent|floatformat:0 }}%</p>{% endif %}</div>
+          <div class="text-right"><p class="text-xl font-semibold tabular-nums">{{ q.total|money:q.currency }}</p>
+            <p class="text-xs text-ink-500">{% trans "total con impuestos" %}</p>
+            <a class="btn-primary btn-sm mt-1" href="{% url 'booking_engine:book' %}?llegada={{ params.llegada }}&salida={{ params.salida }}&adultos={{ params.adultos }}&ninos={{ params.ninos }}&moneda={{ params.moneda }}&promo={{ params.promo|urlencode }}&tipo={{ o.room_type.pk }}&plan={{ q.rate_plan.pk }}">{% trans "Reservar" %}</a></div>
+        </li>{% endfor %}</ul>
+    </div>
+  </article>
+  {% empty %}<div class="card p-6 text-center text-sm text-ink-600">{% trans "No hay habitaciones disponibles para esas fechas. Pruebe otras fechas o escríbanos." %} <a class="underline" href="{% url 'booking_engine:group' %}">{% trans "Grupos y eventos" %}</a></div>{% endfor %}
+{% else %}
+  <h1 class="page-title mb-2">{% trans "Reserve directo al mejor precio" %}</h1>
+  <p class="mb-6 text-sm text-ink-600">{% trans "En Urubamba, corazón del Valle Sagrado de los Incas, a un paso del tren a Machu Picchu." %}</p>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{% for rt in room_types %}<div class="card p-5"><h2 class="font-display text-lg font-semibold">{{ rt|lang_field:"name" }}</h2><p class="mt-1 text-sm text-ink-600">{{ rt|lang_field:"description"|truncatewords:25 }}</p></div>{% endfor %}</div>
+{% endif %}
+{% endblock %}

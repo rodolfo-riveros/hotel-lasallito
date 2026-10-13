@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Channel manager" %}{% endblock %}
+{% block content %}
+{% can "channels.edit" as can_edit %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Ventas" %}</p><h1 class="page-title">{% trans "Channel manager" %}</h1>
+    <p class="page-subtitle">{% trans "Disponibilidad y tarifas sincronizadas con Booking, Expedia y Airbnb (entorno de pruebas)." %}{% if dirty %} <span class="text-state-dirty">{% trans "Hay cambios sin publicar." %}</span>{% endif %}</p></div>
+  {% if can_edit %}<div class="flex flex-wrap gap-2">
+    <a href="{% url 'channels:simulate' %}" class="btn-secondary">{% trans "Simular reserva entrante" %}</a>
+    <a href="{% url 'channels:channel_create' %}" class="btn-secondary">{% icon "plus" "w-4 h-4" %}{% trans "Canal" %}</a>
+    <form method="post">{% csrf_token %}<button name="action" value="push" class="btn-primary">{% icon "share" "w-4 h-4" %}{% trans "Publicar ahora" %}</button></form></div>{% endif %}
+</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  {% for ch in channels %}
+    <div class="card p-4"><div class="flex items-center justify-between"><p class="font-semibold">{{ ch.name }}</p>{% if ch.is_active %}<span class="status status-available">{% trans "Conectado" %}</span>{% else %}<span class="status status-danger">{% trans "Desconectado" %}</span>{% endif %}</div>
+      <p class="mt-1 text-xs text-ink-500">{% trans "Comisión" %} {{ ch.commission_percent|floatformat:"-2" }}% · {% trans "última sinc." %} {{ ch.last_sync_at|date:"d/m H:i"|default:"—" }}</p>
+      <p class="mt-2 text-xs">{{ ch.room_mappings.all|length }} {% trans "tipos mapeados" %} · {{ ch.rate_mappings.all|length }} {% trans "tarifas" %}</p>
+      <div class="mt-3 flex gap-2">{% if can_edit %}<a href="{% url 'channels:mappings' ch.pk %}" class="btn-secondary btn-sm">{% trans "Mapeo" %}</a><a href="{% url 'channels:channel_edit' ch.pk %}" class="btn-ghost btn-sm">{% trans "Editar" %}</a>{% endif %}<a href="{% url 'channels:published' ch.pk %}" class="btn-ghost btn-sm">{% trans "Publicado" %}</a></div></div>
+  {% empty %}<div class="card p-6 text-ink-500">{% trans "Agregue los canales y su mapeo." %}</div>{% endfor %}
+</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Errores de sincronización" %}</h2><span class="text-xs text-ink-400">RF-CHA-04</span></div>
+    <table class="table"><tbody>{% for log in errors %}<tr><td class="text-xs">{{ log.created_at|date:"d/m H:i" }}</td><td>{{ log.channel }}</td><td class="whitespace-normal text-xs text-state-danger">{{ log.message }}</td>
+      <td>{% if can_edit and log.direction == "push" %}<form method="post">{% csrf_token %}<input type="hidden" name="log" value="{{ log.pk }}"><button name="action" value="retry" class="btn-secondary btn-sm">{% trans "Reintentar" %}</button></form>{% endif %}</td></tr>
+    {% empty %}<tr><td class="text-state-available">{% trans "Sin errores." %}</td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden"><div class="card-header"><h2 class="card-title">{% trans "Producción y comisión" %}</h2></div>
+    <table class="table"><thead><tr><th>{% trans "Canal" %}</th><th class="!text-right">{% trans "Reservas" %}</th><th class="!text-right">{% trans "Ingreso" %}</th><th class="!text-right">{% trans "Comisión" %}</th></tr></thead>
+      <tbody>{% for c in commissions %}<tr><td>{{ c.channel }}</td><td class="text-right">{{ c.count }}</td><td class="text-right tabular-nums">{{ c.revenue|money }}</td><td class="text-right tabular-nums">{{ c.commission|money }}</td></tr>{% endfor %}</tbody></table></section>
+  <section class="card overflow-hidden lg:col-span-2"><div class="card-header"><h2 class="card-title">{% trans "Últimas sincronizaciones" %}</h2></div>
+    <table class="table"><tbody>{% for log in logs %}<tr><td class="text-xs">{{ log.created_at|date:"d/m H:i:s" }}</td><td>{{ log.channel }}</td><td>{{ log.get_direction_display }}</td><td>{% if log.status == "ok" %}<span class="text-state-available">✓</span>{% else %}<span class="text-state-danger">✗</span>{% endif %}</td><td class="text-xs">{{ log.message }}</td></tr>{% empty %}<tr><td class="text-ink-500">—</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}

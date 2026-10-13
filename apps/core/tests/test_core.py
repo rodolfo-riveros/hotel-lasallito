@@ -187,7 +187,7 @@ class TestSeed:
         call_command("seed_pms", "--demo", verbosity=0)
         from apps.accounts.models import Role, User
 
-        assert Role.objects.count() == 11
+        assert Role.objects.count() == 12  # 11 de la sección 3 + docente (RF-SIM)
         assert Property.objects.filter(code="la-sallito").count() == 1
         gerente = User.objects.get(username="gerente")
         assert gerente.role_for(Property.objects.get(code="la-sallito")).code == "manager"

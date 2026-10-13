@@ -14,7 +14,7 @@ text = src.read_text(encoding="utf-8")
 if text.startswith("---"):
     text = text.split("---", 2)[2].lstrip()
 
-F0, F1, F2 = "fase 0", "fase 1", "fase 2"
+F0, F1, F2, F3 = "fase 0", "fase 1", "fase 2", "fase 3"
 DONE = {
     # Fase 0
     "RF-SEG-01": F0,
@@ -83,6 +83,16 @@ DONE = {
     "RF-WEB-05": F2,
     "RNF-REN-04": F2,
     "RNF-I18N-01": F2,
+    # Fase 3
+    **{f"RF-CHA-{n:02d}": F3 for n in range(1, 5)},
+    **{f"RF-TUR-{n:02d}": F3 for n in range(1, 6)},
+    **{f"RF-SIM-{n:02d}": F3 for n in range(1, 6)},
+    **{f"RF-MUL-{n:02d}": F3 for n in range(1, 4)},
+    "RF-WEB-01": F3,
+    "RF-WEB-02": F3,
+    "RF-WEB-04": F3,
+    "RF-WEB-06": F3,
+    "RF-HUE-04": F3,
 }
 PARTIAL = {
     "RNF-UX-06": "portal con etiquetas, contraste y salto al contenido; falta auditoría WCAG formal (fase 4)",
@@ -91,12 +101,7 @@ PARTIAL = {
     "RF-REC-13": "cargos, no shows, control de caja y reporte listos; falta respaldo automático",
     "RF-FAC-06": "facturación por cargos seleccionados y con crédito; falta agrupar varios folios",
     "RF-REP-06": "exportación PDF/Excel/CSV lista; falta envío programado",
-    "RF-SIM-01": "hotel de ejemplo con seed_pms --demo; falta botón de restablecer",
-    "RF-TUR-04": "tren y Machu Picchu en la reserva, box lunch y despertador; agenda en la fase 3",
-    "RF-WEB-04": "códigos promocionales en el motor de tarifas; venta web en la fase 3",
-    "RF-MUL-01": "modelo multi-propiedad con series y tarifas por hotel; vista consolidada en la fase 3",
-    "RNF-MAN-02": "156 pruebas de reglas de negocio; falta medir cobertura",
-    "RF-WEB-01": "disponibilidad y precio en tiempo real en el motor de tarifas; sitio público en la fase 3",
+    "RNF-MAN-02": "183 pruebas de reglas de negocio; falta medir cobertura",
     "RNF-MAN-03": "migraciones, datos de ejemplo y README; falta manual de usuario",
     "RNF-MAN-04": "GitHub Actions y .venv reproducible; faltan entornos separados",
     "RNF-MAN-05": "logging + Sentry opcional",

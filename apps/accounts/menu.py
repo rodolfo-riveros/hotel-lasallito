@@ -22,6 +22,7 @@ HOTKEYS = {
     "maintenance": "m",
     "inventory": "w",
     "purchasing": "o",
+    "tours": "t",
 }
 
 # Prefijo de URL que marca como activo el ítem (para módulos con varias pantallas).
@@ -42,6 +43,10 @@ ACTIVE_PREFIX = {
     "maintenance": "/mantenimiento/",
     "inventory": "/almacen/",
     "purchasing": "/compras/",
+    "tours": "/tours/",
+    "channels": "/canales/",
+    "booking_engine": "/motor-web/",
+    "classroom": "/aula/",
 }
 
 

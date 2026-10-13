@@ -328,3 +328,148 @@ msgstr "Half board"
 
 msgid "Pensión completa"
 msgstr "Full board"
+
+msgid "Reserve en línea"
+msgstr "Book online"
+
+msgid "Valle Sagrado de los Incas, Cusco. Reserve directo al mejor precio."
+msgstr "Sacred Valley of the Incas, Cusco. Book direct for the best price."
+
+msgid "Grupos y eventos"
+msgstr "Groups and events"
+
+msgid "Libro de reclamaciones"
+msgstr "Complaints book"
+
+msgid "Adultos"
+msgstr "Adults"
+
+msgid "Niños"
+msgstr "Children"
+
+msgid "Moneda"
+msgstr "Currency"
+
+msgid "Código promocional"
+msgstr "Promo code"
+
+msgid "Ver disponibilidad"
+msgstr "Check availability"
+
+msgid "noche(s)"
+msgstr "night(s)"
+
+msgid "personas"
+msgstr "people"
+
+msgid "¡Últimas %(n)s habitaciones a este precio!"
+msgstr "Only %(n)s rooms left at this price!"
+
+msgid "total con impuestos"
+msgstr "total incl. taxes"
+
+msgid "Reservar"
+msgstr "Book"
+
+msgid ""
+"No hay habitaciones disponibles para esas fechas. Pruebe otras fechas o "
+"escríbanos."
+msgstr "No rooms available for those dates. Try other dates or write to us."
+
+msgid "Reserve directo al mejor precio"
+msgstr "Book direct for the best price"
+
+msgid ""
+"En Urubamba, corazón del Valle Sagrado de los Incas, a un paso del tren a "
+"Machu Picchu."
+msgstr ""
+"In Urubamba, heart of the Sacred Valley of the Incas, close to the train to "
+"Machu Picchu."
+
+msgid "Descuento"
+msgstr "Discount"
+
+msgid "Total"
+msgstr "Total"
+
+msgid "Sus datos"
+msgstr "Your details"
+
+msgid "País"
+msgstr "Country"
+
+msgid "Pedidos especiales (hora de llegada, dieta, tren)"
+msgstr "Special requests (arrival time, diet, train)"
+
+msgid "Pagar ahora con tarjeta"
+msgstr "Pay now by card"
+
+msgid "Pagar en el hotel"
+msgstr "Pay at the hotel"
+
+msgid ""
+"Acepto la política de cancelación y el tratamiento de mis datos personales "
+"(Ley 29733)."
+msgstr ""
+"I accept the cancellation policy and the processing of my personal data "
+"(Peruvian Law 29733)."
+
+msgid "Agregue a su estadía"
+msgstr "Add to your stay"
+
+msgid "por persona"
+msgstr "per person"
+
+msgid "Confirmar reserva"
+msgstr "Confirm booking"
+
+msgid "¡Reserva confirmada y pagada!"
+msgstr "Booking confirmed and paid!"
+
+msgid "Reserva pendiente de pago"
+msgstr "Booking pending payment"
+
+msgid "¡Reserva confirmada!"
+msgstr "Booking confirmed!"
+
+msgid "Gracias, %(name)s. Le enviamos los detalles a su correo."
+msgstr "Thank you, %(name)s. We sent the details to your email."
+
+msgid "Ir a mi portal: pre-check-in y pagos"
+msgstr "Go to my portal: pre-check-in and payments"
+
+msgid "Cuéntenos de su grupo y le enviaremos una cotización."
+msgstr "Tell us about your group and we will send you a quote."
+
+msgid "Gracias. Le enviaremos la cotización a su correo."
+msgstr "Thank you. We will email you the quote."
+
+msgid "La salida debe ser posterior a la llegada."
+msgstr "Departure must be after arrival."
+
+msgid "La llegada no puede ser una fecha pasada."
+msgstr "Arrival cannot be in the past."
+
+msgid "contacto"
+msgstr "contact"
+
+msgid "empresa / agencia"
+msgstr "company / agency"
+
+msgid "correo"
+msgstr "email"
+
+msgid "teléfono / WhatsApp"
+msgstr "phone / WhatsApp"
+
+msgid "llegada"
+msgstr "arrival"
+
+msgid "salida"
+msgstr "departure"
+
+msgid "habitaciones"
+msgstr "rooms"
+
+msgid "detalles"
+msgstr "details"
