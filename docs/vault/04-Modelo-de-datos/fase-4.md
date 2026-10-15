@@ -40,6 +40,6 @@ erDiagram
   por comprobante.
 - `SunatTicket`: tickets RC/RA/GRE con estado 98/0/99, XML enviado y CDR.
 - `RemissionGuide` + `RemissionLine`: guía de remisión remitente (serie T001).
-- `SimulationSettings`: solo queda `connection_down`, que activa el evento del aula.
+- `SimulationSettings`: eliminado. La SUNAT simulada no se configura.
 
 Ver también [[fase-3]] y [[Decisión - Rendimiento con historial grande]].

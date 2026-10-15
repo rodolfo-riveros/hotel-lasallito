@@ -302,9 +302,6 @@ def sunat_panel(request):
             "tickets": SunatTicket.objects.filter(property=prop)[:20],
             "registry": registry[:20],
             "stats": {r["status"]: r["n"] for r in stats},
-            "link_down": (
-                prop.sunat_simulation.connection_down if hasattr(prop, "sunat_simulation") else False
-            ),
         },
     )
 

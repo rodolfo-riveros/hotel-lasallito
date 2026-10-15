@@ -6,7 +6,7 @@ import pytest
 from django.core.exceptions import PermissionDenied, ValidationError
 
 from apps.billing import services as billing
-from apps.billing.models import Invoice, SimulationSettings
+from apps.billing.models import Invoice
 from apps.billing.validators import amount_in_words, ruc_check_digit, ruc_is_valid
 from apps.folio import services as folio
 
@@ -94,18 +94,28 @@ def test_invoice_in_usd_uses_daily_rate_rf_fac_07(setup, book):
     assert inv.currency == "USD" and inv.total == Decimal("100.00")
 
 
-def test_sunat_queues_when_offline_and_rejects_real_errors_rnf_dis_04(setup, book):
+def _offline(monkeypatch):
+    """Falla de red (como la de un OSE en producción): no la controla nadie del sistema."""
+    from apps.billing.sunat import SimulatorAdapter, SunatResult
+
+    def down(self, *args, **kwargs):
+        return SunatResult(False, "0100", "Sin respuesta", connection_error=True)
+
+    monkeypatch.setattr(SimulatorAdapter, "send", down)
+    monkeypatch.setattr(SimulatorAdapter, "send_summary", down)
+
+
+def test_sunat_queues_when_offline_and_rejects_real_errors_rnf_dis_04(setup, book, monkeypatch):
     from apps.billing.models import FakeTaxpayer
 
     f = _folio_with(setup, book)
     inv = billing.issue_invoice(
         f, "03", billing.customer_from_folio(f, "03"), user=setup.receptionist, send=False
     )
-    sim = SimulationSettings.objects.create(property=setup.hotel, connection_down=True)  # evento del aula
-    inv = _send_now(inv)
+    with monkeypatch.context() as m:
+        _offline(m)
+        inv = _send_now(inv)
     assert inv.status == "pending" and inv.number == 1  # conserva su número
-    sim.connection_down = False
-    sim.save()
     assert billing.retry_pending(setup.hotel) == 1
     inv.refresh_from_db()
     assert inv.status == "accepted" and inv.cdr_xml

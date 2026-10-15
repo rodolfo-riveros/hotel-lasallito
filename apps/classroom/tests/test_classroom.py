@@ -5,7 +5,6 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from apps.billing.models import SimulationSettings
 from apps.classroom import services
 from apps.classroom.models import PracticeEvent, ScenarioRun
 from apps.classroom.scenarios import progress
@@ -83,11 +82,8 @@ def test_teacher_events_rf_sim_04(setup, teacher, book):
     services.fire(setup.hotel, "agency_cancel", teacher)
     r.refresh_from_db()
     assert r.status == "cancelled"
-    services.fire(setup.hotel, "sunat_down", teacher)
-    assert SimulationSettings.objects.get(property=setup.hotel).connection_down
-    services.fire(setup.hotel, "sunat_up", teacher)
-    assert not SimulationSettings.objects.get(property=setup.hotel).connection_down
-    assert PracticeEvent.objects.count() == 4
+    assert PracticeEvent.objects.count() == 2
+    assert "sunat_down" not in services.EVENTS  # el docente no interviene en SUNAT
     assert Reservation.objects.filter(status="cancelled").count() == 1
 
 

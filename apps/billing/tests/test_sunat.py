@@ -167,18 +167,18 @@ def test_factura_void_goes_through_ra_ticket(setup, book, settings):
     assert inv.folio.uninvoiced_charges.count() == 1
 
 
-def test_daily_summary_informs_boletas_left_pending(setup, book):
-    from apps.billing.models import SimulationSettings
+def test_daily_summary_informs_boletas_left_pending(setup, book, monkeypatch):
+    from apps.billing.tests.test_billing import _offline
 
-    SimulationSettings.objects.create(property=setup.hotel, connection_down=True)
     f = _folio(setup, book)
-    inv = billing.send_invoice(
-        billing.issue_invoice(
-            f, "03", billing.customer_from_folio(f, "03"), user=setup.receptionist, send=False
+    with monkeypatch.context() as m:
+        _offline(m)
+        inv = billing.send_invoice(
+            billing.issue_invoice(
+                f, "03", billing.customer_from_folio(f, "03"), user=setup.receptionist, send=False
+            )
         )
-    )
     assert inv.status == "pending"
-    SimulationSettings.objects.update(connection_down=False)
     sub = billing.daily_summary(setup.hotel, inv.issue_date)
     assert sub.ticket and SunatTicket.objects.get(number=sub.ticket).kind == "RC"
     inv.refresh_from_db()

@@ -11,7 +11,9 @@ sin que nadie la configure:
 - guarda lo recibido en `SunatRegistry`, que sirve para detectar duplicados y para la consulta
   pública de validez del comprobante.
 
-La única falla externa es la caída de conexión, que activa el evento "Falla SUNAT" del modo aula.
+Nadie la configura ni la interviene (tampoco el docente): siempre está en línea y solo responde según
+los datos del comprobante. Si el OSE real de producción no respondiera, el comprobante queda pendiente
+y se reenvía (RNF-DIS-04).
 Los códigos de respuesta siguen el catálogo de errores de SUNAT (algunos mensajes simplificados).
 Para facturar de verdad se implementa `OSEAdapter` sin tocar el resto del sistema.
 """
@@ -100,11 +102,6 @@ class SimulatorAdapter(SunatAdapter):
     """SUNAT interna: valida y responde como la real. Nada sale del sistema."""
 
     # -- utilidades -----------------------------------------------------------
-
-    def _down(self, property_obj) -> bool:
-        from .models import SimulationSettings
-
-        return SimulationSettings.objects.filter(property=property_obj, connection_down=True).exists()
 
     def _offline(self):
         return SunatResult(False, "0100", msg("0100"), connection_error=True)
@@ -223,8 +220,6 @@ class SimulatorAdapter(SunatAdapter):
         from .models import SunatRegistry
 
         prop = invoice.property
-        if self._down(prop):
-            return self._offline()
         doc_id = invoice.full_number
         if ubl.digest_of(invoice.xml) != ubl.declared_digest(invoice.xml) or not invoice.xml:
             return SunatResult(False, "2335", msg("2335"))
@@ -273,8 +268,6 @@ class SimulatorAdapter(SunatAdapter):
     def _ticket(self, prop, kind, file_name, xml, payload) -> SunatResult:
         from .models import SunatTicket
 
-        if self._down(prop):
-            return self._offline()
         seed = f"{prop.ruc}{kind}{file_name}{timezone.now().timestamp()}"
         number = str(int(hashlib.sha256(seed.encode()).hexdigest()[:13], 16))[:15]  # SUNAT: 15 dígitos
         delay = getattr(settings, "SUNAT_TICKET_SECONDS", 15)
@@ -331,8 +324,6 @@ class SimulatorAdapter(SunatAdapter):
         t = SunatTicket.objects.select_for_update().filter(number=ticket_number).first()
         if t is None:
             return SunatResult(False, "0127", msg("0127"))
-        if self._down(t.property):
-            return self._offline()
         if t.status == SunatTicket.Status.PROCESSING:
             if timezone.now() < t.ready_at:
                 return SunatResult(False, "98", "En proceso", ticket=t.number, processing=True)

@@ -211,25 +211,6 @@ class SunatSubmission(models.Model):
         return f"{self.get_kind_display()} {self.created_at:%d/%m %H:%M} {self.code}"
 
 
-class SimulationSettings(models.Model):
-    """Estado del enlace con la SUNAT simulada.
-
-    No se configura desde facturación: la SUNAT simulada valida y responde sola. Solo el
-    evento "Falla SUNAT" del modo aula (RF-SIM-04) marca una caída de conexión temporal.
-    """
-
-    property = models.OneToOneField(
-        "core.Property", on_delete=models.CASCADE, related_name="sunat_simulation"
-    )
-    connection_down = models.BooleanField(_("caída de conexión (evento del aula)"), default=False)
-
-    class Meta:
-        verbose_name = _("enlace con SUNAT simulada")
-
-    def __str__(self):
-        return f"SUNAT simulada {self.property}"
-
-
 # --------------------------------------------------------------------------
 # Lado "SUNAT" de la simulación: lo que SUNAT guarda de cada contribuyente.
 # --------------------------------------------------------------------------

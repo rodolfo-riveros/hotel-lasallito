@@ -20,7 +20,7 @@ que borrar en cascada un hotel no es posible ni deseable.
 - Los **escenarios** (`apps/classroom/scenarios.py`) preparan el hotel y verifican cada paso consultando lo que
   pasó en la propiedad desde que se lanzaron. No dependen de quién lo hizo, porque cada grupo tiene su hotel.
 - Los **eventos** del docente usan los servicios reales: cancelar reserva, ajuste de almacén y el simulador de
-  SUNAT (`connection_down`).
+  SUNAT (`connection_down`). Este último se quitó el 2026-10-15: el docente no interviene en SUNAT.
 - El **avance por alumno** sale de la auditoría: acciones, anulaciones, descuentos y cajas descuadradas.
 
 **Riesgo.** Los hoteles archivados se acumulan. Si molestan, se pueden borrar con un script en una base de aula

@@ -26,9 +26,10 @@ Pulse un escenario para prepararlo en el hotel activo. Los alumnos ven los pasos
 
 ## Eventos sorpresa
 
+La facturación no es un evento: la SUNAT simulada funciona sola y el docente no la configura ni la interrumpe.
+
 - **Llegan walk-ins:** huéspedes sin reserva que hay que acomodar.
 - **Una agencia cancela:** se cancela una reserva futura.
-- **Falla SUNAT:** los comprobantes quedan pendientes; con **SUNAT vuelve**, se deben reenviar.
 - **Se acaba un insumo:** el almacén queda en cero y el restaurante debe reaccionar.
 
 ## Avance por alumno

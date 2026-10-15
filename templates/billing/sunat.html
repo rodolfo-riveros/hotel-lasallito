@@ -13,8 +13,7 @@
     <form method="post">{% csrf_token %}<button name="summary" value="1" class="btn-secondary">{% trans "Enviar resumen diario de boletas pendientes" %}</button></form>{% endif %}
   </div>
 </div>
-<div class="mb-6 grid gap-4 sm:grid-cols-4">
-  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Conexión" %}</p><p class="font-display text-2xl font-semibold {% if link_down %}text-state-danger{% else %}text-state-available{% endif %}">{% if link_down %}{% trans "Sin servicio" %}{% else %}{% trans "En línea" %}{% endif %}</p>{% if link_down %}<p class="text-xs text-ink-500">{% trans "Evento de práctica del aula" %}</p>{% endif %}</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-3">
   <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Aceptados" %}</p><p class="font-display text-2xl font-semibold">{{ stats.accepted|default:0 }}</p></div>
   <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Con observaciones" %}</p><p class="font-display text-2xl font-semibold">{{ stats.observed|default:0 }}</p></div>
   <div class="card p-4"><p class="text-sm text-ink-500">{% trans "De baja" %}</p><p class="font-display text-2xl font-semibold">{{ stats.voided|default:0 }}</p></div>

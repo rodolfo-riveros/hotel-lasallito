@@ -37,8 +37,13 @@ y sin configuración.
 - **Padrón.** Un RUC con dígito verificador válido que no figure en el padrón ficticio se considera
   ACTIVO/HABIDO, así no hay que cargar empresas para practicar.
 
-**Qué se quitó.** El formulario del docente para forzar rechazos. La única falla externa que queda es la
-caída de conexión del evento "Falla SUNAT" del modo aula.
+**Qué se quitó.**
+- El formulario del docente para forzar rechazos.
+- El evento "Falla SUNAT" / "SUNAT vuelve" del modo aula y el modelo `SimulationSettings`. El usuario
+  pidió que el docente no intervenga en nada.
+
+La SUNAT simulada está siempre en línea. El reintento de pendientes (RNF-DIS-04) se mantiene para el OSE
+real de producción y se prueba simulando una falla de red en las pruebas automáticas.
 
 **RF-FAC-06.**
 - Anticipos: comprobante por el adelanto cobrado, deducido en el comprobante final (`PrepaidPayment` y

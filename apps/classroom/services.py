@@ -243,20 +243,6 @@ def event_agency_cancel(prop, user):
     )
 
 
-def event_sunat_down(prop, user, down=True):
-    from apps.billing.models import SimulationSettings
-
-    sim, _created = SimulationSettings.objects.get_or_create(property=prop)
-    sim.connection_down = down
-    sim.save(update_fields=["connection_down"])
-    msg = (
-        _("SUNAT no responde: los comprobantes quedan pendientes. Reenvíelos cuando vuelva.")
-        if down
-        else _("SUNAT volvió: reenvíe los comprobantes pendientes.")
-    )
-    return _event(prop, "sunat_down" if down else "sunat_up", msg, user, roles=("receptionist", "accountant"))
-
-
 def event_stock_out(prop, user):
     from apps.inventory import services as inv
     from apps.inventory.models import Stock
@@ -283,8 +269,6 @@ def event_stock_out(prop, user):
 EVENTS = {
     "walk_ins": (_("Llegan walk-ins"), event_walk_ins),
     "agency_cancel": (_("Una agencia cancela"), event_agency_cancel),
-    "sunat_down": (_("Falla SUNAT"), event_sunat_down),
-    "sunat_up": (_("SUNAT vuelve"), lambda prop, user: event_sunat_down(prop, user, down=False)),
     "stock_out": (_("Se acaba un insumo"), event_stock_out),
 }
 
