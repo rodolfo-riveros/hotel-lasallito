@@ -8,6 +8,15 @@ def client_ip(request) -> str | None:
     return request.META.get("REMOTE_ADDR")
 
 
+def proxied_client_ip(request) -> str | None:
+    """IP real detrás del proxy de Render: la última entrada de X-Forwarded-For la agrega el proxy y el
+    cliente no puede falsificarla (las anteriores sí). La usa django-axes en producción."""
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[-1].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
 class RequestContextMiddleware:
     """Guarda usuario, IP y navegador de la petición para la auditoría."""
 

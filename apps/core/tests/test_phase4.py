@@ -100,3 +100,12 @@ def test_manual_renders_every_chapter_and_help_button_rnf_man_03(admin_user, log
     # el conversor escapa HTML: un capítulo no puede inyectar código
     html = markdown_to_html("Hola <script>alert(1)</script> [x](javascript:alert(1)) **ok**")
     assert "<script>" not in html and "javascript:" not in html and "<strong>ok</strong>" in html
+
+
+def test_real_client_ip_behind_render_proxy_rnf_seg_01(rf):
+    """django-axes debe bloquear por la IP del usuario, no por la del proxy; la primera entrada es falsificable."""
+    from apps.core.middleware import proxied_client_ip
+
+    request = rf.get("/", HTTP_X_FORWARDED_FOR="1.1.1.1, 200.37.10.5", REMOTE_ADDR="10.0.0.1")
+    assert proxied_client_ip(request) == "200.37.10.5"
+    assert proxied_client_ip(rf.get("/", REMOTE_ADDR="10.0.0.2")) == "10.0.0.2"

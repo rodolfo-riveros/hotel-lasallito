@@ -38,6 +38,7 @@ facturación SUNAT se simula y todo lo demás funciona como un PMS real.
   - [[Decisión - Rendimiento con historial grande]]
   - [[Decisión - Integraciones opcionales y seguridad de la fase 4]]
   - [[Decisión - SUNAT simulada sin configuración]]
+  - [[Decisión - Despliegue en Render]]
 - Modelo de datos: [[core]], [[accounts]], [[fase-1]], [[fase-2]], [[fase-3]], [[fase-4]]
 - Bitácora: [[2026-10-12]], [[2026-10-13]], [[2026-10-15]]
 - Manual de usuario: `docs/manual/` (también en el sistema, en `/ayuda/`)

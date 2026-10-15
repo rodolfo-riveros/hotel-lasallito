@@ -1,0 +1,106 @@
+# Despliegue en Render (Blueprint). Render > New > Blueprint > elija este repositorio.
+# Las variables marcadas con `sync: false` se escriben a mano en el panel de Render (son secretas).
+services:
+  - type: web
+    name: hotel-lasallito
+    runtime: python
+    region: oregon            # misma región que el proyecto Supabase (us-west-2): menos latencia
+    plan: starter             # "free" funciona, pero se duerme tras 15 min sin uso y tarda ~1 min en despertar
+    buildCommand: ./build.sh
+    startCommand: gunicorn config.wsgi:application --workers 2 --threads 4 --timeout 120 --access-logfile -
+    healthCheckPath: /sin-conexion/
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY            # la MISMA de su .env: con ella se cifraron documentos y alergias en Supabase
+        sync: false
+      - key: FIELD_ENCRYPTION_KEY  # opcional; si la definió en su .env, copie la misma
+        sync: false
+      - key: DATABASE_URL          # Supabase > Connect > Session pooler (puerto 5432)
+        sync: false
+      - key: SUNAT_MODE
+        value: simulator
+      - key: LOG_FORMAT
+        value: json
+      - key: SESSION_IDLE_SECONDS
+        value: "1800"
+      - key: DB_CONN_MAX_AGE
+        value: "60"
+      # Archivos subidos (fotos de documentos, firmas, logos) y respaldos: el disco de Render se borra en cada
+      # despliegue, así que deben ir a Supabase Storage (RF-BD-06).
+      - key: SUPABASE_S3_ENDPOINT
+        sync: false
+      - key: SUPABASE_S3_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_S3_SECRET_KEY
+        sync: false
+      - key: SUPABASE_S3_BUCKET
+        value: pms-media
+      - key: SUPABASE_S3_REGION
+        value: us-west-2
+      - key: BACKUP_UPLOAD
+        value: "True"
+      - key: EMAIL_URL             # ej. smtp+tls://usuario:clave@smtp.gmail.com:587 (vacío = no envía correos)
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: Hotel La Sallito <no-reply@lasallito.example>
+      - key: SENTRY_DSN
+        sync: false
+
+  # Tareas periódicas (recordatorios, reenvío a SUNAT, tickets, respaldos, canales, reportes por correo).
+  # Los cron jobs de Render son de pago (mínimo ~1 USD/mes). Sin él, nada de lo automático corre.
+  - type: cron
+    name: hotel-lasallito-scheduler
+    runtime: python
+    region: oregon
+    schedule: "*/15 * * * *"
+    buildCommand: pip install -r requirements/base.txt
+    startCommand: python manage.py run_scheduler
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: SECRET_KEY
+        key: SECRET_KEY
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: DATABASE_URL
+        key: DATABASE_URL
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: FIELD_ENCRYPTION_KEY
+        key: FIELD_ENCRYPTION_KEY
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: SUPABASE_S3_ENDPOINT
+        key: SUPABASE_S3_ENDPOINT
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: SUPABASE_S3_ACCESS_KEY
+        key: SUPABASE_S3_ACCESS_KEY
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: SUPABASE_S3_SECRET_KEY
+        key: SUPABASE_S3_SECRET_KEY
+      - fromService:
+          type: web
+          name: hotel-lasallito
+          envVarKey: EMAIL_URL
+        key: EMAIL_URL
+      - key: BACKUP_UPLOAD
+        value: "True"
+      - key: SITE_URL            # cámbielo si Render le asigna otro dominio o usa uno propio
+        value: https://hotel-lasallito.onrender.com

@@ -78,6 +78,35 @@ Los textos para el huésped están en `locale/catalog.py`. Después de editarlos
 .venv\Scripts\python scripts\compile_translations.py
 ```
 
+## Despliegue en Render
+
+El repositorio trae `render.yaml` (Blueprint) y `build.sh`. El servicio web usa gunicorn en la región Oregon,
+la misma de Supabase (us-west-2). El cron job corre `run_scheduler` cada 15 minutos.
+
+1. Suba el repositorio a GitHub y en Render elija **New → Blueprint** con ese repositorio.
+2. Complete las variables secretas en el panel de Render:
+
+| Variable | De dónde sale |
+| --- | --- |
+| `SECRET_KEY` | **La misma de su `.env`.** Con ella se cifraron los documentos y alergias que ya están en Supabase. Si cambia, esos datos no se pueden leer. |
+| `DATABASE_URL` | La misma de su `.env` (Supabase, *Session pooler*, puerto 5432). |
+| `SUPABASE_S3_*` | Supabase → Storage → S3 Connection. Cree antes el bucket privado `pms-media`. |
+| `EMAIL_URL` | Servidor SMTP (opcional; sin él no salen correos). |
+| `SENTRY_DSN` | Opcional. |
+
+3. El primer despliegue instala dependencias, recopila los estáticos y aplica las migraciones. La base ya
+   tiene los datos: no hace falta `seed_pms`.
+
+Notas:
+- **Archivos subidos.** El disco de Render se borra en cada despliegue: fotos de documentos, firmas,
+  logos y respaldos van a Supabase Storage (`SUPABASE_S3_*` y `BACKUP_UPLOAD=True`).
+- **Plan gratuito.** El servicio se duerme tras 15 minutos sin uso y tarda cerca de un minuto en
+  despertar. Los cron jobs son de pago.
+- **Seguridad.**
+  - HTTPS obligatorio y cookies seguras.
+  - El bloqueo por intentos fallidos usa la IP real del usuario detrás del proxy de Render.
+  - `config/settings/prod.py` se niega a arrancar sin una `SECRET_KEY` válida.
+
 ## Pruebas y calidad
 
 ```bash
