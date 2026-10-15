@@ -14,4 +14,6 @@ urlpatterns = [
     path("auditoria/", views.audit_list, name="audit_list"),
     path("guia-visual/", views.design_system, name="design_system"),
     path("contingencia/", views.offline, name="offline"),
+    path("ayuda/", views.help_index, name="help"),
+    path("ayuda/<slug:slug>/", views.help_topic, name="help_topic"),
 ]

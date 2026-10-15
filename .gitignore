@@ -31,3 +31,6 @@ docs/vault/.obsidian/workspace*.json
 .DS_Store
 Thumbs.db
 *.log
+
+# Respaldos locales (contienen datos personales)
+backups/

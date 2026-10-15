@@ -56,4 +56,11 @@
     <button type="submit" class="btn-primary">{% trans "Guardar usuario" %}</button>
   </div>
 </form>
+{% if object %}
+<section class="card mt-6 flex flex-wrap items-center justify-between gap-3 p-4">
+  <div><p class="font-semibold">{% trans "Doble factor" %} (RF-SEG-03)</p>
+    <p class="text-sm text-ink-500">{% if object.totp_enabled %}{% trans "Activo con app autenticadora." %}{% else %}{% trans "No activado." %}{% endif %}</p></div>
+  {% if object.totp_enabled %}<form method="post" action="{% url 'accounts:two_factor_reset' object.pk %}" data-confirm="{% trans '¿Reiniciar el doble factor? El usuario deberá configurarlo de nuevo.' %}">{% csrf_token %}<input type="hidden" name="reason" value="{% trans 'Perdió el celular' %}"><button class="btn-secondary">{% trans "Reiniciar doble factor" %}</button></form>{% endif %}
+</section>
+{% endif %}
 {% endblock %}

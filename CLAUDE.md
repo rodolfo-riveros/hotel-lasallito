@@ -47,6 +47,10 @@ npm run build                                     # CSS de Tailwind + HTMX/Alpin
 .venv/Scripts/python manage.py run_scheduler      # tareas periódicas (programar cada 15 min)
 .venv/Scripts/python scripts/compile_translations.py   # compila locale/catalog.py (en, pt_BR)
 .venv/Scripts/python scripts/vault_requirements.py     # regenera casillas de requerimientos en la bóveda
+.venv/Scripts/python manage.py backup_pms [--verify]   # respaldo comprimido en backups/ (30 días)
+.venv/Scripts/python manage.py generate_history --count 100000   # historial para pruebas de carga (no en Supabase)
+.venv/Scripts/python scripts/load_test.py --users 50 --think 10   # prueba de carga (LOAD_TEST_USER/PASSWORD)
+.venv/Scripts/python -m pytest --cov --cov-config=.coveragerc-business   # cobertura de reglas de negocio (≥ 80 %)
 ```
 
 Después de cambiar plantillas o clases de Tailwind: `npm run build:css`. `static/css/app.css` se versiona
@@ -72,3 +76,7 @@ Es un monolito modular. Hay una app de Django por módulo (sección 8.2 del docu
 - **Rendimiento:** cada consulta a Supabase cuesta ~200 ms. Use `select_related`, las anotaciones de
   `apps/folio/queries.py` y respete `test_query_budget.py`.
 - **Datos de práctica:** `apps/core/demo.py` (se cargan con `seed_pms --demo`).
+- **Manual de usuario:** `docs/manual/*.md`, visible en `/ayuda/` (`apps/core/help.py`). Al cambiar una pantalla,
+  actualice su capítulo.
+- **Historial grande:** las consultas del día filtran por `departure` (índice `res_prop_departure`), no por
+  `arrival < X`, que recorre todo el historial.

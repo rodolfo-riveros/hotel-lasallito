@@ -14,6 +14,7 @@
     <a href="{% url 'frontdesk:luggage' %}" class="btn-secondary">{% icon "box" "w-4 h-4" %}{% trans "Equipaje" %}</a>
     <a href="{% url 'frontdesk:shift_log' %}" class="btn-secondary">{% icon "chat" "w-4 h-4" %}{% trans "Novedades" %}</a>
     <a href="{% url 'frontdesk:wakeups' %}" class="btn-secondary">{% icon "clock" "w-4 h-4" %}{% trans "Despertador" %}</a>
+    <a href="{% url 'integrations:panel' %}" class="btn-secondary">{% icon "key" "w-4 h-4" %}{% trans "Llaves y llamadas" %}</a>
     <a href="{% url 'frontdesk:night_audit' %}" class="btn-secondary">{% icon "moon" "w-4 h-4" %}{% trans "Cierre de día" %}</a>
     <a href="{% url 'portal:staff_requests' %}" class="btn-secondary">{% icon "sparkles" "w-4 h-4" %}{% trans "Solicitudes" %}</a>
   </div>
@@ -28,6 +29,7 @@
       <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'llegadas' 'pdf' %}">{% trans "Llegadas" %} PDF</a>
       <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'en-casa' 'xlsx' %}">{% trans "En casa" %} Excel</a>
       <a class="badge bg-ink-100 dark:bg-ink-800" href="{% url 'frontdesk:contingency' 'libres' 'pdf' %}">{% trans "Libres" %} PDF</a>
+      <a class="badge bg-gold-100 text-gold-800 dark:bg-gold-900/30 dark:text-gold-300" href="{% url 'core:offline' %}">{% trans "Modo sin internet" %}</a>
     </div></div>
 </div>
 

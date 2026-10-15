@@ -3,7 +3,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.core import pwa
+
 urlpatterns = [
+    path("manifest.webmanifest", pwa.manifest, name="pwa_manifest"),
+    path("sw.js", pwa.service_worker, name="pwa_sw"),
+    path("sin-conexion/", pwa.offline_shell, name="pwa_offline"),
     path("django-admin/", admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
     path("cuenta/", include("apps.accounts.urls")),
@@ -25,6 +30,7 @@ urlpatterns = [
     path("canales/", include("apps.channels.urls")),
     path("tours/", include("apps.tours.urls")),
     path("aula/", include("apps.classroom.urls")),
+    path("integraciones/", include("apps.integrations.urls")),
     path("", include("apps.booking_engine.urls")),
     path("", include("apps.portal.urls")),
     path("", include("apps.core.urls")),

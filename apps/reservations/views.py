@@ -56,12 +56,13 @@ def reservation_list(request):
     qs = Reservation.objects.filter(property=request.property).select_related("guest", "room", "room_type")
     q = request.GET.get("q", "").strip()
     if q:
-        qs = qs.filter(
-            Q(code__icontains=q)
-            | Q(guest__first_name__icontains=q)
-            | Q(guest__last_name__icontains=q)
-            | Q(external_ref__icontains=q)
-        )
+        # RNF-REN-01: primero los huéspedes que coinciden (tabla chica, con índice de trigramas en
+        # PostgreSQL) y luego sus reservas por id; el JOIN con LIKE en cuatro columnas recorría todo
+        # el historial.
+        from apps.guests.models import Guest
+
+        guest_ids = Guest.objects.filter(Q(first_name__icontains=q) | Q(last_name__icontains=q)).values("pk")
+        qs = qs.filter(Q(code__icontains=q) | Q(external_ref__icontains=q) | Q(guest_id__in=guest_ids))
     status = request.GET.get("status")
     if status:
         qs = qs.filter(status=status)

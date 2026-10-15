@@ -53,6 +53,15 @@ def run_all(property_obj) -> dict:
             )
         result["alertas_almacen"] = low + expiring
     result["canales"] = _push_channels(property_obj)
+    from apps.core.backup import create_backup, expire_guest_data
+    from apps.reports.schedule import send_due
+
+    if _once_per_day("backup"):
+        result["respaldo"] = create_backup().name
+    if timezone.localdate().day == 1 and _once_per_day("retencion"):
+        result["huespedes_anonimizados"] = expire_guest_data()
+
+    result["reportes_enviados"] = send_due(property_obj)
     if timezone.localtime().hour >= 18 and _once_per_day(f"tours:{property_obj.pk}"):
         result["agendas_tours"] = _send_tour_agendas(property_obj)
     log.info("Programador %s: %s", property_obj.code, result)

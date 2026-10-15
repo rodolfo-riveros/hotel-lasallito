@@ -38,3 +38,13 @@ Hacerlo en este orden, con aprobación del usuario antes de empezar:
 - [ ] Envío programado de reportes por correo (RF-REP-06).
 - [ ] Para publicar la web de reservas: definir dominio y `SITE_URL`, y fotos de los tipos de habitación.
 - [ ] Base de aula separada (RF-BD-07) si los hoteles archivados se acumulan.
+
+## Después de la fase 4 (paso a producción)
+- [ ] Servidor de producción (Linux con gunicorn y varios procesos, o un PaaS) con HTTPS y dominio.
+- [ ] Repetir `scripts/load_test.py` contra producción con 50 usuarios.
+- [ ] Proyecto Supabase de producción/aula en una región cercana (sa-east-1) (RF-BD-07).
+- [ ] Prueba mensual de restauración del respaldo (`backup_pms` + `loaddata` en una base vacía).
+- [ ] Programar `run_scheduler` cada 15 minutos (Programador de tareas de Windows o cron).
+- [ ] Definir `PBX_TOKEN` antes de conectar una central real, y elegir cerradura, channel manager y pasarela.
+- [ ] RF-FAC-06 (facturar varios folios juntos) y RF-FAC-09 (guías de remisión) quedan pendientes.
+- [ ] RNF-DIS-01/05 (disponibilidad 99,5 %, RTO/RPO) dependen del hosting elegido.

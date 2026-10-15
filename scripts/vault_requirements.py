@@ -14,7 +14,7 @@ text = src.read_text(encoding="utf-8")
 if text.startswith("---"):
     text = text.split("---", 2)[2].lstrip()
 
-F0, F1, F2, F3 = "fase 0", "fase 1", "fase 2", "fase 3"
+F0, F1, F2, F3, F4 = "fase 0", "fase 1", "fase 2", "fase 3", "fase 4"
 DONE = {
     # Fase 0
     "RF-SEG-01": F0,
@@ -93,18 +93,25 @@ DONE = {
     "RF-WEB-04": F3,
     "RF-WEB-06": F3,
     "RF-HUE-04": F3,
+    # Fase 4
+    "RF-SEG-03": F4,
+    "RF-REC-13": F4,
+    "RF-REP-06": F4,
+    "RNF-UX-06": F4,
+    "RNF-MAN-02": F4,
+    "RNF-MAN-03": F4,
+    "RNF-MAN-05": F4,
+    "RNF-SEG-06": F4,
+    "RNF-REN-01": F4,
+    "RNF-REN-02": F4,
 }
 PARTIAL = {
-    "RNF-UX-06": "portal con etiquetas, contraste y salto al contenido; falta auditoría WCAG formal (fase 4)",
-    "RF-SEG-03": "pendiente: doble factor (TOTP)",
+    "RNF-UX-07": "manual en el sistema y ayuda contextual por pantalla; falta medirlo en una capacitación real",
+    "RNF-REN-03": "inmediata con CHANNEL_SYNC_ASYNC y Redis; sin Redis, el programador publica cada 15 min",
+    "RNF-DIS-02": "respaldo diario comprimido, 30 días, verificado y copia opcional a Storage; falta prueba de restauración mensual programada",
     "RNF-SEG-01": "Argon2, bloqueo, inactividad y HTTPS en prod; falta probar despliegue",
-    "RF-REC-13": "cargos, no shows, control de caja y reporte listos; falta respaldo automático",
     "RF-FAC-06": "facturación por cargos seleccionados y con crédito; falta agrupar varios folios",
-    "RF-REP-06": "exportación PDF/Excel/CSV lista; falta envío programado",
-    "RNF-MAN-02": "183 pruebas de reglas de negocio; falta medir cobertura",
-    "RNF-MAN-03": "migraciones, datos de ejemplo y README; falta manual de usuario",
     "RNF-MAN-04": "GitHub Actions y .venv reproducible; faltan entornos separados",
-    "RNF-MAN-05": "logging + Sentry opcional",
     "RF-BD-06": "Supabase Storage configurable; falta crear el bucket",
     "RF-BD-07": "proyecto de desarrollo; falta proyecto de producción/aula",
 }

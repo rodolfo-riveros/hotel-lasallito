@@ -198,7 +198,12 @@ class Reservation(TimeStampedModel, SoftDeleteModel, PropertyScopedModel):
             ),
             models.UniqueConstraint(fields=["property", "code"], name="uniq_reservation_code"),
         ]
-        indexes = [models.Index(fields=["property", "status", "arrival"])]
+        indexes = [
+            models.Index(fields=["property", "status", "arrival"]),
+            # RNF-REN-02: con 100 000 reservas históricas, las consultas del día (salidas, en casa,
+            # ocupación) filtran por salida; sin este índice recorren todo el historial.
+            models.Index(fields=["property", "departure"], name="res_prop_departure"),
+        ]
 
     def __str__(self):
         return f"{self.code} · {self.guest}"

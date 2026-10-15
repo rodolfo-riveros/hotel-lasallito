@@ -180,3 +180,12 @@ def mul(a, b):
         return (Decimal(str(a)) * Decimal(str(b))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     except (InvalidOperation, TypeError, ValueError):
         return ""
+
+
+@register.simple_tag(takes_context=True)
+def help_url(context):
+    """Enlace al capítulo del manual de la pantalla actual (RNF-UX-07)."""
+    from apps.core.help import topic_for_path
+
+    request = context.get("request")
+    return f"/ayuda/{topic_for_path(request.path if request else '/')}/"

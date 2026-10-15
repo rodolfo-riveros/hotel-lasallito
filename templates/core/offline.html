@@ -2,11 +2,19 @@
 {% load i18n pms %}
 {% block title %}{% trans "Modo contingencia" %}{% endblock %}
 {% block content %}
-<div class="card mx-auto max-w-2xl p-8 text-center">
-  <span class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-state-dirty/10 text-state-dirty">{% icon "wifi-off" "w-6 h-6" %}</span>
-  <h1 class="page-title">{% trans "Modo contingencia" %}</h1>
-  <p class="mt-3 text-sm text-ink-500">
-    {% trans "Desde la fase 1, aquí se descargan en PDF y Excel la lista de llegadas, los huéspedes in-house y las habitaciones disponibles, para seguir operando si falla internet (RNF-DIS-03)." %}
-  </p>
+<div class="card mx-auto max-w-2xl p-8">
+  <div class="text-center">
+    <span class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-state-dirty/10 text-state-dirty">{% icon "wifi-off" "w-6 h-6" %}</span>
+    <h1 class="page-title">{% trans "Modo contingencia" %}</h1>
+    <p class="mt-3 text-sm text-ink-500">{% trans "Si se cae internet, siga operando con estas listas (RNF-DIS-03). Ábralas al inicio de cada turno: el sistema guarda la última copia en este equipo y la muestra aunque no haya conexión." %}</p>
+  </div>
+  <div class="mt-6 grid gap-3 sm:grid-cols-3">
+    {% for key, label in pages %}<div class="rounded-xl border border-ink-200 p-4 text-center dark:border-ink-700"><p class="font-semibold">{{ label }}</p>
+      <div class="mt-3 flex justify-center gap-2"><a class="btn-secondary btn-sm" href="{% url 'reports:report' key %}">{% trans "Ver" %}</a><a class="btn-ghost btn-sm" href="{% url 'reports:report' key %}?format=pdf">PDF</a><a class="btn-ghost btn-sm" href="{% url 'reports:report' key %}?format=xlsx">Excel</a></div></div>{% endfor %}
+  </div>
+  <div class="mt-6 rounded-xl bg-ink-50 p-4 text-sm text-ink-600 dark:bg-ink-800/50 dark:text-ink-300">
+    <p class="font-semibold">{% trans "Instale el sistema como aplicación" %}</p>
+    <p class="mt-1">{% trans "En Chrome o Edge use el ícono de instalar en la barra de direcciones; en el celular, «Agregar a la pantalla de inicio». Abre más rápido y funciona en pantalla completa." %}</p>
+  </div>
 </div>
 {% endblock %}

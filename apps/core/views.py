@@ -2,6 +2,7 @@ import csv
 from datetime import timedelta
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -257,4 +258,32 @@ def design_system(request):
 
 @require_perm("dashboard.view")
 def offline(request):
-    return render(request, "core/offline.html")
+    """RNF-DIS-03: listas para operar sin internet; el service worker guarda su última copia."""
+    pages = [
+        ("arrivals", _("Llegadas del día")),
+        ("in_house", _("Huéspedes en casa")),
+        ("rooms", _("Estado de habitaciones")),
+    ]
+    return render(request, "core/offline.html", {"pages": pages})
+
+
+@login_required
+def help_index(request):
+    """Manual de usuario (RNF-MAN-03)."""
+    from .help import TOPICS
+
+    return render(request, "core/help.html", {"topics": TOPICS, "slug": None, "body": None})
+
+
+@login_required
+def help_topic(request, slug):
+    from django.http import Http404
+
+    from .help import TOPICS, render_topic
+
+    body = render_topic(slug)
+    if body is None:
+        raise Http404
+    return render(
+        request, "core/help.html", {"topics": TOPICS, "slug": slug, "title": TOPICS[slug][0], "body": body}
+    )

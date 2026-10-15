@@ -82,3 +82,10 @@ document.addEventListener("submit", (e) => {
   const msg = e.target.dataset.confirm;
   if (msg && !window.confirm(msg)) e.preventDefault();
 });
+
+// PWA: registra el service worker (instalable y con contingencia sin internet, RNF-DIS-03).
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+  });
+}

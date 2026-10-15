@@ -124,6 +124,9 @@ def check_in(
         changes={"status": ["checked_in"], "habitación": room.number},
         user=user,
     )
+    from apps.integrations.services import issue_keys, safe
+
+    safe(issue_keys, reservation, user)
     transaction.on_commit(lambda: res_services._send_event_safe("welcome", reservation.pk))
     return reservation
 
@@ -153,6 +156,9 @@ def move_room(reservation: Reservation, new_room: Room, *, kind: str, reason: st
     if reservation.status == Reservation.Status.CHECKED_IN:
         old_room.hk_status = Room.HKStatus.DIRTY
         old_room.save(update_fields=["hk_status"])
+        from apps.integrations.services import issue_keys, safe
+
+        safe(issue_keys, reservation, user)  # las tarjetas de la habitación anterior quedan anuladas
     return reservation
 
 
@@ -192,6 +198,9 @@ def check_out(
     reservation.status = Reservation.Status.CHECKED_OUT
     reservation.checked_out_at = timezone.now()
     reservation.save()
+    from apps.integrations.services import revoke_keys, safe
+
+    safe(revoke_keys, reservation)
     for folio in reservation.folios.filter(status=Folio.Status.OPEN):
         if folio.balance == 0:
             folio_services.close_folio(folio, user)
@@ -346,6 +355,12 @@ def run_night_audit(property_obj, *, user) -> NightAudit:
     from apps.housekeeping.services import generate_daily_tasks
 
     generate_daily_tasks(property_obj, property_obj.business_date)
+    from django.conf import settings
+
+    if settings.BACKUP_ON_NIGHT_AUDIT:
+        from apps.core.backup import backup_in_background
+
+        transaction.on_commit(backup_in_background)  # RF-REC-13: respaldo al cerrar el día
     return audit_record
 
 

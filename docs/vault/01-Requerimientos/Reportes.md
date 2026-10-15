@@ -1,6 +1,6 @@
 ---
 fase: 1
-estado: en curso
+estado: completo
 tags: [requerimientos, modulo]
 ---
 # Reportes
@@ -12,4 +12,4 @@ Requerimientos `RF-REP` del [[Documento de requerimientos]]. Fase prevista: 1.
 - [x] **RF-REP-03** reportes operativos: reservas del día, in-house, rooming list, estado de habitaciones, consumo de almacén y costo de alimentos. ✅ fase 1
 - [x] **RF-REP-04** reporte de pronóstico (forecast) de ocupación a 30, 60 y 90 días con comparación contra el año anterior. ✅ fase 1
 - [x] **RF-REP-05** reportes para MINCETUR y DIRCETUR (estadística de arribos y pernoctaciones) exportables. ✅ fase 1
-- [ ] **RF-REP-06** exportación a PDF, Excel y CSV, y envío programado por correo al gerente. — 🟡 parcial: exportación PDF/Excel/CSV lista; falta envío programado
+- [x] **RF-REP-06** exportación a PDF, Excel y CSV, y envío programado por correo al gerente. ✅ fase 4

@@ -1,6 +1,6 @@
 ---
 fase: 1
-estado: en curso
+estado: completo
 tags: [requerimientos, modulo]
 ---
 # Recepcion
@@ -19,5 +19,5 @@ Requerimientos `RF-REC` del [[Documento de requerimientos]]. Fase prevista: 1.
 - [x] **RF-REC-10** check-out rápido con folio final, cobro, comprobante electrónico y encuesta de salida. ✅ fase 2
 - [x] **RF-REC-11** custodia de equipaje con número de ticket y registro de entrada y salida. ✅ fase 1
 - [x] **RF-REC-12** libro de novedades y mensajes entre turnos, y alertas de VIP, cumpleaños, alergias y solicitudes especiales. ✅ fase 1
-- [ ] **RF-REC-13** cierre de día (night audit) automático: cargo de habitaciones, no shows, cierre de caja, respaldo y reporte. — 🟡 parcial: cargos, no shows, control de caja y reporte listos; falta respaldo automático
+- [x] **RF-REC-13** cierre de día (night audit) automático: cargo de habitaciones, no shows, cierre de caja, respaldo y reporte. ✅ fase 4
 - [x] **RF-REC-14** pedido de despertador, wake-up call y registro de llamadas pendientes. ✅ fase 1

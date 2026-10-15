@@ -6,7 +6,7 @@ porque el sistema se usa para enseñar gestión hotelera.
 
 La fuente de verdad es el documento de requerimientos (`docs/vault/01-Requerimientos`).
 
-**Estado:** fases 0 a 3 terminadas (base; operación del hotel con restaurante; almacén, compras, mantenimiento y portal; channel manager, web de reservas en `/reservar/`, tours, fidelidad, consolidado multi-hotel y modo aula). Siguiente: fase 4.
+**Estado:** las 5 fases terminadas: base; operación con restaurante; almacén, compras, mantenimiento y portal; canales, web de reservas, tours, fidelidad y modo aula; y pulido (PWA, doble factor, cerraduras y central telefónica, respaldos, prueba de carga con 100 000 reservas y manual en `/ayuda/`).
 
 ## Puesta en marcha (Windows)
 

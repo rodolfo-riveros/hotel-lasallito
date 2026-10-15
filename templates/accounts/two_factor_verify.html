@@ -1,0 +1,23 @@
+{% load static i18n pms %}<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% trans "Verificación" %} · PMS</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="flex min-h-full items-center justify-center bg-ink-50 p-4 dark:bg-ink-950">
+  <main class="card w-full max-w-sm p-8">
+    <span class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-gold-200">{% icon "lock" "w-6 h-6" %}</span>
+    <h1 class="mt-4 font-display text-2xl font-semibold">{% trans "Verificación en dos pasos" %}</h1>
+    <p class="mt-2 text-sm text-ink-500">{% trans "Escriba el código de 6 dígitos de su app autenticadora." %}</p>
+    {% if error %}<p class="mt-4 rounded-lg bg-state-danger/10 p-3 text-sm text-state-danger" role="alert">{{ error }}</p>{% endif %}
+    {% for message in messages %}<p class="mt-4 rounded-lg bg-ink-100 p-3 text-sm">{{ message }}</p>{% endfor %}
+    <form method="post" class="mt-6 space-y-4">{% csrf_token %}
+      <label class="block"><span class="field-label">{% trans "Código" %}</span>
+        <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]*" maxlength="7" class="w-full text-center font-mono text-2xl tracking-[0.4em]" required autofocus></label>
+      <button class="btn-primary w-full">{% trans "Verificar" %}</button>
+    </form>
+    <p class="mt-6 text-xs text-ink-500">{% trans "¿Perdió el celular? Pida al administrador que reinicie su doble factor." %} <a class="underline" href="{% url 'accounts:login' %}">{% trans "Volver" %}</a></p>
+  </main>
+</body>
+</html>

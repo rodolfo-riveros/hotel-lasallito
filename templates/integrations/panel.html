@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Cerraduras y central telefónica" %}{% endblock %}
+{% block content %}
+{% can "frontdesk.edit" as can_edit %}
+<div class="mb-6"><a href="{% url 'frontdesk:panel' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Recepción" %}</a>
+  <h1 class="page-title mt-2">{% trans "Cerraduras y central telefónica" %}</h1>
+  <p class="page-subtitle">{% trans "Cerradura" %}: <b>{{ lock.code|default:_("desactivada") }}</b> · {% trans "Central" %}: <b>{% if pbx %}{% trans "activa" %}{% else %}{% trans "desactivada" %}{% endif %}</b></p></div>
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Llamadas" %}</h2></div><table class="table">
+      <thead><tr><th>{% trans "Inicio" %}</th><th>{% trans "Anexo" %}</th><th>{% trans "Número" %}</th><th>{% trans "Tipo" %}</th><th class="!text-right">{% trans "Duración" %}</th><th class="!text-right">{% trans "Importe" %}</th><th>{% trans "Folio" %}</th></tr></thead>
+      <tbody>{% for c in calls %}<tr><td class="text-xs">{{ c.started_at|date:"d/m H:i" }}</td><td>{{ c.extension }}</td><td class="font-mono text-xs">{{ c.dialed }}</td><td>{{ c.get_kind_display }}</td><td class="text-right">{{ c.seconds }} s</td><td class="text-right tabular-nums">{{ c.cost|money }}</td><td class="text-xs">{% if c.charge_id %}{{ c.reservation.code }}{% else %}—{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="7" class="text-ink-500">{% trans "Sin llamadas." %}</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Tarjetas activas" %}</h2></div><table class="table">
+      <thead><tr><th>{% trans "Habitación" %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Tarjeta" %}</th><th>{% trans "Válida hasta" %}</th></tr></thead>
+      <tbody>{% for k in cards %}<tr><td>{{ k.room.number }}</td><td>{{ k.reservation.guest }}</td><td class="font-mono text-xs">{{ k.card_ref }}</td><td class="text-xs">{{ k.valid_to|date:"d/m H:i" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="text-ink-500">{% trans "Sin tarjetas activas." %}</td></tr>{% endfor %}</tbody></table></section>
+  </div>
+  <aside class="space-y-6">
+    {% if can_edit and pbx %}<form method="post" action="{% url 'integrations:simulate_call' %}" class="card space-y-3 p-4">{% csrf_token %}<h2 class="font-semibold">{% trans "Simular llamada (central de prueba)" %}</h2>
+      {% for f in form %}{% include "components/field.html" with field=f %}{% endfor %}<button class="btn-primary w-full">{% trans "Registrar llamada" %}</button></form>{% endif %}
+    <section class="card p-4 text-sm"><h2 class="mb-2 font-semibold">{% trans "Tarifa por minuto" %}</h2>
+      <ul class="space-y-1">{% for kind, rate in rates.items %}<li class="flex justify-between"><span>{{ kind }}</span><span class="tabular-nums">{{ rate|money }}</span></li>{% endfor %}</ul>
+      <p class="mt-3 text-xs text-ink-500">{% trans "La central real envía cada llamada a" %} <code>/integraciones/pbx/cdr/</code> {% trans "con el encabezado X-PBX-Token." %}</p></section>
+  </aside>
+</div>
+{% endblock %}

@@ -22,6 +22,7 @@ ignore = ["S101", "E501", "DJ006"]
 "**/tests/**" = ["S105", "S106"]
 "conftest.py" = ["S105", "S106"]
 "config/settings/*" = ["F405"]
+"scripts/load_test.py" = ["S310"]  # solo abre la URL http(s) que se le indica (validada en main)
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
@@ -31,3 +32,6 @@ addopts = "-ra --strict-markers"
 [tool.coverage.run]
 source = ["apps"]
 omit = ["*/migrations/*", "*/tests/*"]
+
+# RNF-MAN-02: reglas de negocio (tarifas, disponibilidad, impuestos, folio, facturación) con 80 % mínimo.
+# Se mide con:  pytest --cov --cov-config=.coveragerc-business

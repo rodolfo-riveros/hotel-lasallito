@@ -11,6 +11,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.fields import EncryptedTextField
 from apps.core.models import TimeStampedModel
 
 from .permissions import ACTIONS, MODULES_BY_CODE
@@ -34,6 +35,10 @@ class User(AbstractUser):
         related_name="+",
     )
     must_change_password = models.BooleanField(_("debe cambiar la contraseña"), default=False)
+    # RF-SEG-03: doble factor con app autenticadora (TOTP). El secreto se guarda cifrado.
+    totp_secret = EncryptedTextField(_("secreto del doble factor"), blank=True, editable=False)
+    totp_enabled = models.BooleanField(_("doble factor activo"), default=False)
+    totp_last_step = models.BigIntegerField(default=0, editable=False)
 
     class Meta:
         verbose_name = _("usuario")

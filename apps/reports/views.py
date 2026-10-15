@@ -1,16 +1,19 @@
 from datetime import date, timedelta
 
+from django import forms
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from apps.accounts.decorators import require_perm
 from apps.core import audit
+from apps.core.crud import Crud, PropertyModelForm
 from apps.core.models import AuditLog
 from apps.rooms.models import RoomType
 
 from . import services as rep
 from .exports import export_table
+from .models import ReportSubscription
 
 
 def _range(request):
@@ -251,3 +254,32 @@ def consolidated(request):
     return render(
         request, "reports/consolidated.html", {"rows": rows, "group": group, "start": start, "end": end}
     )
+
+
+# --------------------------------------------------------------------------
+# Envío programado por correo (RF-REP-06)
+# --------------------------------------------------------------------------
+
+
+class SubscriptionForm(PropertyModelForm):
+    report = forms.ChoiceField(label=gettext_lazy("Reporte"), choices=list(REPORTS.items()))
+
+    class Meta:
+        model = ReportSubscription
+        fields = ["report", "recipients", "frequency", "format", "is_active"]
+
+
+subscription_crud = Crud(
+    model=ReportSubscription,
+    module="reports",
+    form_class=SubscriptionForm,
+    columns=[
+        (gettext_lazy("Reporte"), "report"),
+        (gettext_lazy("Destinatarios"), "recipients"),
+        (gettext_lazy("Frecuencia"), "frequency"),
+        (gettext_lazy("Formato"), "format"),
+        (gettext_lazy("Último envío"), "last_sent_on"),
+        (gettext_lazy("Activo"), "is_active"),
+    ],
+    help_text=gettext_lazy("Se envían solos con el programador de tareas (run_scheduler)."),
+)

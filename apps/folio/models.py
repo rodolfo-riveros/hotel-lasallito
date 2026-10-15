@@ -126,6 +126,7 @@ class Charge(TimeStampedModel):
         TOUR = "tour", _("Tour / traslado")
         TRANSFER = "transfer", _("Transferido")
         PORTAL = "portal", _("Portal del huésped")
+        PHONE = "phone", _("Central telefónica")
 
     folio = models.ForeignKey(
         Folio, verbose_name=_("folio"), on_delete=models.PROTECT, related_name="charges"

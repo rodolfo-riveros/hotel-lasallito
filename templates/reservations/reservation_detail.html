@@ -79,6 +79,9 @@
   </div>
 
   <aside class="space-y-6">
+    {% if r.status == "checked_in" %}{% with cards=r.key_cards.all %}<section class="card p-4"><h2 class="mb-2 font-semibold">{% trans "Tarjetas de habitación" %}</h2>
+      <ul class="space-y-1 text-sm">{% for k in cards %}<li class="flex justify-between"><span class="font-mono text-xs">{{ k.card_ref }}</span><span class="text-xs {% if k.status == 'revoked' %}text-ink-400 line-through{% endif %}">{{ k.room.number }} · {{ k.get_status_display }}</span></li>{% empty %}<li class="text-ink-500">{% trans "Sin tarjetas grabadas." %}</li>{% endfor %}</ul>
+      {% if can_fd %}<form method="post" action="{% url 'integrations:duplicate_key' r.pk %}" class="mt-3 flex gap-2">{% csrf_token %}<button class="btn-secondary btn-sm">{% trans "Grabar otra" %}</button><button name="lost" value="1" class="btn-ghost btn-sm" data-confirm="{% trans '¿Anular las tarjetas actuales y grabar nuevas?' %}">{% trans "Perdió la tarjeta" %}</button></form>{% endif %}</section>{% endwith %}{% endif %}
     <section class="card">
       <div class="card-header"><h2 class="card-title">{% trans "Huésped" %}</h2><a href="{% url 'guests:guest_detail' r.guest.pk %}" class="text-xs font-medium text-brand-700 hover:underline">{% trans "Ver perfil" %}</a></div>
       <div class="card-body space-y-1 text-sm">

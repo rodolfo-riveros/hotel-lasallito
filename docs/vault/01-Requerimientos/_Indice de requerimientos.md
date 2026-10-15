@@ -7,16 +7,16 @@ tags: [requerimientos, indice]
 | --- | --- | --- |
 | [[Base de datos Supabase]] | 0 | 5/7 |
 | [[Bitacora Obsidian]] | 0 | 6/6 |
-| [[No funcionales]] | 0 | 20/34 |
-| [[Seguridad y roles]] | 0 | 2/3 |
+| [[No funcionales]] | 0 | 27/34 |
+| [[Seguridad y roles]] | 0 | 3/3 |
 | [[Caja y pagos]] | 1 | 5/5 |
 | [[Facturacion SUNAT]] | 1 | 8/10 |
 | [[Habitaciones]] | 1 | 5/5 |
 | [[Housekeeping]] | 1 | 8/8 |
 | [[Huespedes]] | 1 | 7/7 |
 | [[Modo aula y simulacion]] | 1 | 7/7 |
-| [[Recepcion]] | 1 | 13/14 |
-| [[Reportes]] | 1 | 5/6 |
+| [[Recepcion]] | 1 | 14/14 |
+| [[Reportes]] | 1 | 6/6 |
 | [[Reservas]] | 1 | 11/11 |
 | [[Restaurante y bar]] | 1 | 8/8 |
 | [[Tarifas]] | 1 | 8/8 |

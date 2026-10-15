@@ -20,3 +20,5 @@ WHITENOISE_USE_FINDERS = True
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}}
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+BACKUP_ON_NIGHT_AUDIT = False

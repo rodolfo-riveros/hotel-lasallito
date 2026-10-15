@@ -16,7 +16,7 @@ facturación SUNAT se simula y todo lo demás funciona como un PMS real.
 | 1. MVP operativo | Habitaciones, tarifas, reservas, recepción, folio, caja, housekeeping, huéspedes, SUNAT simulado, reportes, **restaurante y bar** | ✅ Terminada |
 | 2. Operación completa | Almacén, compras, recetas, mantenimiento, portal, pre-check-in, comunicaciones, pagos en línea | ✅ Terminada |
 | 3. Ventas y crecimiento | Channel manager, motor web, tours, multi-propiedad, fidelidad, pronóstico, modo aula | ✅ Terminada |
-| 4. Pulido | Integraciones opcionales, PWA, pruebas de carga, manual | ⏳ Siguiente |
+| 4. Pulido | Integraciones opcionales, PWA, doble factor, respaldos, pruebas de carga, manual | ✅ Terminada |
 
 ## Mapa de notas
 
@@ -35,6 +35,9 @@ facturación SUNAT se simula y todo lo demás funciona como un PMS real.
   - [[Decisión - Traducciones y tareas programadas]]
   - [[Decisión - Channel manager y motor web]]
   - [[Decisión - Modo aula]]
-- Modelo de datos: [[core]], [[accounts]], [[fase-1]], [[fase-2]], [[fase-3]]
-- Bitácora: [[2026-10-12]], [[2026-10-13]]
+  - [[Decisión - Rendimiento con historial grande]]
+  - [[Decisión - Integraciones opcionales y seguridad de la fase 4]]
+- Modelo de datos: [[core]], [[accounts]], [[fase-1]], [[fase-2]], [[fase-3]], [[fase-4]]
+- Bitácora: [[2026-10-12]], [[2026-10-13]], [[2026-10-15]]
+- Manual de usuario: `docs/manual/` (también en el sistema, en `/ayuda/`)
 - Pendientes: [[Pendientes]]

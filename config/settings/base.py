@@ -71,6 +71,7 @@ LOCAL_APPS = [
     "apps.booking_engine",
     "apps.tours",
     "apps.classroom",
+    "apps.integrations",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -269,13 +270,22 @@ SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000")
 # --------------------------------------------------------------------------
 # Registros (RNF-MAN-05)
 # --------------------------------------------------------------------------
+LOG_FORMAT = env("LOG_FORMAT", default="text")  # text | json (RNF-MAN-05)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {"request": {"()": "apps.core.logging.RequestContextFilter"}},
     "formatters": {
         "simple": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"},
+        "json": {"()": "apps.core.logging.JsonFormatter"},
     },
-    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json" if LOG_FORMAT == "json" else "simple",
+            "filters": ["request"],
+        }
+    },
     "root": {"handlers": ["console"], "level": "INFO"},
     "loggers": {"django.db.backends": {"level": "WARNING"}},
 }
@@ -285,3 +295,20 @@ SENTRY_DSN = env("SENTRY_DSN", default="")
 # Fidelidad (RF-HUE-04): puntos por cada sol consumido y valor de canje de cada punto.
 LOYALTY_POINTS_PER_PEN = Decimal(env("LOYALTY_POINTS_PER_PEN", default="0.1"))
 LOYALTY_PEN_PER_POINT = Decimal(env("LOYALTY_PEN_PER_POINT", default="0.10"))
+
+# Doble factor (RF-SEG-03): roles que deben activarlo al ingresar (vacío = opcional para todos).
+TWO_FACTOR_REQUIRED_ROLES = env.list("TWO_FACTOR_REQUIRED_ROLES", default=[])
+TWO_FACTOR_ISSUER = env("TWO_FACTOR_ISSUER", default="PMS La Sallito")
+
+# Integraciones opcionales (fase 4): cerradura de tarjetas y central telefónica.
+DOOR_LOCK = env("DOOR_LOCK", default="test")  # test | salto | none
+PBX = env("PBX", default="test")  # test | none
+PBX_TOKEN = env("PBX_TOKEN", default="")
+PBX_RATES = env.json("PBX_RATES", default={})  # {"mobile": "1.20", ...} soles por minuto iniciado
+
+# Respaldo lógico diario (RNF-DIS-02, RF-REC-13) y conservación de datos personales (RNF-SEG-06).
+BACKUP_DIR = env("BACKUP_DIR", default=str(BASE_DIR / "backups"))
+BACKUP_RETENTION_DAYS = env.int("BACKUP_RETENTION_DAYS", default=30)
+BACKUP_UPLOAD = env.bool("BACKUP_UPLOAD", default=False)
+BACKUP_ON_NIGHT_AUDIT = env.bool("BACKUP_ON_NIGHT_AUDIT", default=True)
+GUEST_RETENTION_YEARS = env.int("GUEST_RETENTION_YEARS", default=5)

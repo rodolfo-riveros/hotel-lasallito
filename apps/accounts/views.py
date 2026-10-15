@@ -1,7 +1,10 @@
+import time
+
 from django.contrib import messages
+from django.contrib.auth import login as auth_login
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth import views as auth_views
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,17 +15,123 @@ from django.views.decorators.http import require_POST
 from apps.core import audit
 from apps.core.models import AuditLog
 
+from . import two_factor
 from .decorators import require_perm
 from .forms import ForcedPasswordChangeForm, LoginForm, PropertyAccessFormSet, RoleForm, UserForm
 from .middleware import SESSION_PROPERTY_KEY
 from .models import Permission, Role, User
 from .permissions import ACTIONS, MODULES
 
+PENDING_2FA = "pms_2fa_pending"
+MAX_2FA_TRIES = 5
+
 
 class LoginView(auth_views.LoginView):
     template_name = "accounts/login.html"
     authentication_form = LoginForm
     redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        """Si el usuario tiene doble factor, la sesión se abre recién al validar el código (RF-SEG-03)."""
+        user = form.get_user()
+        if user.totp_enabled:
+            self.request.session[PENDING_2FA] = {
+                "user": user.pk,
+                "backend": user.backend,
+                "next": self.get_success_url(),
+                "at": int(time.time()),
+                "tries": 0,
+            }
+            return redirect("accounts:two_factor_verify")
+        response = super().form_valid(form)
+        if two_factor.required_for(user):
+            messages.warning(self.request, _("Su rol requiere doble factor. Actívelo para continuar."))
+            return redirect("accounts:two_factor_setup")
+        return response
+
+
+def two_factor_verify(request):
+    """Segundo paso del ingreso: código de 6 dígitos de la app autenticadora."""
+    pending = request.session.get(PENDING_2FA)
+    if not pending or time.time() - pending["at"] > 300:
+        request.session.pop(PENDING_2FA, None)
+        messages.error(request, _("La verificación expiró. Ingrese de nuevo."))
+        return redirect("accounts:login")
+    user = get_object_or_404(User, pk=pending["user"], is_active=True)
+    error = ""
+    if request.method == "POST":
+        if two_factor.verify(user, request.POST.get("code", "")):
+            request.session.pop(PENDING_2FA, None)
+            auth_login(request, user, backend=pending["backend"])
+            next_url = pending.get("next") or "/"
+            if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                next_url = "/"
+            return redirect(next_url)
+        pending["tries"] += 1
+        audit.log(
+            AuditLog.Action.LOGIN_FAILED,
+            user,
+            changes={"doble_factor": "código inválido"},
+            user=user,
+            property=user.default_property,
+        )
+        if pending["tries"] >= MAX_2FA_TRIES:
+            request.session.pop(PENDING_2FA, None)
+            messages.error(request, _("Demasiados códigos incorrectos. Ingrese de nuevo."))
+            return redirect("accounts:login")
+        request.session[PENDING_2FA] = pending
+        error = _("Código incorrecto.")
+    return render(request, "accounts/two_factor_verify.html", {"error": error})
+
+
+def two_factor_setup(request):
+    """Activar o desactivar el doble factor de la propia cuenta."""
+    if not request.user.is_authenticated:
+        return redirect("accounts:login")
+    user = request.user
+    if request.method == "POST" and request.POST.get("action") == "disable":
+        if two_factor.verify(user, request.POST.get("code", "")):
+            two_factor.disable(user, user)
+            messages.success(request, _("Doble factor desactivado."))
+        else:
+            messages.error(request, _("Código incorrecto."))
+        return redirect("accounts:two_factor_setup")
+    secret = request.session.get("pms_2fa_secret") or two_factor.new_secret()
+    request.session["pms_2fa_secret"] = secret
+    if request.method == "POST":
+        try:
+            two_factor.enable(user, secret, request.POST.get("code", ""))
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
+        else:
+            request.session.pop("pms_2fa_secret", None)
+            messages.success(
+                request, _("Doble factor activado. Desde ahora se le pedirá el código al ingresar.")
+            )
+            return redirect("core:dashboard")
+    uri = two_factor.provisioning_uri(user, secret)
+    return render(
+        request,
+        "accounts/two_factor_setup.html",
+        {
+            "enabled": user.totp_enabled,
+            "secret": secret,
+            "qr": two_factor.qr_svg(uri) if not user.totp_enabled else "",
+            "required": two_factor.required_for(user),
+        },
+    )
+
+
+@require_POST
+@require_perm("accounts.edit")
+def two_factor_reset(request, pk):
+    """El administrador reinicia el doble factor de un usuario que perdió su celular."""
+    user = get_object_or_404(User, pk=pk)
+    two_factor.disable(
+        user, request.user, reason=request.POST.get("reason", "") or _("Reinicio por administrador")
+    )
+    messages.success(request, _("Doble factor de %(u)s reiniciado.") % {"u": user})
+    return redirect("accounts:user_edit", pk=pk)
 
 
 class LogoutView(auth_views.LogoutView):

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Doble factor" %}{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl">
+  <p class="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-gold-600 dark:text-gold-400">{% trans "Mi cuenta" %}</p>
+  <h1 class="page-title">{% trans "Doble factor" %}</h1>
+  <p class="page-subtitle mb-6">{% trans "Además de la contraseña, al ingresar se pide un código de 6 dígitos de una app en su celular (Google Authenticator, Microsoft Authenticator o Authy)." %}</p>
+  {% if enabled %}
+    <div class="card p-6">
+      <p class="flex items-center gap-2 font-semibold text-state-available">{% icon "check-circle" "w-5 h-5" %}{% trans "El doble factor está activo." %}</p>
+      {% if required %}<p class="mt-2 text-sm text-ink-500">{% trans "Su rol lo requiere: no puede desactivarlo." %}</p>{% else %}
+      <form method="post" class="mt-4 flex flex-wrap items-end gap-3">{% csrf_token %}<input type="hidden" name="action" value="disable">
+        <label><span class="field-label">{% trans "Código actual" %}</span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="w-32" required></label>
+        <button class="btn-secondary">{% trans "Desactivar" %}</button></form>{% endif %}
+    </div>
+  {% else %}
+    <div class="card p-6">
+      <ol class="list-decimal space-y-2 pl-5 text-sm">
+        <li>{% trans "Abra la app autenticadora y elija «Agregar cuenta» o «Escanear código QR»." %}</li>
+        <li>{% trans "Escanee este código:" %}</li>
+      </ol>
+      <div class="mx-auto my-4 w-48 rounded-lg bg-white p-2" role="img" aria-label="{% trans 'Código QR para la app autenticadora' %}">{{ qr|safe }}</div>
+      <p class="text-center text-xs text-ink-500">{% trans "¿No puede escanear? Escriba esta clave:" %} <code class="select-all font-mono">{{ secret }}</code></p>
+      <form method="post" class="mt-5 flex flex-wrap items-end gap-3">{% csrf_token %}
+        <label><span class="field-label">{% trans "3. Escriba el código que muestra la app" %}</span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="w-32" required autofocus></label>
+        <button class="btn-primary">{% trans "Activar" %}</button></form>
+    </div>
+  {% endif %}
+  <p class="mt-4 text-sm"><a class="underline" href="{% url 'accounts:password_change' %}">{% trans "Cambiar mi contraseña" %}</a></p>
+</div>
+{% endblock %}

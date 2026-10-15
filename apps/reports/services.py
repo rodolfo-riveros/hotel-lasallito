@@ -74,12 +74,17 @@ def daily_stats(property_obj, start: date, end: date, room_type=None) -> list[Da
     today = property_obj.current_business_date()
     sold = defaultdict(int)
     forecast_rev = defaultdict(lambda: ZERO)
+    # RNF-REN-02: se filtra en la base solo por salida (índice res_prop_departure, muy selectivo) y la
+    # llegada se descarta aquí. Con `arrival < fin` el motor puede elegir el índice de llegada y
+    # recorrer todo el historial (100 000 reservas: 1,1 s contra 0,02 s).
     res = Reservation.objects.filter(
-        property=property_obj, status__in=Reservation.OCCUPYING_STATUSES, arrival__lt=end, departure__gt=start
+        property=property_obj, status__in=Reservation.OCCUPYING_STATUSES, departure__gt=start
     )
     if room_type is not None:
         res = res.filter(room_type=room_type)
     for r in res.only("arrival", "departure", "nightly_rates", "status", "currency"):
+        if r.arrival >= end:
+            continue
         for d in days(max(r.arrival, start), min(r.departure, end)):
             sold[d] += 1
             if d >= today:
