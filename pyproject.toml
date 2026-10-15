@@ -1,8 +1,13 @@
+# Este archivo solo configura herramientas (black, ruff, pytest, coverage). El sistema NO es un paquete
+# instalable: las dependencias están en requirements/ y en Render se construye con ./build.sh.
 [project]
 name = "pms-la-sallito"
 version = "0.1.0"
 description = "PMS hotelero para hoteles de Urubamba, Cusco (Django)"
 requires-python = ">=3.12"
+
+[tool.poetry]
+package-mode = false
 
 [tool.black]
 line-length = 110

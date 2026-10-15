@@ -1,0 +1,2 @@
+# Dependencias de producción (Render y otros servicios buscan este archivo en la raíz).
+-r requirements/base.txt
