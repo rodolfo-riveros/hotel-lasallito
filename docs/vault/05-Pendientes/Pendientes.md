@@ -46,5 +46,5 @@ Hacerlo en este orden, con aprobación del usuario antes de empezar:
 - [ ] Prueba mensual de restauración del respaldo (`backup_pms` + `loaddata` en una base vacía).
 - [ ] Programar `run_scheduler` cada 15 minutos (Programador de tareas de Windows o cron).
 - [ ] Definir `PBX_TOKEN` antes de conectar una central real, y elegir cerradura, channel manager y pasarela.
-- [ ] RF-FAC-06 (facturar varios folios juntos) y RF-FAC-09 (guías de remisión) quedan pendientes.
+- [x] RF-FAC-06 y RF-FAC-09 terminados el 2026-10-15 (anticipos, facturación agrupada y guías de remisión).
 - [ ] RNF-DIS-01/05 (disponibilidad 99,5 %, RTO/RPO) dependen del hosting elegido.

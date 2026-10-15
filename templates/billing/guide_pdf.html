@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: a4 portrait; margin: 1.5cm;
+          @frame watermark { -pdf-frame-content: wm; left: 2cm; top: 12cm; width: 17cm; height: 3cm; } }
+  body { font-family: Helvetica; font-size: 9pt; color: #292524; }
+  h1 { font-size: 14pt; color: #7a1e2c; margin: 0; }
+  h2 { font-size: 10pt; color: #7a1e2c; margin: 10px 0 4px; border-bottom: 1px solid #e7e5e4; }
+  .box { border: 1.5px solid #7a1e2c; padding: 8px; text-align: center; }
+  .box p { margin: 2px; font-size: 11pt; font-weight: bold; }
+  table.lines { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.lines th { background: #f5f5f4; border-bottom: 1px solid #a8a29e; padding: 4px; text-align: left; font-size: 8pt; }
+  table.lines td { border-bottom: 0.5px solid #e7e5e4; padding: 4px; }
+  .muted { color: #78716c; font-size: 8pt; }
+  #wm { font-size: 30pt; color: #e7c9ce; text-align: center; font-weight: bold; }
+  .sim { border: 1px dashed #c08b36; color: #865127; padding: 4px; text-align: center; font-weight: bold; }
+</style>
+</head>
+<body>
+<div id="wm">SIMULACIÓN, SIN VALOR TRIBUTARIO</div>
+<table width="100%"><tr>
+  <td width="62%" valign="top"><h1>{{ property.name }}</h1><p>{{ property.legal_name }}<br>{{ property.address }}<br>{{ property.district }} - {{ property.province }} - {{ property.region }}</p></td>
+  <td width="38%" valign="top"><div class="box"><p>R.U.C. {{ property.ruc }}</p><p>GUÍA DE REMISIÓN ELECTRÓNICA REMITENTE</p><p>{{ g.full_number }}</p></div></td>
+</tr></table>
+<p class="sim">SIMULACIÓN, SIN VALOR TRIBUTARIO</p>
+<table width="100%">
+  <tr><td width="25%"><b>Fecha de emisión:</b></td><td>{{ g.issue_date|date:"d/m/Y" }}</td><td width="25%"><b>Inicio del traslado:</b></td><td>{{ g.transfer_date|date:"d/m/Y" }}</td></tr>
+  <tr><td><b>Motivo de traslado:</b></td><td colspan="3">{{ g.get_reason_display }}{% if g.reason_detail %} · {{ g.reason_detail }}{% endif %}</td></tr>
+  <tr><td><b>Destinatario:</b></td><td colspan="3">{{ g.recipient_name }} · {{ g.get_recipient_doc_type_display }} {{ g.recipient_doc }}</td></tr>
+</table>
+<h2>Puntos de partida y llegada</h2>
+<table width="100%">
+  <tr><td width="25%"><b>Partida:</b></td><td>{{ g.origin_address }} (ubigeo {{ g.origin_ubigeo }})</td></tr>
+  <tr><td><b>Llegada:</b></td><td>{{ g.destination_address }} (ubigeo {{ g.destination_ubigeo }})</td></tr>
+</table>
+<h2>Transporte</h2>
+<table width="100%">
+  <tr><td width="25%"><b>Modalidad:</b></td><td>{{ g.get_transport_mode_display }}</td><td width="25%"><b>Peso bruto / bultos:</b></td><td>{{ g.gross_weight }} kg · {{ g.packages }}</td></tr>
+  {% if g.transport_mode == "01" %}<tr><td><b>Transportista:</b></td><td colspan="3">{{ g.carrier_name }} · RUC {{ g.carrier_ruc }}</td></tr>
+  {% else %}<tr><td><b>Vehículo:</b></td><td>{{ g.vehicle_plate }}</td><td><b>Conductor:</b></td><td>{{ g.driver_name }} · DNI {{ g.driver_doc }} · Lic. {{ g.driver_license }}</td></tr>{% endif %}
+</table>
+<h2>Bienes trasladados</h2>
+<table class="lines"><tr><th width="6%">N.°</th><th width="14%">Código</th><th>Descripción</th><th width="10%">Unidad</th><th width="12%">Cantidad</th></tr>
+  {% for ln in lines %}<tr><td>{{ forloop.counter }}</td><td>{{ ln.code|default:"-" }}</td><td>{{ ln.description }}</td><td>{{ ln.unit }}</td><td>{{ ln.quantity|floatformat:"-3" }}</td></tr>{% endfor %}
+</table>
+{% if g.notes %}<p><b>Observaciones:</b> {{ g.notes }}</p>{% endif %}
+<table width="100%" style="margin-top:10px"><tr>
+  <td valign="top"><p class="muted">Código hash: {{ g.hash }}<br>Estado SUNAT: {{ g.get_status_display }} {{ g.sunat_code }} {{ g.sunat_message }}<br>Consulte la validez en {{ validity_url }}</p></td>
+  <td width="100" valign="top">{% if qr %}<img src="{{ qr }}" width="90" height="90">{% endif %}</td>
+</tr></table>
+<p class="muted">Representación impresa de la guía de remisión electrónica remitente (simulación educativa).</p>
+</body>
+</html>

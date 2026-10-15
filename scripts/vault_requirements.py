@@ -104,13 +104,14 @@ DONE = {
     "RNF-SEG-06": F4,
     "RNF-REN-01": F4,
     "RNF-REN-02": F4,
+    "RF-FAC-06": F4,
+    "RF-FAC-09": F4,
 }
 PARTIAL = {
     "RNF-UX-07": "manual en el sistema y ayuda contextual por pantalla; falta medirlo en una capacitación real",
     "RNF-REN-03": "inmediata con CHANNEL_SYNC_ASYNC y Redis; sin Redis, el programador publica cada 15 min",
     "RNF-DIS-02": "respaldo diario comprimido, 30 días, verificado y copia opcional a Storage; falta prueba de restauración mensual programada",
     "RNF-SEG-01": "Argon2, bloqueo, inactividad y HTTPS en prod; falta probar despliegue",
-    "RF-FAC-06": "facturación por cargos seleccionados y con crédito; falta agrupar varios folios",
     "RNF-MAN-04": "GitHub Actions y .venv reproducible; faltan entornos separados",
     "RF-BD-06": "Supabase Storage configurable; falta crear el bucket",
     "RF-BD-07": "proyecto de desarrollo; falta proyecto de producción/aula",

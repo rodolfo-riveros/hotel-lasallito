@@ -29,7 +29,35 @@ def qr_data_uri(invoice) -> str:
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
+def _validity_url() -> str:
+    from django.conf import settings
+
+    return f"{getattr(settings, 'SITE_URL', '').rstrip('/')}/consulta-comprobante/"
+
+
 def invoice_pdf_bytes(invoice) -> bytes:
     return render_pdf(
-        "billing/invoice_pdf.html", {"inv": invoice, "property": invoice.property, "qr": qr_data_uri(invoice)}
+        "billing/invoice_pdf.html",
+        {
+            "inv": invoice,
+            "property": invoice.property,
+            "qr": qr_data_uri(invoice),
+            "validity_url": _validity_url(),
+        },
+    )
+
+
+def guide_pdf_bytes(guide) -> bytes:
+    """Representación impresa de la guía de remisión (RF-FAC-09) con QR de consulta."""
+    p = guide.property
+    text = "|".join(
+        [p.ruc, "09", guide.series.code, str(guide.number), guide.issue_date.strftime("%Y-%m-%d"), guide.hash]
+    )
+    img = qrcode.make(text, box_size=4, border=1)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    qr = "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+    return render_pdf(
+        "billing/guide_pdf.html",
+        {"g": guide, "property": p, "qr": qr, "lines": guide.lines.all(), "validity_url": _validity_url()},
     )

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Guías de remisión" %}{% endblock %}
+{% block content %}
+{% can "billing.create" as can_create %}
+<div class="mb-4 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
+    <h1 class="page-title mt-2">{% trans "Guías de remisión electrónicas" %}</h1>
+    <p class="page-subtitle">{% trans "Para trasladar bienes fuera del hotel: lavandería externa, reparación, devolución a proveedores u otra sede (RF-FAC-09)." %}</p></div>
+  {% if can_create %}<a href="{% url 'billing:guide_create' %}" class="btn-primary" data-shortcut-new>{% icon "plus" "w-4 h-4" %}{% trans "Nueva guía" %}</a>{% endif %}
+</div>
+<div class="card overflow-x-auto"><table class="table">
+  <thead><tr><th>{% trans "Número" %}</th><th>{% trans "Traslado" %}</th><th>{% trans "Motivo" %}</th><th>{% trans "Destinatario" %}</th><th>{% trans "Llegada" %}</th><th>{% trans "SUNAT" %}</th></tr></thead>
+  <tbody>{% for g in guides %}<tr class="cursor-pointer" onclick="location='{% url 'billing:guide_detail' g.pk %}'"><td class="font-mono text-xs">{{ g.full_number }}</td><td class="text-xs">{{ g.transfer_date|date:"d/m/Y" }}</td><td class="text-xs">{{ g.get_reason_display }}</td><td>{{ g.recipient_name }}</td><td class="text-xs">{{ g.destination_address }}</td>
+    <td><span class="status {% if g.status == 'accepted' %}status-confirmed{% elif g.status == 'rejected' %}status-danger{% else %}status-pending{% endif %}">{{ g.get_status_display }}</span></td></tr>
+  {% empty %}<tr><td colspan="6">{% trans "Sin guías." as msg %}{% include "components/empty.html" with icon_name="box" message=msg %}</td></tr>{% endfor %}</tbody></table></div>
+{% endblock %}

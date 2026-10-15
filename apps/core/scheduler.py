@@ -33,6 +33,9 @@ def run_all(property_obj) -> dict:
     result = {}
     result["recordatorios_48h"] = send_reminders(property_obj, property_obj.current_business_date())
     result["sunat_reenviados"] = retry_pending(property_obj)
+    from apps.billing.services import poll_tickets
+
+    result["sunat_tickets"] = poll_tickets(property_obj)
     result["preventivos"] = len(generate_preventive(property_obj))
     released = GroupBlock.objects.filter(
         property=property_obj,

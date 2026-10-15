@@ -43,6 +43,7 @@
       <td width="18%"><b>Fecha / Date:</b></td><td>{{ inv.issue_date|date:"d/m/Y" }}</td></tr>
   <tr><td><b>{{ inv.get_customer_doc_type_display }}:</b></td><td>{{ inv.customer_doc|default:"-" }}</td>
       <td><b>Moneda / Currency:</b></td><td>{{ inv.currency }}{% if inv.currency == "USD" %} (T.C. {{ inv.exchange_rate }}){% endif %}</td></tr>
+  {% if inv.due_date %}<tr><td><b>Forma de pago:</b></td><td>Crédito</td><td><b>Vencimiento:</b></td><td>{{ inv.due_date|date:"d/m/Y" }}</td></tr>{% endif %}
   {% if inv.customer_address %}<tr><td><b>Dirección:</b></td><td colspan="3">{{ inv.customer_address }}</td></tr>{% endif %}
   {% if inv.related_invoice %}<tr><td><b>Documento que modifica:</b></td><td>{{ inv.related_invoice.full_number }}</td>
       <td><b>Motivo:</b></td><td>{{ inv.note_reason_code }} {{ inv.note_reason }}</td></tr>{% endif %}
@@ -70,11 +71,13 @@
         {% if inv.export_amount %}<tr><td>Exportación</td><td class="right">{{ inv.export_amount }}</td></tr>{% endif %}
         <tr><td>IGV 18%</td><td class="right">{{ inv.igv }}</td></tr>
         {% if inv.other_charges %}<tr><td>Otros cargos</td><td class="right">{{ inv.other_charges }}</td></tr>{% endif %}
+        {% if inv.prepaid_amount %}<tr><td>Anticipos (-)</td><td class="right">{{ inv.prepaid_amount }}</td></tr>{% for a in inv.advances.all %}<tr><td class="muted" colspan="2">Anticipo {{ a.full_number }}</td></tr>{% endfor %}{% endif %}
         <tr><td><b>IMPORTE TOTAL {{ inv.currency }}</b></td><td class="right"><b>{{ inv.total }}</b></td></tr>
       </table>
     </td>
   </tr>
 </table>
+<p class="muted">Consulte la validez de este comprobante en {{ validity_url }}</p>
 <p class="muted">Representación impresa de la {{ inv.get_doc_type_display|lower }} electrónica (simulación educativa). Printed representation of an electronic receipt (educational simulation).</p>
 </body>
 </html>

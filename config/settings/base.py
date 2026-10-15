@@ -312,3 +312,6 @@ BACKUP_RETENTION_DAYS = env.int("BACKUP_RETENTION_DAYS", default=30)
 BACKUP_UPLOAD = env.bool("BACKUP_UPLOAD", default=False)
 BACKUP_ON_NIGHT_AUDIT = env.bool("BACKUP_ON_NIGHT_AUDIT", default=True)
 GUEST_RETENTION_YEARS = env.int("GUEST_RETENTION_YEARS", default=5)
+
+# SUNAT simulada: segundos que tarda en procesar un ticket (resumen diario, baja, guía de remisión).
+SUNAT_TICKET_SECONDS = env.int("SUNAT_TICKET_SECONDS", default=15)

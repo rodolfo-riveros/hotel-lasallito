@@ -6,15 +6,20 @@
 <div class="mb-4 flex flex-wrap items-start justify-between gap-4">
   <div><a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
     <div class="mt-2 flex flex-wrap items-center gap-3"><h1 class="page-title">{{ inv.get_doc_type_display }} {{ inv.full_number }}</h1>
-      <span class="status {% if inv.status == 'accepted' %}status-confirmed{% elif inv.status == 'pending' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></div>
+      {% if inv.is_advance %}<span class="badge bg-gold-100 text-gold-800">{% trans "Anticipo" %}{% if inv.applied_to %} · {% trans "aplicado en" %} {{ inv.applied_to.full_number }}{% endif %}</span>{% endif %}
+      <span class="status {% if inv.status == 'accepted' or inv.status == 'observed' %}status-confirmed{% elif inv.status == 'pending' or inv.status == 'voiding' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></div>
     <p class="page-subtitle">{{ inv.issue_date|date:"d/m/Y" }} · {{ inv.customer_name }} · {{ inv.get_customer_doc_type_display }} {{ inv.customer_doc }}{% if inv.related_invoice %} · {% trans "modifica" %} <a class="hover:underline" href="{% url 'billing:invoice_detail' inv.related_invoice.pk %}">{{ inv.related_invoice.full_number }}</a>{% endif %}</p></div>
   <div class="flex flex-wrap gap-2">
     <a href="{% url 'billing:invoice_pdf' inv.pk %}" target="_blank" class="btn-secondary">{% icon "document" "w-4 h-4" %}PDF</a>
+    {% if inv.xml %}<a href="{% url 'billing:invoice_file' inv.pk 'xml' %}" class="btn-secondary">XML</a>{% endif %}
+    {% if inv.cdr_xml %}<a href="{% url 'billing:invoice_file' inv.pk 'cdr' %}" class="btn-secondary">CDR</a>{% endif %}
+    {% if inv.status == "voiding" %}<form method="post" action="{% url 'billing:invoice_action' inv.pk 'ticket' %}">{% csrf_token %}<button class="btn-primary">{% trans "Consultar ticket de baja" %}</button></form>{% endif %}
     {% if inv.status == "pending" or inv.status == "rejected" %}<form method="post" action="{% url 'billing:invoice_action' inv.pk 'send' %}">{% csrf_token %}<button class="btn-primary">{% trans "Enviar a SUNAT" %}</button></form>{% endif %}
     {% if inv.folio %}<a href="{% url 'folio:folio_detail' inv.folio.pk %}" class="btn-secondary">Folio {{ inv.folio.number }}</a>{% endif %}
   </div>
 </div>
 <div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+{% if inv.sunat_code %}<p class="mb-4 rounded-lg p-3 text-sm {% if inv.status == 'accepted' or inv.status == 'voided' %}bg-state-available/10 text-state-available{% elif inv.status == 'rejected' %}bg-state-danger/10 text-state-danger{% else %}bg-gold-50 text-gold-800{% endif %}" role="status"><b>SUNAT {{ inv.sunat_code }}</b> · {{ inv.sunat_message }}{% for o in inv.observations %}<br>{% trans "Observación" %}: {{ o }}{% endfor %}{% if inv.status == "rejected" %}<br>{% trans "Corrija los datos y emita un nuevo comprobante: los cargos quedaron libres en el folio." %}{% endif %}</p>{% endif %}
 <div class="grid gap-6 lg:grid-cols-3">
   <div class="space-y-6 lg:col-span-2">
     <section class="card overflow-hidden"><table class="table">
@@ -25,6 +30,7 @@
         {% if inv.exempt_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Op. exoneradas" %}</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.exempt_amount }}</td></tr>{% endif %}
         {% if inv.export_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Exportación" %}</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.export_amount }}</td></tr>{% endif %}
         <tr><td colspan="5" class="px-4 py-1 text-right">IGV</td><td class="px-4 py-1 text-right tabular-nums">{{ inv.igv }}</td></tr>
+        {% if inv.prepaid_amount %}<tr><td colspan="5" class="px-4 py-1 text-right">{% trans "Anticipos deducidos" %} ({% for a in advances %}<a class="underline" href="{% url 'billing:invoice_detail' a.pk %}">{{ a.full_number }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})</td><td class="px-4 py-1 text-right tabular-nums">−{{ inv.prepaid_amount }}</td></tr>{% endif %}
         <tr><td colspan="5" class="px-4 py-2 text-right font-semibold">{% trans "Total" %} {{ inv.currency }}</td><td class="px-4 py-2 text-right font-display text-xl font-semibold tabular-nums">{{ inv.total }}</td></tr>
       </tfoot></table>
       <div class="space-y-1 border-t border-ink-100 px-5 py-3 text-xs text-ink-500 dark:border-ink-800">{% for lg in inv.legends %}<p>{{ lg.code }} · {{ lg.text }}</p>{% endfor %}<p>Hash: {{ inv.hash }}</p></div>
@@ -52,10 +58,10 @@
         <input name="reason" placeholder="{% trans 'Sustento' %}" required><input name="amount" inputmode="decimal" placeholder="{% trans 'Monto' %}" required>
         <button class="btn-secondary w-full">{% trans "Emitir nota de débito" %}</button></div></form>
     {% endif %}
-    {% if can_void and inv.status != "voided" %}
+    {% if can_void and inv.status in "accepted observed pending" %}
     <form method="post" action="{% url 'billing:invoice_action' inv.pk 'void' %}" class="card border-state-danger/30" data-confirm="{% trans '¿Dar de baja el comprobante?' %}">{% csrf_token %}
       <div class="card-header"><h2 class="card-title text-state-danger">{% trans "Comunicación de baja" %}</h2></div>
-      <div class="card-body space-y-3"><input name="reason" placeholder="{% trans 'Motivo' %}" required><p class="text-xs text-ink-500">{% trans "Plazo: 7 días desde la emisión. Después, use una nota de crédito." %}</p><button class="btn-danger w-full">{% trans "Dar de baja" %}</button></div></form>
+      <div class="card-body space-y-3"><input name="reason" placeholder="{% trans 'Motivo' %}" required><p class="text-xs text-ink-500">{% if inv.series.code|slice:":1" == "F" %}{% trans "Se envía una comunicación de baja (RA) a SUNAT." %}{% else %}{% trans "Las boletas se dan de baja en el resumen diario (RC, estado 3)." %}{% endif %} {% trans "Plazo: 7 días desde la emisión. Después, use una nota de crédito." %}</p><button class="btn-danger w-full">{% trans "Dar de baja" %}</button></div></form>
     {% endif %}
   </aside>
 </div>

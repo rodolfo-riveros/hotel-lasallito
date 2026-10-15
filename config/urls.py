@@ -3,12 +3,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.billing import views as billing_views
 from apps.core import pwa
 
 urlpatterns = [
     path("manifest.webmanifest", pwa.manifest, name="pwa_manifest"),
     path("sw.js", pwa.service_worker, name="pwa_sw"),
     path("sin-conexion/", pwa.offline_shell, name="pwa_offline"),
+    path("consulta-comprobante/", billing_views.validity_check, name="cpe_validity"),
     path("django-admin/", admin.site.urls),
     path("i18n/", include("django.conf.urls.i18n")),
     path("cuenta/", include("apps.accounts.urls")),

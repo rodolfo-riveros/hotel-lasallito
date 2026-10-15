@@ -31,4 +31,15 @@ erDiagram
   - `res_prop_departure` (propiedad, salida) en reservas;
   - en PostgreSQL, índices de trigramas `pg_trgm` en nombres de huésped y código de reserva.
 
+## Facturación completa (2026-10-15)
+- `Invoice`:
+  - nuevos campos `xml`, `cdr_xml`, `observations` y `prepaid_amount`;
+  - `applied_to`: el anticipo apunta al comprobante final;
+  - estado `voiding` (baja en proceso).
+- `SunatRegistry`: lo que la SUNAT simulada recibió (RUC, tipo, serie, número, total, hash, estado). Es único
+  por comprobante.
+- `SunatTicket`: tickets RC/RA/GRE con estado 98/0/99, XML enviado y CDR.
+- `RemissionGuide` + `RemissionLine`: guía de remisión remitente (serie T001).
+- `SimulationSettings`: solo queda `connection_down`, que activa el evento del aula.
+
 Ver también [[fase-3]] y [[Decisión - Rendimiento con historial grande]].

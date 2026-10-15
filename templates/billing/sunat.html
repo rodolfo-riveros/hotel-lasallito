@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "SUNAT simulada" %}{% endblock %}
+{% block content %}
+{% can "billing.create" as can_create %}
+<div class="mb-6 flex flex-wrap items-end justify-between gap-4">
+  <div><a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
+    <h1 class="page-title mt-2">{% trans "SUNAT simulada" %}</h1>
+    <p class="page-subtitle">{% trans "Recibe el XML de cada comprobante, lo valida con las reglas de SUNAT y responde con su constancia (CDR). No necesita configuración." %}</p></div>
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'cpe_validity' %}" target="_blank" class="btn-secondary">{% icon "search" "w-4 h-4" %}{% trans "Consulta de validez" %}</a>
+    {% if can_create %}<form method="post">{% csrf_token %}<button name="poll" value="1" class="btn-secondary">{% trans "Consultar tickets" %}</button></form>
+    <form method="post">{% csrf_token %}<button name="summary" value="1" class="btn-secondary">{% trans "Enviar resumen diario de boletas pendientes" %}</button></form>{% endif %}
+  </div>
+</div>
+<div class="mb-6 grid gap-4 sm:grid-cols-4">
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Conexión" %}</p><p class="font-display text-2xl font-semibold {% if link_down %}text-state-danger{% else %}text-state-available{% endif %}">{% if link_down %}{% trans "Sin servicio" %}{% else %}{% trans "En línea" %}{% endif %}</p>{% if link_down %}<p class="text-xs text-ink-500">{% trans "Evento de práctica del aula" %}</p>{% endif %}</div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Aceptados" %}</p><p class="font-display text-2xl font-semibold">{{ stats.accepted|default:0 }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "Con observaciones" %}</p><p class="font-display text-2xl font-semibold">{{ stats.observed|default:0 }}</p></div>
+  <div class="card p-4"><p class="text-sm text-ink-500">{% trans "De baja" %}</p><p class="font-display text-2xl font-semibold">{{ stats.voided|default:0 }}</p></div>
+</div>
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Respuestas de SUNAT" %}</h2></div>
+    <table class="table"><tbody>{% for s in submissions %}<tr><td class="text-xs">{{ s.created_at|date:"d/m H:i:s" }}</td><td class="text-xs">{{ s.get_kind_display }}</td><td class="font-mono text-xs">{% if s.invoice %}<a href="{% url 'billing:invoice_detail' s.invoice.pk %}" class="hover:underline">{{ s.invoice.full_number }}</a>{% endif %}</td>
+      <td>{% if s.connection_error %}<span class="text-state-dirty">{% trans "sin conexión" %}</span>{% elif s.success %}<span class="text-state-available">✓</span>{% else %}<span class="text-state-danger">✗</span>{% endif %}</td><td class="text-xs"><b>{{ s.code }}</b> {{ s.message }}</td></tr>
+    {% empty %}<tr><td class="text-ink-500">{% trans "Sin envíos." %}</td></tr>{% endfor %}</tbody></table></section>
+  <div class="space-y-6">
+    <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Tickets (resumen diario, bajas y guías)" %}</h2></div>
+      <table class="table"><tbody>{% for t in tickets %}<tr><td class="text-xs">{{ t.created_at|date:"d/m H:i" }}</td><td class="text-xs">{{ t.get_kind_display }}</td><td class="font-mono text-xs">{{ t.number }}<p class="text-ink-500">{{ t.file_name }}</p></td>
+        <td class="text-xs">{% if t.status == "98" %}<span class="text-state-dirty">{% trans "En proceso" %}</span>{% elif t.status == "0" %}<span class="text-state-available">✓ {{ t.response_code }}</span>{% else %}<span class="text-state-danger">✗ {{ t.response_code }}</span>{% endif %}<p>{{ t.response_message }}</p></td>
+        <td>{% if t.cdr_xml %}<a class="text-xs underline" href="{% url 'billing:ticket_cdr' t.number %}">CDR</a>{% endif %}</td></tr>
+      {% empty %}<tr><td class="text-ink-500">{% trans "Sin tickets." %}</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Registrado en SUNAT" %}</h2></div>
+      <table class="table"><tbody>{% for r in registry %}<tr><td class="font-mono text-xs">{{ r.doc_type }} {{ r.series }}-{{ r.number }}</td><td class="text-xs">{{ r.issue_date|date:"d/m/Y" }}</td><td class="text-right text-xs tabular-nums">{{ r.currency }} {{ r.total }}</td><td class="text-xs">{{ r.get_status_display }}</td></tr>
+      {% empty %}<tr><td class="text-ink-500">{% trans "Aún no hay comprobantes registrados." %}</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card p-4 text-sm"><p class="mb-2 font-semibold">{% trans "Padrones ficticios" %}</p>
+      <a href="{% url 'billing:taxpayer_list' %}" class="block hover:underline">{% trans "Padrón RUC (estado y condición del contribuyente)" %} →</a>
+      <a href="{% url 'billing:person_list' %}" class="block hover:underline">{% trans "Padrón DNI" %} →</a></section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Guía de remisión" %}{% endblock %}
+{% block content %}
+<a href="{% url 'billing:guide_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Guías de remisión" %}</a>
+<h1 class="page-title mt-2">{% if guide.pk %}{{ guide.full_number }}{% else %}{% trans "Nueva guía de remisión" %}{% endif %}</h1>
+{% if guide.status == "rejected" %}<p class="mt-2 rounded-lg bg-state-danger/10 p-3 text-sm text-state-danger" role="alert">{% trans "SUNAT rechazó la guía" %}: {{ guide.sunat_code }} {{ guide.sunat_message }}. {% trans "Corrija y vuelva a enviar." %}</p>{% endif %}
+<form method="post" class="mt-4 space-y-6" x-data="{ mode: '{{ form.transport_mode.value|default:'02' }}' }" novalidate>{% csrf_token %}
+  {% include "components/form_errors.html" %}
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Traslado" %}</h2></div>
+    <div class="card-body grid gap-4 sm:grid-cols-3">
+      {% include "components/field.html" with field=form.reason %}{% include "components/field.html" with field=form.reason_detail %}{% include "components/field.html" with field=form.transfer_date %}
+    </div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Destinatario" %}</h2></div>
+    <div class="card-body grid gap-4 sm:grid-cols-3">
+      {% include "components/field.html" with field=form.supplier wrapper_class="sm:col-span-3" %}
+      {% include "components/field.html" with field=form.recipient_doc_type %}{% include "components/field.html" with field=form.recipient_doc %}{% include "components/field.html" with field=form.recipient_name %}
+      <p class="text-xs text-ink-500 sm:col-span-3">{% trans "En el traslado entre establecimientos (motivo 04) el destinatario es el propio hotel." %}</p>
+    </div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Partida y llegada" %}</h2></div>
+    <div class="card-body grid gap-4 sm:grid-cols-4">
+      {% include "components/field.html" with field=form.origin_address wrapper_class="sm:col-span-3" %}{% include "components/field.html" with field=form.origin_ubigeo %}
+      {% include "components/field.html" with field=form.destination_address wrapper_class="sm:col-span-3" %}{% include "components/field.html" with field=form.destination_ubigeo %}
+      {% include "components/field.html" with field=form.gross_weight %}{% include "components/field.html" with field=form.packages %}
+    </div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Transporte" %}</h2></div>
+    <div class="card-body grid gap-4 sm:grid-cols-3">
+      <div class="sm:col-span-3" @change="mode = $event.target.value">{% include "components/field.html" with field=form.transport_mode %}</div>
+      <template x-if="mode === '01'"><div class="contents">{% include "components/field.html" with field=form.carrier_ruc %}{% include "components/field.html" with field=form.carrier_name wrapper_class="sm:col-span-2" %}</div></template>
+      <template x-if="mode === '02'"><div class="contents">{% include "components/field.html" with field=form.vehicle_plate %}{% include "components/field.html" with field=form.driver_doc %}{% include "components/field.html" with field=form.driver_name %}{% include "components/field.html" with field=form.driver_license %}</div></template>
+      {% include "components/field.html" with field=form.notes wrapper_class="sm:col-span-3" %}
+    </div></section>
+  <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Bienes trasladados" %}</h2></div>
+    {{ formset.management_form }}
+    <table class="table"><thead><tr><th>{% trans "Artículo del almacén" %}</th><th>{% trans "Descripción" %}</th><th>{% trans "Unidad" %}</th><th>{% trans "Cantidad" %}</th><th>{% trans "Quitar" %}</th></tr></thead>
+      <tbody>{% for f in formset %}<tr>{{ f.id }}<td>{{ f.item }}</td><td>{{ f.description }}</td><td>{{ f.unit }}</td><td>{{ f.quantity }}</td><td>{% if f.instance.pk %}{{ f.DELETE }}{% endif %}</td></tr>{% endfor %}</tbody></table>
+    <p class="px-4 pb-4 text-xs text-ink-500">{% trans "Si elige un artículo y deja la descripción vacía, se usa el nombre del artículo." %}</p></section>
+  <div class="flex flex-wrap justify-end gap-2"><button class="btn-secondary">{% trans "Guardar borrador" %}</button><button name="send" value="1" class="btn-primary">{% trans "Guardar y enviar a SUNAT" %}</button></div>
+</form>
+{% endblock %}

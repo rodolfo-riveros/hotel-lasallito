@@ -133,6 +133,7 @@ def folio_detail(request, pk):
             "others": others,
             "session": session,
             "uninvoiced_total": folio.uninvoiced_charges.aggregate(s=Sum("amount"))["s"] or 0,
+            "deposits_available": billing.deposits_available(folio),
         },
     )
 

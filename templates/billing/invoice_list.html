@@ -7,12 +7,14 @@
     <h1 class="page-title">{% trans "Facturación electrónica" %}</h1></div>
   <div class="flex flex-wrap gap-2">
     {% if pending %}<form method="post" action="{% url 'billing:retry_pending' %}">{% csrf_token %}<button class="btn-primary">{% icon "arrow-right" "w-4 h-4" %}{% trans "Reenviar pendientes" %} ({{ pending }})</button></form>{% endif %}
-    <a href="{% url 'billing:simulator' %}" class="btn-secondary">{% icon "cog" "w-4 h-4" %}{% trans "Simulador SUNAT" %}</a>
+    <a href="{% url 'billing:sunat' %}" class="btn-secondary">{% icon "receipt" "w-4 h-4" %}{% trans "SUNAT simulada" %}</a>
+    <a href="{% url 'billing:grouped' %}" class="btn-secondary">{% trans "Facturación agrupada" %}</a>
+    <a href="{% url 'billing:guide_list' %}" class="btn-secondary">{% icon "box" "w-4 h-4" %}{% trans "Guías de remisión" %}</a>
     <a href="{% url 'billing:ple' %}" class="btn-secondary">{% icon "download" "w-4 h-4" %}PLE</a>
     <a href="{% url 'billing:series_list' %}" class="btn-secondary">{% trans "Series" %}</a>
   </div>
 </div>
-<div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario: nada se envía a SUNAT ni a un OSE." %}</div>
+<div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario: los comprobantes se validan en una SUNAT simulada dentro del sistema." %}</div>
 <div class="card overflow-hidden">
   <form class="flex flex-wrap items-end gap-3 border-b border-ink-100 p-4 dark:border-ink-800">
     <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Cliente, documento o serie' %}" class="!w-64" data-search>
@@ -27,7 +29,7 @@
       <tr class="cursor-pointer" onclick="location='{% url 'billing:invoice_detail' inv.pk %}'"><td class="font-mono text-xs">{{ inv.full_number }}</td><td>{{ inv.get_doc_type_display }}</td><td>{{ inv.issue_date|date:"d/m/Y" }}</td>
         <td>{{ inv.customer_name }}<p class="text-xs text-ink-500">{{ inv.get_customer_doc_type_display }} {{ inv.customer_doc }}</p></td>
         <td class="text-right tabular-nums">{{ inv.currency }} {{ inv.total }}</td>
-        <td><span class="status {% if inv.status == 'accepted' %}status-confirmed{% elif inv.status == 'pending' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></td></tr>
+        <td><span class="status {% if inv.status == 'accepted' or inv.status == 'observed' %}status-confirmed{% elif inv.status == 'pending' or inv.status == 'voiding' %}status-pending{% elif inv.status == 'voided' %}status-neutral{% else %}status-danger{% endif %}">{{ inv.get_status_display }}</span></td></tr>
     {% empty %}<tr><td colspan="6">{% trans "Sin comprobantes." as msg %}{% include "components/empty.html" with icon_name="receipt" message=msg %}</td></tr>{% endfor %}</tbody>
   </table></div>
   {% include "components/pagination.html" %}

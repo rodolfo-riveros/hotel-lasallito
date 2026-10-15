@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{% trans "Facturación agrupada" %}{% endblock %}
+{% block content %}
+<a href="{% url 'billing:invoice_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Comprobantes" %}</a>
+<h1 class="page-title mt-2">{% trans "Facturación agrupada" %}</h1>
+<p class="page-subtitle mb-4">{% trans "Una sola factura a crédito con los consumos de varias estadías de una empresa o agencia (RF-FAC-06)." %}</p>
+<form method="get" class="card mb-4 grid gap-3 p-4 sm:grid-cols-4 sm:items-end">
+  {% include "components/field.html" with field=form.company wrapper_class="sm:col-span-2" %}
+  {% include "components/field.html" with field=form.start %}{% include "components/field.html" with field=form.end %}
+  <button class="btn-secondary sm:col-span-4">{% trans "Buscar consumos sin facturar" %}</button>
+</form>
+{% if company %}
+<form method="post" class="card overflow-x-auto">{% csrf_token %}<input type="hidden" name="company" value="{{ company.pk }}">
+  <div class="card-header flex-wrap gap-2"><h2 class="card-title">{{ company.legal_name }} · RUC {{ company.ruc }}</h2><p class="text-sm text-ink-500">{% trans "Crédito" %}: {{ company.credit_days }} {% trans "días" %}</p></div>
+  <table class="table"><thead><tr><th><input type="checkbox" checked aria-label="{% trans 'Marcar todos' %}" onclick="document.querySelectorAll('input[name=charges]').forEach(c => c.checked = this.checked)"></th><th>{% trans "Reserva" %}</th><th>{% trans "Huésped" %}</th><th>{% trans "Fecha" %}</th><th>{% trans "Concepto" %}</th><th class="!text-right">{% trans "Importe" %}</th></tr></thead>
+    <tbody>{% for c in charges %}<tr><td><input type="checkbox" name="charges" value="{{ c.pk }}" checked aria-label="{{ c.description }}"></td><td class="font-mono text-xs">{{ c.folio.reservation.code|default:c.folio.number }}</td><td>{{ c.folio.reservation.guest|default:"—" }}</td><td class="text-xs">{{ c.service_date|date:"d/m/Y" }}</td><td>{{ c.description }}</td><td class="text-right tabular-nums">{{ c.amount|money }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="text-ink-500">{% trans "No hay consumos sin facturar en el periodo." %}</td></tr>{% endfor %}</tbody>
+    {% if charges %}<tfoot><tr><td colspan="5" class="px-4 py-2 text-right font-semibold">{% trans "Total" %}</td><td class="px-4 py-2 text-right font-semibold tabular-nums">{{ total|money }}</td></tr></tfoot>{% endif %}</table>
+  {% if charges %}<div class="flex flex-wrap items-center justify-end gap-3 p-4"><label class="flex items-center gap-2 text-sm">{% trans "Moneda" %}<select name="currency" class="!w-auto"><option>PEN</option><option>USD</option></select></label><button class="btn-primary" data-confirm="{% trans '¿Emitir la factura agrupada?' %}">{% trans "Emitir factura" %}</button></div>{% endif %}
+</form>
+{% endif %}
+{% endblock %}

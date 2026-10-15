@@ -10,7 +10,7 @@ tags: [requerimientos, indice]
 | [[No funcionales]] | 0 | 27/34 |
 | [[Seguridad y roles]] | 0 | 3/3 |
 | [[Caja y pagos]] | 1 | 5/5 |
-| [[Facturacion SUNAT]] | 1 | 8/10 |
+| [[Facturacion SUNAT]] | 1 | 10/10 |
 | [[Habitaciones]] | 1 | 5/5 |
 | [[Housekeeping]] | 1 | 8/8 |
 | [[Huespedes]] | 1 | 7/7 |

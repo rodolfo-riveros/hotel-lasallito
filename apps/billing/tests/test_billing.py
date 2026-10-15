@@ -94,29 +94,35 @@ def test_invoice_in_usd_uses_daily_rate_rf_fac_07(setup, book):
     assert inv.currency == "USD" and inv.total == Decimal("100.00")
 
 
-def test_simulator_accepts_rejects_and_queues_rnf_dis_04(setup, book):
+def test_sunat_queues_when_offline_and_rejects_real_errors_rnf_dis_04(setup, book):
+    from apps.billing.models import FakeTaxpayer
+
     f = _folio_with(setup, book)
     inv = billing.issue_invoice(
         f, "03", billing.customer_from_folio(f, "03"), user=setup.receptionist, send=False
     )
-    sim = SimulationSettings.objects.create(property=setup.hotel, connection_down=True)
+    sim = SimulationSettings.objects.create(property=setup.hotel, connection_down=True)  # evento del aula
     inv = _send_now(inv)
     assert inv.status == "pending" and inv.number == 1  # conserva su número
     sim.connection_down = False
     sim.save()
     assert billing.retry_pending(setup.hotel) == 1
     inv.refresh_from_db()
-    assert inv.status == "accepted"
+    assert inv.status == "accepted" and inv.cdr_xml
 
+    # SUNAT rechaza por una causa real: el RUC del cliente está de baja en el padrón.
+    FakeTaxpayer.objects.create(ruc=VALID_RUC, legal_name="EMPRESA CERRADA SAC", status="BAJA DE OFICIO")
     f2 = _folio_with(setup, book)
-    sim.reject_next = 1
-    sim.save()
     inv2 = _send_now(
         billing.issue_invoice(
-            f2, "03", billing.customer_from_folio(f2, "03"), user=setup.receptionist, send=False
+            f2,
+            "01",
+            billing.Customer("6", VALID_RUC, "Empresa Cerrada SAC", "Av. Sol 1"),
+            user=setup.receptionist,
+            send=False,
         )
     )
-    assert inv2.status == "rejected"
+    assert inv2.status == "rejected" and inv2.sunat_code == "2020"
     assert f2.uninvoiced_charges.count() == 1  # se puede corregir y reemitir
 
 
@@ -165,7 +171,11 @@ def test_void_within_seven_days_rf_fac_10(setup, book):
     setup.hotel.save()
     inv.refresh_from_db()
     billing.void_invoice(inv, "Error", user=setup.auditor)
-    assert inv.status == "voided"
+    assert inv.status == "voiding"  # la boleta se da de baja con resumen diario (ticket)
+    ticket = inv.submissions.exclude(ticket="").first().ticket
+    billing.check_ticket(ticket)
+    inv.refresh_from_db()
+    assert inv.status == "voided" and inv.sunat_code == "0"
 
 
 def test_pdf_has_simulation_watermark(setup, book):

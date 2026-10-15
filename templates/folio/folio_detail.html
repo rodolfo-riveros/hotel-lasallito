@@ -78,6 +78,7 @@
       <div class="card-header"><h2 class="card-title">{% trans "Emitir comprobante" %}</h2></div>
       <div class="card-body space-y-3">
         <div class="sim-banner">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+        {% if deposits_available %}<p class="rounded-lg bg-gold-50 p-2 text-xs text-gold-800 dark:bg-gold-900/20">{% trans "Hay adelantos cobrados sin comprobante" %}: <b>{{ deposits_available|money }}</b>. <a class="underline" href="{% url 'billing:advance' folio.pk %}">{% trans "Emitir comprobante de anticipo" %}</a> · {% trans "se descuenta solo en el comprobante final." %}</p>{% endif %}
         <p class="text-sm">{% trans "Por facturar" %}: <b>{{ uninvoiced_total|money }}</b> <span class="text-xs text-ink-500">({% trans "o marque cargos para facturar solo esos" %})</span></p>
         <div class="grid grid-cols-2 gap-3" x-data="rucLookup('{% url 'billing:lookup' %}')">
           {% include "components/field.html" with field=invoice_form.doc_type %}{% include "components/field.html" with field=invoice_form.currency %}

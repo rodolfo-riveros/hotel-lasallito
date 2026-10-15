@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load i18n pms %}
+{% block title %}{{ g.full_number }}{% endblock %}
+{% block content %}
+{% can "billing.create" as can_create %}
+<div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+  <div><a href="{% url 'billing:guide_list' %}" class="text-sm text-ink-500 hover:text-ink-800">← {% trans "Guías de remisión" %}</a>
+    <div class="mt-2 flex flex-wrap items-center gap-3"><h1 class="page-title">{% trans "Guía de remisión" %} {{ g.full_number }}</h1>
+      <span class="status {% if g.status == 'accepted' %}status-confirmed{% elif g.status == 'rejected' %}status-danger{% else %}status-pending{% endif %}">{{ g.get_status_display }}</span></div>
+    <p class="page-subtitle">{{ g.get_reason_display }} · {% trans "traslado" %} {{ g.transfer_date|date:"d/m/Y" }}</p></div>
+  <div class="flex flex-wrap gap-2">
+    {% if g.number %}<a href="{% url 'billing:guide_file' g.pk 'pdf' %}" target="_blank" class="btn-secondary">PDF</a>{% endif %}
+    {% if g.xml %}<a href="{% url 'billing:guide_file' g.pk 'xml' %}" class="btn-secondary">XML</a>{% endif %}
+    {% if g.cdr_xml %}<a href="{% url 'billing:guide_file' g.pk 'cdr' %}" class="btn-secondary">CDR</a>{% endif %}
+    {% if can_create and g.status == "processing" %}<form method="post">{% csrf_token %}<button name="ticket" value="1" class="btn-primary">{% trans "Consultar ticket" %}</button></form>{% endif %}
+    {% if can_create and g.status in "draft rejected" %}<a href="{% url 'billing:guide_edit' g.pk %}" class="btn-secondary">{% trans "Editar" %}</a><form method="post">{% csrf_token %}<button name="send" value="1" class="btn-primary">{% trans "Enviar a SUNAT" %}</button></form>{% endif %}
+  </div>
+</div>
+<div class="sim-banner mb-6">{% icon "info" "w-4 h-4" %}{% trans "Simulación, sin valor tributario" %}</div>
+{% if g.sunat_code %}<p class="mb-4 rounded-lg p-3 text-sm {% if g.status == 'accepted' %}bg-state-available/10 text-state-available{% elif g.status == 'rejected' %}bg-state-danger/10 text-state-danger{% else %}bg-ink-100{% endif %}" role="status"><b>{{ g.sunat_code }}</b> {{ g.sunat_message }}{% if g.ticket %} · ticket {{ g.ticket.number }}{% endif %}</p>{% endif %}
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card"><div class="card-header"><h2 class="card-title">{% trans "Datos del traslado" %}</h2></div>
+    <dl class="card-body grid grid-cols-3 gap-2 text-sm">
+      <dt class="text-ink-500">{% trans "Destinatario" %}</dt><dd class="col-span-2">{{ g.recipient_name }} · {{ g.get_recipient_doc_type_display }} {{ g.recipient_doc }}</dd>
+      <dt class="text-ink-500">{% trans "Partida" %}</dt><dd class="col-span-2">{{ g.origin_address }} ({{ g.origin_ubigeo }})</dd>
+      <dt class="text-ink-500">{% trans "Llegada" %}</dt><dd class="col-span-2">{{ g.destination_address }} ({{ g.destination_ubigeo }})</dd>
+      <dt class="text-ink-500">{% trans "Peso / bultos" %}</dt><dd class="col-span-2">{{ g.gross_weight }} kg · {{ g.packages }}</dd>
+      <dt class="text-ink-500">{% trans "Transporte" %}</dt><dd class="col-span-2">{{ g.get_transport_mode_display }}<br>{% if g.transport_mode == "01" %}{{ g.carrier_name }} · RUC {{ g.carrier_ruc }}{% else %}{{ g.vehicle_plate }} · {{ g.driver_name }} (DNI {{ g.driver_doc }}, lic. {{ g.driver_license }}){% endif %}</dd>
+      {% if g.hash %}<dt class="text-ink-500">Hash</dt><dd class="col-span-2 break-all font-mono text-xs">{{ g.hash }}</dd>{% endif %}
+    </dl></section>
+  <section class="card overflow-x-auto"><div class="card-header"><h2 class="card-title">{% trans "Bienes" %}</h2></div>
+    <table class="table"><tbody>{% for ln in lines %}<tr><td>{{ ln.description }}</td><td class="text-right">{{ ln.quantity|floatformat:"-3" }} {{ ln.unit }}</td></tr>{% empty %}<tr><td class="text-ink-500">{% trans "Sin bienes." %}</td></tr>{% endfor %}</tbody></table></section>
+</div>
+{% endblock %}
